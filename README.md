@@ -1,4 +1,2 @@
 # TIPE
 Projet de TIPE en MP2I 2022-2023
-Projet de TIPE en MP2I 2022-2023
-Projet de TIPE en MP2I 2022-2023
