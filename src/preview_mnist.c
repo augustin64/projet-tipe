@@ -10,18 +10,12 @@ void print_image(unsigned int width, unsigned int height, FILE* ptr, int start) 
     fread(buffer, sizeof(buffer), 1, ptr);
 
     int cur;
+    char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
     for (int i=0; i<height; i++) {
         for (int j=0; j<width; j++) {
-            cur = buffer[start+j+i*width];
-            if (cur > 150)
-                printf("0");
-            else {
-                if (cur > 100)
-                    printf(".");
-                else
-                    printf(" ");
-            }
+            cur = (int)buffer[start+j+i*width];
+            printf("%c", tab[cur/52]);
         }
         printf("\n");
     }
