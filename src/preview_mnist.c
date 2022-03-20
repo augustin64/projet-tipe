@@ -15,7 +15,7 @@ uint32_t swap_endian(uint32_t val) {
 // commencant à l'adresse mémoire start
 // dans le fichier pointé par ptr
 void print_image(unsigned int width, unsigned int height, FILE* ptr, int start) {
-    unsigned char buffer[width*height+start];
+    unsigned char buffer[width*height];
 
     fread(buffer, sizeof(buffer), 1, ptr);
 
@@ -24,7 +24,7 @@ void print_image(unsigned int width, unsigned int height, FILE* ptr, int start) 
 
     for (int i=0; i<height; i++) {
         for (int j=0; j<width; j++) {
-            cur = (int)buffer[start+j+i*width];
+            cur = (int)buffer[j+i*width];
             printf("%c", tab[cur/52]);
         }
         printf("\n");
@@ -34,7 +34,7 @@ void print_image(unsigned int width, unsigned int height, FILE* ptr, int start) 
 // Lit un set de données images de la base de données MNIST
 // dans le fichier situé à filename, les
 // images comportant comme labels 'labels'
-void read_mnist_images(char* filename, unsigned char* labels) {
+void read_mnist_images(char* filename, unsigned int* labels) {
     FILE *ptr;
     
     ptr = fopen(filename, "rb");
@@ -66,13 +66,13 @@ void read_mnist_images(char* filename, unsigned char* labels) {
     //printf("%u x %u\n\n", width, height);
 
     for (int i=0; i < number_of_images; i++) {
-        printf("--- Number %d : %u ---\n", i, labels[i]);
+        printf("--- Number %d : %d ---\n", i, labels[i]);
         print_image(width, height, ptr, (i*width*height));
     }
 }
 
 
-unsigned char* read_mnist_labels(char* filename) {
+unsigned int* read_mnist_labels(char* filename) {
     FILE* ptr;
 
     ptr = fopen(filename, "rb");
@@ -93,11 +93,13 @@ unsigned char* read_mnist_labels(char* filename) {
 
     printf("number of items: %" PRIu32 "\n", number_of_items);
 
-    unsigned char* labels = malloc(sizeof(unsigned char)*number_of_items); 
-    unsigned char tmp;
+    unsigned char buffer[number_of_items];
+    fread(buffer, sizeof(unsigned char), number_of_items, ptr);
+
+    unsigned int* labels = malloc(sizeof(unsigned int)*number_of_items);
+
     for (int i=0; i< number_of_items; i++) {
-        fread(&tmp, sizeof(unsigned char), 1, ptr);
-        labels[i] = tmp;
+        labels[i] = (unsigned int)buffer[i];
     }
     return labels;
 }
@@ -107,7 +109,7 @@ int main(int argc, char *argv[]) {
         printf("Utilisation: %s [IMAGES FILE] [LABELS FILE]\n", argv[0]);
         return 1;
     }
-    unsigned char* labels = read_mnist_labels(argv[2]);
+    unsigned int* labels = read_mnist_labels(argv[2]);
     read_mnist_images(argv[1], labels);
     free(labels);
     return 0;
