@@ -1,4 +1,4 @@
-typedef struct neurone_struct{
+typedef struct Neurone{
     float activation; // Caractérise l'activation du neurone
     float* poids_sortants; // Liste de tous les poids des arêtes sortants du neurone
     float biais; // Caractérise le biais du neurone
@@ -8,10 +8,10 @@ typedef struct neurone_struct{
     float *dw;
     float dbiais;
     float dz;
-} neurone_struct;
+} Neurone;
 
 
-typedef struct couche_struct{
+typedef struct Couche{
     int nb_neurone; // Nombre de neurones dans la couche (longueur de la liste ci-dessous)
-    neurone_struct* neurone; // Liste des neurones dans la couche
-} couche_struct;
+    Neurone* neurone; // Liste des neurones dans la couche
+} Couche;

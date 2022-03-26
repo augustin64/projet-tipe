@@ -8,7 +8,7 @@
 
 #define TAUX_APPRENTISSAGE 0.15 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 
-couche_struct* reseau_neuronal;
+Couche* reseau_neuronal;
 
 void creation_du_reseau_neuronal(int nb_couches, int* neurones_par_couche);
 void suppression_du_reseau_neuronal(int nb_couches, int* neurones_par_couche);
@@ -24,11 +24,11 @@ void creation_du_reseau_neuronal(int nb_couches, int* neurones_par_couche) {
     /* Créé les différentes variables dans la variable du réseau neuronal à
     partir du nombre de couches et de la liste du nombre de neurones par couche */
 
-    reseau_neuronal = (couche_struct*)malloc(sizeof(couche_struct)*nb_couches); // Création des différentes couches
+    reseau_neuronal = (Couche*)malloc(sizeof(Couche)*nb_couches); // Création des différentes couches
     for (int i=0; i<nb_couches; i++) {
 
         reseau_neuronal[i].nb_neurone = neurones_par_couche[i]; // nombre de neurones pour la couche
-        reseau_neuronal[i].neurone = (neurone_struct*)malloc(sizeof(neurone_struct)*neurones_par_couche[i]); // Création des différents neurones dans la couche
+        reseau_neuronal[i].neurone = (Neurone*)malloc(sizeof(Neurone)*neurones_par_couche[i]); // Création des différents neurones dans la couche
 
         if (i!=nb_couches-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
             for (int j=0; j<neurones_par_couche[i]; j++) {
