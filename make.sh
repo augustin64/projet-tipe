@@ -18,3 +18,21 @@ if [[ $1 == "preview" ]]; then
 		exit
 	fi
 fi
+
+if [[ $1 == "test" ]]; then
+	[[ $2 ]] || set -- "$1" "build"
+	if [[ $2 == "build" ]]; then
+		mkdir -p out
+		for i in $(ls test); do
+			gcc "test/$i" -o "out/test_$(echo $i | awk -F. '{print $1}')" $FLAGS
+		done
+		exit
+	elif [[ $2 == "run" ]]; then
+		$0 test build
+		for i in $(ls out/test_*); do
+			echo "--- $i ---"
+			$i
+		done
+		exit
+	fi
+fi
