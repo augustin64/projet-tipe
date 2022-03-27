@@ -29,6 +29,7 @@ if [[ $1 == "test" ]]; then
 		exit
 	elif [[ $2 == "run" ]]; then
 		$0 test build
+		mkdir -p .test-cache
 		for i in $(ls out/test_*); do
 			echo "--- $i ---"
 			$i
