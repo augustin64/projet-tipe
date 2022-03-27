@@ -13,10 +13,10 @@ typedef struct Neurone{
 
 typedef struct Couche{
     int nb_neurone; // Nombre de neurones dans la couche (longueur de la liste ci-dessous)
-    Neurone* neurone; // Liste des neurones dans la couche
+    Neurone** neurone; // Liste des neurones dans la couche
 } Couche;
 
 typedef struct Reseau{
     int nb_couche;
-    Couche* couche;
+    Couche** couche;
 } Reseau;
