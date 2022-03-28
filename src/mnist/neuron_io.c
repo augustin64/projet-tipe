@@ -70,7 +70,7 @@ void ecrire_neurone(Neurone* neurone, int poids_sortants, FILE *ptr) {
 // Stocke l'entièreté du réseau neuronal dans un fichier binaire
 int ecrire_reseau(char* filename, Reseau* reseau) {
     FILE *ptr;
-    int nb_couches = reseau->nb_couche;
+    int nb_couches = reseau->nb_couches;
     int nb_neurones[nb_couches+1];
 
     ptr = fopen(filename, "wb");
@@ -80,8 +80,8 @@ int ecrire_reseau(char* filename, Reseau* reseau) {
     buffer[0] = MAGIC_NUMBER;
     buffer[1] = nb_couches;
     for (int i=0; i < nb_couches; i++) {
-        buffer[i+2] = reseau->couche[i]->nb_neurone;
-        nb_neurones[i] = reseau->couche[i]->nb_neurone;
+        buffer[i+2] = reseau->couches[i]->nb_neurones;
+        nb_neurones[i] = reseau->couches[i]->nb_neurones;
     }
     nb_neurones[nb_couches] = 0;
 
@@ -89,7 +89,7 @@ int ecrire_reseau(char* filename, Reseau* reseau) {
 
     for (int i=0; i < nb_couches; i++) {
         for (int j=0; j < nb_neurones[i]; j++) {
-            ecrire_neurone(reseau->couche[i]->neurone[j], nb_neurones[i+1], ptr);
+            ecrire_neurone(reseau->couches[i]->neurones[j], nb_neurones[i+1], ptr);
         }
     }
 

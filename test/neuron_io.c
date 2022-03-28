@@ -30,8 +30,8 @@ Couche* creer_couche(int nb_neurones, int nb_sortants) {
     Couche* couche = malloc(sizeof(int)+sizeof(Neurone**));
     Neurone** tab = malloc(sizeof(Neurone*)*nb_neurones);
 
-    couche->nb_neurone = nb_neurones;
-    couche->neurone = tab;
+    couche->nb_neurones = nb_neurones;
+    couche->neurones = tab;
 
     for (int i=0; i<nb_neurones; i++) {
         tab[i] = creer_neurone(nb_sortants);
@@ -42,10 +42,10 @@ Couche* creer_couche(int nb_neurones, int nb_sortants) {
 
 Reseau* creer_reseau(int nb_couches, int nb_max_neurones, int nb_min_neurones) {
     Reseau* reseau = malloc(sizeof(int)+sizeof(Couche**));
-    reseau->couche = malloc(sizeof(Couche*)*nb_couches);
+    reseau->couches = malloc(sizeof(Couche*)*nb_couches);
     int nb_neurones[nb_couches+1];
 
-    reseau->nb_couche = nb_couches;
+    reseau->nb_couches = nb_couches;
 
     for (int i=0; i < nb_couches; i++) {
         nb_neurones[i] = i*(nb_min_neurones-nb_max_neurones)/(nb_couches-1) + nb_max_neurones;
@@ -53,7 +53,7 @@ Reseau* creer_reseau(int nb_couches, int nb_max_neurones, int nb_min_neurones) {
     nb_neurones[nb_couches] = 0;
 
     for (int i=0; i < nb_couches; i++) {
-        reseau->couche[i] = creer_couche(nb_neurones[i], nb_neurones[i+1]);
+        reseau->couches[i] = creer_couche(nb_neurones[i], nb_neurones[i+1]);
     }
     return reseau;
 }
