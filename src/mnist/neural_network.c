@@ -4,17 +4,9 @@
 #include <math.h>
 #include <time.h>
 
-#include "struct/neuron.c"
+#include "struct/neuron.h"
 
 #define TAUX_APPRENTISSAGE 0.15 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
-
-void creation_du_reseau_neuronal(Reseau* reseau_neuronal, int* neurones_par_couche, int nb_couches);
-void suppression_du_reseau_neuronal(Reseau* reseau_neuronal);
-void forward_propagation(Reseau* reseau_neuronal);
-int* creation_de_la_sortie_voulue(Reseau* reseau_neuronal, int pos_nombre_voulu);
-void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue);
-void modification_du_reseau_neuronal(Reseau* reseau_neuronal);
-void initialisation_du_reseau_neuronal(Reseau* reseau_neuronal);
 
 
 

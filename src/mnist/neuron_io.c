@@ -3,10 +3,9 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "struct/neuron.c"
-
-
+#include "struct/neuron.h"
 #define MAGIC_NUMBER 2023
+
 
 
 Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
