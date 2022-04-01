@@ -8,23 +8,60 @@
 
 #define MAGIC_NUMBER 2023
 
-/*
-Neurone* lire_neurones(uint32_t nb_neurones, uint32_t nb_poids_sortants) {
-    // le malloc dépend en fait du nombre de neurones de la couche suivante,
-    // il faut donc rentrer plus en détails sur la taille de l'allocation
-    Neurone* tab = malloc(sizeof(Neurone)*nb_neurones);
-    return tab;
+
+Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
+    Neurone* neurone = malloc(sizeof(Neurone));
+    float activation;
+    float biais;
+    float tmp;
+
+    fread(&activation, sizeof(float), 1, ptr);
+    fread(&biais, sizeof(float), 1, ptr);
+
+    neurone->activation = activation;
+    neurone->biais = biais;
+
+    neurone->z = 0.0;
+    neurone->dactivation = 0.0;
+    neurone->dbiais = 0.0;
+    neurone->dz = 0.0;
+
+    float* poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
+
+    neurone->dw = malloc(sizeof(float)*nb_poids_sortants);
+    neurone->poids_sortants = poids_sortants;
+
+    for (int i=0; i < nb_poids_sortants; i++) {
+        fread(&tmp, sizeof(float), 1, ptr);
+        neurone->poids_sortants[i] = tmp;
+        neurone->dw[i] = 0.0;
+    }
+
+    return neurone;
 }
 
+
+// Lit une couche de neurones
+Neurone** lire_neurones(uint32_t nb_neurones, uint32_t nb_poids_sortants, FILE *ptr) {
+    Neurone** neurones = malloc(sizeof(Neurone*)*nb_neurones);
+    for (int i=0; i < nb_neurones; i++) {
+        neurones[i] = lire_neurone(nb_poids_sortants, ptr);
+    }
+    return neurones;
+}
+
+
 // Charge l'entièreté du réseau neuronal depuis un fichier binaire
-Couche* lire_reseau(char* filename) {
+Reseau* lire_reseau(char* filename) {
     FILE *ptr;
-    Reseau* reseau = malloc(sizeof(int)+sizeof(Couche*));
+    Reseau* reseau = malloc(sizeof(Reseau));
     
     ptr = fopen(filename, "rb");
 
     uint32_t magic_number;
     uint32_t nb_couches;
+    uint32_t tmp;
+    reseau->nb_couches = nb_couches;
 
     fread(&magic_number, sizeof(uint32_t), 1, ptr);
     if (magic_number != MAGIC_NUMBER) {
@@ -35,22 +72,28 @@ Couche* lire_reseau(char* filename) {
     fread(&nb_couches, sizeof(uint32_t), 1, ptr);
 
 
-    Couche* couches = malloc((sizeof(int)+sizeof(Neurone*)*nb_couches));
-    uint32_t nb_neurones_couche[nb_couches];
+    Couche** couches = malloc(sizeof(Couche*)*nb_couches);
+    uint32_t nb_neurones_couche[nb_couches+1];
 
-    reseau->couche  = couches;
+    reseau->couches  = couches;
 
-    fread(&nb_neurones_couche, sizeof(nb_neurones_couche), 1, ptr);
+    for (int i=0; i < nb_couches; i++) {
+        couches[i] = malloc(sizeof(int)+sizeof(Neurone**));
+        fread(&tmp, sizeof(tmp), 1, ptr);
+        couches[i]->nb_neurones = tmp;
+        nb_neurones_couche[i] = tmp;
+    }
+    nb_neurones_couche[nb_couches] = 0;
 
-    for (int i=0; i < nb_couches+1; i++) {
-        couches[i].nb_neurone = nb_neurones_couche[i];
-        couches[i].neurone = lire_neurones(couches[i].nb_neurone, nb_neurones_couche[i+1]);
+    for (int i=0; i < nb_couches; i++) {
+        couches[i]->neurones = lire_neurones(couches[i]->nb_neurones, nb_neurones_couche[i+1], ptr);
     }
 
     fclose(ptr);
-    return couches;
+    return reseau;
 }
-*/
+
+
 
 
 // Écrit un neurone dans le fichier pointé par *ptr

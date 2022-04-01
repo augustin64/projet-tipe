@@ -61,5 +61,6 @@ Reseau* creer_reseau(int nb_couches, int nb_max_neurones, int nb_min_neurones) {
 int main() {
     Reseau* reseau = creer_reseau(5, 300, 10);
     ecrire_reseau(".test-cache/neuron_io.bin", reseau);
+    Reseau* reseau2 = lire_reseau(".test-cache/neuron_io.bin");
     return 1;
 }
