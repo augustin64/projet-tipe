@@ -1,3 +1,6 @@
+#ifndef DEF_NEURON_H
+#define DEF_NEURON_H
+
 typedef struct Neurone{
     float activation; // Caractérise l'activation du neurone
     float* poids_sortants; // Liste de tous les poids des arêtes sortants du neurone
@@ -20,3 +23,5 @@ typedef struct Reseau{
     int nb_couches;
     Couche** couches;
 } Reseau;
+
+#endif
