@@ -29,15 +29,11 @@ void creation_du_reseau_neuronal(Reseau* reseau_neuronal, int* neurones_par_couc
         reseau_neuronal->couches[i] = (Couche*)malloc(sizeof(Couche));
         reseau_neuronal->couches[i]->nb_neurones = neurones_par_couche[i]; // nombre de neurones pour la couche
         reseau_neuronal->couches[i]->neurones = (Neurone**)malloc(sizeof(Neurone*)*reseau_neuronal->couches[i]->nb_neurones); // Création des différents neurones dans la couche
-        if (i!=reseau_neuronal->nb_couches-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
-            for (int j=0; j < reseau_neuronal->couches[i]->nb_neurones; j++) {
-                reseau_neuronal->couches[i]->neurones[j] = (Neurone*)malloc(sizeof(Neurone));
+        for (int j=0; j < reseau_neuronal->couches[i]->nb_neurones; j++) {
+            reseau_neuronal->couches[i]->neurones[j] = (Neurone*)malloc(sizeof(Neurone));
+            if (i!=reseau_neuronal->nb_couches-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
                 reseau_neuronal->couches[i]->neurones[j]->poids_sortants = (float*)malloc(sizeof(float)*neurones_par_couche[i+1]);// Création des poids sortants du neurone
                 reseau_neuronal->couches[i]->neurones[j]->dw= (float*)malloc(sizeof(float)*neurones_par_couche[i+1]);
-            }
-        } else {
-            for (int j=0; j < reseau_neuronal->couches[i]->nb_neurones; j++) {
-                reseau_neuronal->couches[i]->neurones[j] = (Neurone*)malloc(sizeof(Neurone));
             }
         }
     }
