@@ -90,7 +90,7 @@ int*** read_mnist_images(char* filename) {
     fread(&width, sizeof(unsigned int), 1, ptr);
     width = swap_endian(width);
 
-    int*** tab = (int***)malloc(sizeof(int**)*width*height);
+    int*** tab = (int***)malloc(sizeof(int**)*number_of_images);
 
     for (int i=0; i < number_of_images; i++) {
         tab[i] = read_image(width, height, ptr);
