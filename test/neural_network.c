@@ -21,7 +21,7 @@ int main() {
     printf("OK\n");
     printf("Enregistrement du réseau\n");
 
-    ecrire_reseau("/tmp/reseau_test.bin", reseau_neuronal);
+    ecrire_reseau(".test-cache/random_reseau.bin", reseau_neuronal);
 
     printf("OK\n");
     return 1;

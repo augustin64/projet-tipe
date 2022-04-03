@@ -12,11 +12,11 @@ if [[ $1 == "preview" ]]; then
 		exit
 	elif [[ $2 == "train" ]]; then
 		[[ -f out/preview_mnist ]] || $0 preview build
-		out/preview_mnist data/train-images-idx3-ubyte data/train-labels-idx1-ubyte
+		out/preview_mnist data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
 		exit
 	elif [[ $2 == "t10k" ]]; then
 		[[ -f out/preview_mnist ]] || $0 preview build
-		out/preview_mnist data/t10k-images-idx3-ubyte data/t10k-labels-idx1-ubyte
+		out/preview_mnist data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
 		exit
 	fi
 fi

@@ -23,8 +23,8 @@ void test_lecture(int nb_images, int width, int height, int*** images, unsigned 
 }
 
 int main() {
-    char* image_file = "data/t10k-images-idx3-ubyte";
-    char* labels_file = "data/t10k-labels-idx1-ubyte";
+    char* image_file = "data/mnist/t10k-images-idx3-ubyte";
+    char* labels_file = "data/mnist/t10k-labels-idx1-ubyte";
     printf("Chargement des paramètres\n");
 
     int* parameters = read_mnist_images_parameters(image_file);
