@@ -21,19 +21,19 @@ Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
     neurone->biais = biais;
 
     neurone->z = 0.0;
-    neurone->dactivation = 0.0;
-    neurone->dbiais = 0.0;
-    neurone->dz = 0.0;
+    neurone->d_activation = 0.0;
+    neurone->d_biais = 0.0;
+    neurone->d_z = 0.0;
 
     float* poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
 
-    neurone->dw = malloc(sizeof(float)*nb_poids_sortants);
+    neurone->d_poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
     neurone->poids_sortants = poids_sortants;
 
     for (int i=0; i < nb_poids_sortants; i++) {
         fread(&tmp, sizeof(float), 1, ptr);
         neurone->poids_sortants[i] = tmp;
-        neurone->dw[i] = 0.0;
+        neurone->d_poids_sortants[i] = 0.0;
     }
 
     return neurone;

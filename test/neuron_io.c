@@ -9,18 +9,18 @@
 Neurone* creer_neurone(int nb_sortants) {
     Neurone* neurone = malloc(2*sizeof(float*)+6*sizeof(float));
     neurone->poids_sortants = malloc(sizeof(float)*nb_sortants);
-    neurone->dw = malloc(sizeof(float)*nb_sortants);
+    neurone->d_poids_sortants = malloc(sizeof(float)*nb_sortants);
 
     for (int i=0; i < nb_sortants; i++) {
         neurone->poids_sortants[i] = 0.5;
-        neurone->dw[i] = 0.0;
+        neurone->d_poids_sortants[i] = 0.0;
     }
     neurone->activation = 0.0;
     neurone->biais = 0.0;
     neurone->z = 0.0;
-    neurone->dactivation = 0.0;
-    neurone->dbiais = 0.0;
-    neurone->dz = 0.0;
+    neurone->d_activation = 0.0;
+    neurone->d_biais = 0.0;
+    neurone->d_z = 0.0;
 
     return neurone;
 }

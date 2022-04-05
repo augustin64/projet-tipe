@@ -9,6 +9,10 @@
 #ifndef DEF_NEURAL_NETWORK_H
 #define DEF_NEURAL_NETWORK_H
 
+float max(float a, float b);
+float sigmoid(float x);
+float sigmoid_derivee(float x);
+float ReLU(float x);
 void creation_du_reseau_neuronal(Reseau* reseau_neuronal, int* neurones_par_couche, int nb_couches);
 void suppression_du_reseau_neuronal(Reseau* reseau_neuronal);
 void forward_propagation(Reseau* reseau_neuronal);
