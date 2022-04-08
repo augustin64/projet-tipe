@@ -100,11 +100,14 @@ int* creation_de_la_sortie_voulue(Reseau* reseau_neuronal, int pos_nombre_voulu)
     /* Renvoie la liste des sorties voulues à partir du nombre
     de couches, de la liste du nombre de neurones par couche et de la
     position du résultat voulue, */
+    int nb_neurones = reseau_neuronal->couches[reseau_neuronal->nb_couches-1]->nb_neurones;
 
-    int* sortie_voulue = (int*)malloc(sizeof(int));
-    for (int i=0; i<reseau_neuronal->couches[reseau_neuronal->nb_couches-1]->nb_neurones; i++) // On initialise toutes les sorties à 0 par défault
-        sortie_voulue[i]=0;
-    sortie_voulue[pos_nombre_voulu]=1; // Seule la sortie voulue vaut 1
+    int* sortie_voulue = (int*)malloc(sizeof(int)*nb_neurones);
+
+    for (int i=0; i < nb_neurones; i++) // On initialise toutes les sorties à 0 par défault
+        sortie_voulue[i] = 0;
+
+    sortie_voulue[pos_nombre_voulu] = 1; // Seule la sortie voulue vaut 1
     return sortie_voulue;
 }
 

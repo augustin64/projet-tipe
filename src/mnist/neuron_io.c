@@ -60,7 +60,6 @@ Reseau* lire_reseau(char* filename) {
     uint32_t magic_number;
     uint32_t nb_couches;
     uint32_t tmp;
-    reseau->nb_couches = nb_couches;
 
     fread(&magic_number, sizeof(uint32_t), 1, ptr);
     if (magic_number != MAGIC_NUMBER) {
@@ -69,6 +68,7 @@ Reseau* lire_reseau(char* filename) {
     }
 
     fread(&nb_couches, sizeof(uint32_t), 1, ptr);
+    reseau->nb_couches = nb_couches;
 
 
     Couche** couches = malloc(sizeof(Couche*)*nb_couches);
@@ -77,7 +77,7 @@ Reseau* lire_reseau(char* filename) {
     reseau->couches  = couches;
 
     for (int i=0; i < nb_couches; i++) {
-        couches[i] = malloc(sizeof(int)+sizeof(Neurone**));
+        couches[i] = malloc(sizeof(Couche));
         fread(&tmp, sizeof(tmp), 1, ptr);
         couches[i]->nb_neurones = tmp;
         nb_neurones_couche[i] = tmp;
