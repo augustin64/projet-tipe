@@ -154,11 +154,10 @@ void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue) {
 void modification_du_reseau_neuronal(Reseau* reseau_neuronal) {
     /* Modifie les poids et le biais des neurones du réseau neuronal à partir
     du nombre de couches et de la liste du nombre de neurone par couche */
-
-    for (int i=0; i<reseau_neuronal->nb_couches-1; i++) { // on exclut la dernière couche
-        for (int j=0; i<reseau_neuronal->couches[i]->nb_neurones; j++) {
+    for (int i=0; i < reseau_neuronal->nb_couches-1; i++) { // on exclut la dernière couche
+        for (int j=0; j < reseau_neuronal->couches[i]->nb_neurones; j++) {
             reseau_neuronal->couches[i]->neurones[j]->biais = reseau_neuronal->couches[i]->neurones[j]->biais - (TAUX_APPRENTISSAGE * reseau_neuronal->couches[i]->neurones[j]->d_biais); // On modifie le biais du neurone à partir des données de la propagation en arrière
-            for (int k=0; k<reseau_neuronal->couches[i+1]->nb_neurones; k++) {
+            for (int k=0; k < reseau_neuronal->couches[i+1]->nb_neurones; k++) {
                 reseau_neuronal->couches[i]->neurones[j]->poids_sortants[k] = reseau_neuronal->couches[i]->neurones[j]->poids_sortants[k] - (TAUX_APPRENTISSAGE * reseau_neuronal->couches[i]->neurones[j]->d_poids_sortants[k]); // On modifie le poids du neurone à partir des données de la propagation en arrière
             }
         }

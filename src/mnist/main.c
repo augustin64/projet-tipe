@@ -14,7 +14,7 @@ void help(char* call) {
     printf("\t\t--batches | -b [int]\tNombre de batches.\n");
     printf("\t\t--couches | -c [int]\tNombres de couches.\n");
     printf("\t\t--neurons | -n [int]\tNombre de neurones sur la première couche.\n");
-    printf("\t\t--recover  | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
+    printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
@@ -52,7 +52,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
         creation_du_reseau_neuronal(reseau, repartition, couches);
     } else {
         reseau = lire_reseau(recovery);
-        printf("Backup restorée.\n");
+        printf("Backup restaurée.\n");
     }
 
     // Chargement des images du set de données MNIST
