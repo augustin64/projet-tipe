@@ -1,22 +1,23 @@
 #!/bin/bash
 
 FLAGS="-std=c99 -lm"
+OUT="out"
 
 if [[ $1 == "preview" ]]; then
 	[[ $2 ]] || set -- "$1" "build"
 	if [[ $2 == "build" ]]; then
-		mkdir -p out
+		mkdir -p "$OUT"
 		echo "Compilation de src/mnist/preview.c"
-		gcc src/mnist/preview.c -o out/preview_mnist $FLAGS
+		gcc src/mnist/preview.c -o "$OUT/preview_mnist" $FLAGS
 		echo "Fait."
 		exit
 	elif [[ $2 == "train" ]]; then
-		[[ -f out/preview_mnist ]] || $0 preview build
-		out/preview_mnist data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
+		[[ -f "$OUT/preview_mnist" ]] || $0 preview build
+		"$OUT/preview_mnist" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
 		exit
 	elif [[ $2 == "t10k" ]]; then
-		[[ -f out/preview_mnist ]] || $0 preview build
-		out/preview_mnist data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
+		[[ -f "$OUT/preview_mnist" ]] || $0 preview build
+		"$OUT/preview_mnist" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
 		exit
 	fi
 fi
@@ -24,17 +25,17 @@ fi
 if [[ $1 == "test" ]]; then
 	[[ $2 ]] || set -- "$1" "build"
 	if [[ $2 == "build" ]]; then
-		mkdir -p out
+		mkdir -p "$OUT"
 		for i in $(ls test); do
 			echo "Compilation de test/$i"
-			gcc "test/$i" -o "out/test_$(echo $i | awk -F. '{print $1}')" $FLAGS
+			gcc "test/$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}')" $FLAGS
 			echo "Fait."
 		done
 		exit
 	elif [[ $2 == "run" ]]; then
 		$0 test build
 		mkdir -p .test-cache
-		for i in $(ls out/test_*); do
+		for i in $(ls "$OUT/test_"*); do
 			echo "--- $i ---"
 			$i
 		done
@@ -42,7 +43,44 @@ if [[ $1 == "test" ]]; then
 	fi
 fi
 
+if [[ $1 == "build" ]]; then
+	echo "Compilation de src/mnist/main.c"
+	gcc src/mnist/main.c -o "$OUT/main" $FLAGS
+	echo "Fait."
+	exit
+fi
+
+if [[ $1 == "train" ]]; then
+	[[ -f "$OUT/main" ]] || $0 build
+	[[ $2 ]] || set -- "$1" "train"
+	mkdir -p .cache
+	"$OUT/main" train \
+		--images "data/mnist/$2-images-idx3-ubyte" \
+		--labels "data/mnist/$2-labels-idx1-ubyte" \
+		--out ".cache/reseau.bin"
+	exit
+fi
+
+if [[ $1 == "recognize" ]]; then
+	if [[ $2 ]]; then
+		[[ $3 ]] || set -- "$1" "$2" "text"
+		[[ -f "$OUT/main" ]] || $0 build
+		[[ -f ".cache/reseau.bin" ]] || $0 train train
+		"$OUT/main" recognize \
+			--modele ".cache/reseau.bin" \
+			--in "$2" \
+			--out "$3"
+		exit
+	else
+		echo "Pas de fichier d'entrée spécifié. Abandon"
+		exit 1
+	fi
+fi
+
 echo "Usage:"
 echo -e "\t$0 preview ( build | train | t10k )"
-echo -e "\t$0 test    ( build | run )\n"
+echo -e "\t$0 test    ( build | run )"
+echo -e "\t$0 build"
+echo -e "\t$0 train   ( train | t10k )"
+echo -e "\t$0 recognize [FILENAME] ( text | json )\n"
 echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants"
