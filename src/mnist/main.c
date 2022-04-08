@@ -35,6 +35,7 @@ void ecrire_image_dans_reseau(int** image, Reseau* reseau, int height, int width
 
 
 void train(int batches, int couches, int neurons, char* recovery, char* image_file, char* label_file, char* out) {
+    // Entraînement du réseau sur le set de données MNIST
     Reseau* reseau;
 
     //int* repartition = malloc(sizeof(int)*couches);
@@ -73,8 +74,30 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
             backward_propagation(reseau, sortie_voulue);
         }
         printf("\n");
+        modification_du_reseau_neuronal(reseau);
         ecrire_reseau(out, reseau);
     }
+}
+
+void recognize(char* modele, char* entree, char* sortie) {
+    Reseau* reseau = lire_reseau(modele);
+
+    int* parameters = read_mnist_images_parameters(entree);
+    int nb_images = parameters[0];
+    int height = parameters[1];
+    int width = parameters[2];
+
+    int*** images = read_mnist_images(entree);
+
+    for (int i=0; i < nb_images; i++) {
+        printf("Image %d\n", i);
+        ecrire_image_dans_reseau(images[i], reseau, height, width);
+        forward_propagation(reseau);
+        for (int j=0; j < reseau->couches[reseau->nb_couches-1]->nb_neurones; j++) {
+            printf("Probabilité %d: %f\n", j, reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
+        }
+    }
+
 }
 
 
@@ -169,6 +192,7 @@ int main(int argc, char* argv[]) {
         if (! out) {
             out = "text";
         }
+        recognize(modele, in, out);
         // Reconnaissance puis affichage des données sous le format spécifié
         exit(0);
     }
