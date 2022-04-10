@@ -50,6 +50,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
     if (! recovery) {
         reseau = malloc(sizeof(Reseau));
         creation_du_reseau_neuronal(reseau, repartition, couches);
+        initialisation_du_reseau_neuronal(reseau);
     } else {
         reseau = lire_reseau(recovery);
         printf("Backup restaurée.\n");
@@ -65,15 +66,16 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
     unsigned int* labels = read_mnist_labels(label_file);
 
     for (int i=0; i < batches; i++) {
-        printf("Batch [%d/%d]\n", i, batches);
+        printf("Batch [%d/%d]", i, batches);
         for (int j=0; j < nb_images; j++) {
-            printf("\rImage [%d/%d]", j, nb_images);
+            printf("\rBatch [%d/%d]\tImage [%d/%d]",i, batches, j, nb_images);
             ecrire_image_dans_reseau(images[j], reseau, height, width);
             sortie_voulue = creation_de_la_sortie_voulue(reseau, labels[j]);
             forward_propagation(reseau);
             backward_propagation(reseau, sortie_voulue);
         }
-        printf("\n");
+        // TODO: récupération accuracy
+        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %d%%\n",i, batches, nb_images, nb_images, 1);
         modification_du_reseau_neuronal(reseau);
         ecrire_reseau(out, reseau);
     }
@@ -89,14 +91,35 @@ void recognize(char* modele, char* entree, char* sortie) {
 
     int*** images = read_mnist_images(entree);
 
+    if (! strcmp(sortie, "json")) {
+        printf("{\n");
+    }
     for (int i=0; i < nb_images; i++) {
-        printf("Image %d\n", i);
+        if (! strcmp(sortie, "text"))
+            printf("Image %d\n", i);
+        else
+            printf("\"%d\" : [", i);
+
         ecrire_image_dans_reseau(images[i], reseau, height, width);
         forward_propagation(reseau);
         for (int j=0; j < reseau->couches[reseau->nb_couches-1]->nb_neurones; j++) {
-            printf("Probabilité %d: %f\n", j, reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
+            if (! strcmp(sortie, "json")) {
+                printf("%f", reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
+                if (j+1 < reseau->couches[reseau->nb_couches-1]->nb_neurones) {
+                    printf(", ");
+                }
+            } else
+                printf("Probabilité %d: %f\n", j, reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
+        }
+        if (! strcmp(sortie, "json")) {
+            if (i+1 < nb_images) {
+                printf("],\n");
+            } else {
+                printf("]\n");
+            }
         }
     }
+    printf("}\n");
 
 }
 
