@@ -7,6 +7,19 @@
 #include "mnist.c"
 
 
+int indice_max(float* tab, int n) {
+    int indice = -1;
+    float maxi = 0.;
+    
+    for (int i=0; i < n; i++) {
+        if (tab[i] > maxi) {
+            maxi = tab[i];
+            indice = i;
+        }
+    }
+    return indice;
+}
+
 void help(char* call) {
     printf("Usage: %s ( train | recognize ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
@@ -39,8 +52,12 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
     Reseau* reseau;
 
     //int* repartition = malloc(sizeof(int)*couches);
+    int nb_neurones_der = 10;
+    int repartition[5] = {784, 100, 75, 40, nb_neurones_der};
+
+    float* sortie = malloc(sizeof(float)*nb_neurones_der);
     int* sortie_voulue;
-    int repartition[5] = {784, 100, 75, 40, 10};
+    float accuracy;
     //generer_repartition(couches, repartition);
 
     /*
@@ -56,6 +73,8 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
         printf("Backup restaurée.\n");
     }
 
+    Couche* der_couche = reseau->couches[reseau->nb_couches-1];
+
     // Chargement des images du set de données MNIST
     int* parameters = read_mnist_images_parameters(image_file);
     int nb_images = parameters[0];
@@ -67,15 +86,27 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
 
     for (int i=0; i < batches; i++) {
         printf("Batch [%d/%d]", i, batches);
+        accuracy = 0.;
+
         for (int j=0; j < nb_images; j++) {
             printf("\rBatch [%d/%d]\tImage [%d/%d]",i, batches, j, nb_images);
+
             ecrire_image_dans_reseau(images[j], reseau, height, width);
             sortie_voulue = creation_de_la_sortie_voulue(reseau, labels[j]);
             forward_propagation(reseau);
+
+            for (int k=0; k < nb_neurones_der; k++) {
+                sortie[k] = der_couche->neurones[k]->activation;
+            }
+            if (indice_max(sortie, nb_neurones_der) == labels[j]) {
+                accuracy += 1. / (float)nb_images;
+            }
+
             backward_propagation(reseau, sortie_voulue);
+
         }
-        // TODO: récupération accuracy
-        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %d%%\n",i, batches, nb_images, nb_images, 1);
+        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n",i, batches, nb_images, nb_images, accuracy*100);
+
         modification_du_reseau_neuronal(reseau);
         ecrire_reseau(out, reseau);
     }
@@ -103,9 +134,11 @@ void recognize(char* modele, char* entree, char* sortie) {
 
         ecrire_image_dans_reseau(images[i], reseau, height, width);
         forward_propagation(reseau);
+
         for (int j=0; j < derniere_couche->nb_neurones; j++) {
             if (! strcmp(sortie, "json")) {
                 printf("%f", derniere_couche->neurones[j]->activation); // CHECK: ->activation ou ->z
+
                 if (j+1 < derniere_couche->nb_neurones) {
                     printf(", ");
                 }
