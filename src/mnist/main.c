@@ -83,6 +83,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
 
 void recognize(char* modele, char* entree, char* sortie) {
     Reseau* reseau = lire_reseau(modele);
+    Couche* derniere_couche = reseau->couches[reseau->nb_couches-1];
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -102,14 +103,14 @@ void recognize(char* modele, char* entree, char* sortie) {
 
         ecrire_image_dans_reseau(images[i], reseau, height, width);
         forward_propagation(reseau);
-        for (int j=0; j < reseau->couches[reseau->nb_couches-1]->nb_neurones; j++) {
+        for (int j=0; j < derniere_couche->nb_neurones; j++) {
             if (! strcmp(sortie, "json")) {
-                printf("%f", reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
-                if (j+1 < reseau->couches[reseau->nb_couches-1]->nb_neurones) {
+                printf("%f", derniere_couche->neurones[j]->activation); // CHECK: ->activation ou ->z
+                if (j+1 < derniere_couche->nb_neurones) {
                     printf(", ");
                 }
             } else
-                printf("Probabilité %d: %f\n", j, reseau->couches[reseau->nb_couches-1]->neurones[j]->activation);
+                printf("Probabilité %d: %f\n", j, derniere_couche->neurones[j]->activation); // CHECK: ->activation ou ->z
         }
         if (! strcmp(sortie, "json")) {
             if (i+1 < nb_images) {
