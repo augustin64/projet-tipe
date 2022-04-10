@@ -10,15 +10,15 @@ if [[ $1 == "preview" ]]; then
 		echo "Compilation de src/mnist/preview.c"
 		gcc src/mnist/preview.c -o "$OUT/preview_mnist" $FLAGS
 		echo "Fait."
-		exit
+		exit 0
 	elif [[ $2 == "train" ]]; then
 		[[ -f "$OUT/preview_mnist" ]] || $0 preview build
 		"$OUT/preview_mnist" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
-		exit
+		exit 0
 	elif [[ $2 == "t10k" ]]; then
 		[[ -f "$OUT/preview_mnist" ]] || $0 preview build
 		"$OUT/preview_mnist" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
-		exit
+		exit 0
 	fi
 fi
 
@@ -31,7 +31,7 @@ if [[ $1 == "test" ]]; then
 			gcc "test/$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}')" $FLAGS
 			echo "Fait."
 		done
-		exit
+		exit 0
 	elif [[ $2 == "run" ]]; then
 		$0 test build
 		mkdir -p .test-cache
@@ -39,7 +39,7 @@ if [[ $1 == "test" ]]; then
 			echo "--- $i ---"
 			$i
 		done
-		exit
+		exit 0
 	fi
 fi
 
@@ -47,7 +47,7 @@ if [[ $1 == "build" ]]; then
 	echo "Compilation de src/mnist/main.c"
 	gcc src/mnist/main.c -o "$OUT/main" $FLAGS
 	echo "Fait."
-	exit
+	exit 0
 fi
 
 if [[ $1 == "train" ]]; then
@@ -58,7 +58,7 @@ if [[ $1 == "train" ]]; then
 		--images "data/mnist/$2-images-idx3-ubyte" \
 		--labels "data/mnist/$2-labels-idx1-ubyte" \
 		--out ".cache/reseau.bin"
-	exit
+	exit 0
 fi
 
 if [[ $1 == "recognize" ]]; then
@@ -70,7 +70,7 @@ if [[ $1 == "recognize" ]]; then
 			--modele ".cache/reseau.bin" \
 			--in "$2" \
 			--out "$3"
-		exit
+		exit 0
 	else
 		echo "Pas de fichier d'entrée spécifié. Abandon"
 		exit 1
