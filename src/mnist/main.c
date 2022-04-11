@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 
 #include "neural_network.c"
 #include "neuron_io.c"
@@ -9,7 +10,7 @@
 
 int indice_max(float* tab, int n) {
     int indice = -1;
-    float maxi = 0.;
+    float maxi = FLT_MIN;
     
     for (int i=0; i < n; i++) {
         if (tab[i] > maxi) {
@@ -96,7 +97,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
             forward_propagation(reseau);
 
             for (int k=0; k < nb_neurones_der; k++) {
-                sortie[k] = der_couche->neurones[k]->activation;
+                sortie[k] = der_couche->neurones[k]->z;
             }
             if (indice_max(sortie, nb_neurones_der) == labels[j]) {
                 accuracy += 1. / (float)nb_images;
@@ -137,13 +138,13 @@ void recognize(char* modele, char* entree, char* sortie) {
 
         for (int j=0; j < derniere_couche->nb_neurones; j++) {
             if (! strcmp(sortie, "json")) {
-                printf("%f", derniere_couche->neurones[j]->activation); // CHECK: ->activation ou ->z
+                printf("%f", derniere_couche->neurones[j]->z);
 
                 if (j+1 < derniere_couche->nb_neurones) {
                     printf(", ");
                 }
             } else
-                printf("Probabilité %d: %f\n", j, derniere_couche->neurones[j]->activation); // CHECK: ->activation ou ->z
+                printf("Probabilité %d: %f\n", j, derniere_couche->neurones[j]->z);
         }
         if (! strcmp(sortie, "json")) {
             if (i+1 < nb_images) {

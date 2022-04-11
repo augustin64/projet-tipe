@@ -38,7 +38,7 @@ function draw(ctx, x, y, isDown) {
         ctx.beginPath();
         // On choisit les options suivantes:
         ctx.strokeStyle = "white";
-        ctx.lineWidth = "10";
+        ctx.lineWidth = "12";
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.moveTo(lastX, lastY);
@@ -126,10 +126,10 @@ function getPrediction() {
     let tableau = [];
     let tmp_tableau = [];
 
-    while (curWidth < totalWidth) {
-        curHeight = 0;
+    while (curHeight < totalHeight) {
+        curWidth = 0;
         tmp_tableau = [];
-        while (curHeight < totalHeight) {
+        while (curWidth < totalWidth) {
             data = ctx.getImageData(curWidth, curHeight, stepSize, stepSize);
             size = data.width * data.height;
             density = 0;
@@ -140,9 +140,9 @@ function getPrediction() {
             density = density*1.0 / size;
 
             tmp_tableau.push(density);
-            curHeight += stepSize;
+            curWidth += stepSize;
         }    
-        curWidth += stepSize;
+        curHeight += stepSize;
         tableau.push(tmp_tableau);
     }
 
