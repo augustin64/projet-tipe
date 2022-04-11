@@ -77,6 +77,13 @@ if [[ $1 == "recognize" ]]; then
 	fi
 fi
 
+if [[ $1 == "webserver" ]]; then
+	[[ -f "$OUT/main" ]] || $0 build
+	[[ -f ".cache/reseau.bin" ]] || $0 train train
+	FLASK_APP="src/webserver/app.py" flask run
+	exit 0
+fi
+
 echo "Usage:"
 echo -e "\t$0 preview ( build | train | t10k )"
 echo -e "\t$0 test    ( build | run )"
