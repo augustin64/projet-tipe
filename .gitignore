@@ -2,3 +2,4 @@
 **/a.out
 .cache/*
 .test-cache/*
+**/__pycache__

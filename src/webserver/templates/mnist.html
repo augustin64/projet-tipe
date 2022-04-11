@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>MNIST interaction</title>
+  <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static',filename='script.js') }}"></script>
+</head>
+<body onload="init()">
+  <div id="maincard">
+    <canvas id="digit-canvas" width="280" height="280"></canvas><br/>
+    <button id="clear">Clear</button>
+    <button id="predict" onclick="getPrediction()">Prédire</button>
+  </div><br/>
+  <div id="result"></div>
+</body>
+</html>
