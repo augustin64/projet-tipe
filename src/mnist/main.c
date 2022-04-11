@@ -153,7 +153,8 @@ void recognize(char* modele, char* entree, char* sortie) {
             }
         }
     }
-    printf("}\n");
+    if (! strcmp(sortie, "json"))
+        printf("}\n");
 
 }
 
