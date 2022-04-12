@@ -231,15 +231,18 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
 float erreur_sortie(Reseau* reseau, int numero_voulu){
     /* Renvoie l'erreur du réseau neuronal pour une sortie */
     float erreur = 0;
-    Couche* derniere_couche = reseau->couches[reseau->nb_couches-1];
+    float neurone_value;
 
     for (int i=0; i < reseau->nb_couches-1; i++) {
+        neurone_value = reseau->couches[reseau->nb_couches-1]->neurones[i]->z;
+
         if (i==numero_voulu) {
-            erreur += (1-derniere_couche->neurones[i]->z)*(1-derniere_couche->neurones[i]->z);
+            erreur += (1-neurone_value)*(1-neurone_value);
         }
         else {
-            erreur += derniere_couche->neurones[i]->z*derniere_couche->neurones[i]->z;
+            erreur += neurone_value*neurone_value;
         }
     }
+    
     return erreur;
 }
