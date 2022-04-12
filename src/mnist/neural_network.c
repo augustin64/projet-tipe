@@ -87,12 +87,11 @@ void forward_propagation(Reseau* reseau_neuronal) {
             couche->neurones[j]->z = couche->neurones[j]->biais;
 
             for (int k=0; k < pre_couche->nb_neurones; k++) {
-                couche->neurones[j]->z += pre_couche->neurones[k]->activation * pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[i]; // CHECK: ->poids_sortants[k] plutôt que i
+                couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[i]; // CHECK: ->poids_sortants[k] plutôt que i
             }
 
             if (i < reseau_neuronal->nb_couches-1) { // Pour toutes les couches sauf la dernière on utilise la fonction ReLU (0 si z<0,  z sinon)
-                couche->neurones[j]->z=ReLU(couche->neurones[j]->z);
-                    
+                couche->neurones[j]->z = ReLU(couche->neurones[j]->z);  
             }
             else { // Pour la dernière couche on utilise la fonction sigmoid permettant d'obtenir un résultat entre 0 et 1 à savoir une probabilité
                 couche->neurones[j]->z = sigmoid(couche->neurones[j]->z);
@@ -137,7 +136,7 @@ void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue) {
         for(int k=0; k<reseau_neuronal->couches[reseau_neuronal->nb_couches-2]->nb_neurones; k++) { // Pour chaque neurone de l'avant dernière couche
             neurone2 = reseau_neuronal->couches[reseau_neuronal->nb_couches-2]->neurones[k];
 
-            neurone2->d_poids_sortants[i] = (neurone->d_z * neurone2->activation);
+            neurone2->d_poids_sortants[i] = neurone->d_z;
             neurone2->d_activation = neurone2->poids_sortants[i] * neurone->d_z;
         }
         // ???
@@ -156,7 +155,7 @@ void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue) {
             for(int k=0; k<reseau_neuronal->couches[i-1]->nb_neurones; k++) {
                 neurone2 = reseau_neuronal->couches[i-1]->neurones[k];
 
-                neurone2->d_poids_sortants[j] = neurone->d_z * neurone2->activation;
+                neurone2->d_poids_sortants[j] = neurone->d_z;
                 if(i>1) // ??? ...
                     neurone2->d_activation = neurone2->poids_sortants[j] * neurone->d_z;
             }
