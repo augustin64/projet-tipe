@@ -42,7 +42,7 @@ void help(char* call) {
 void ecrire_image_dans_reseau(int** image, Reseau* reseau, int height, int width) {
     for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
-            reseau->couches[0]->neurones[i*height+j]->activation = (float)image[i][j] / 255.0;
+            reseau->couches[0]->neurones[i*height+j]->z = (float)image[i][j] / 255.0;
         }
     }
 }
