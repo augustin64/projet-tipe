@@ -224,3 +224,22 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
         neurone->biais = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure); // On initialise le biais aléatoirement
     }
 }
+
+
+
+
+float erreur_sortie(Reseau* reseau, int numero_voulu){
+    /* Renvoie l'erreur du réseau neuronal pour une sortie */
+    float erreur = 0;
+    Couche* derniere_couche = reseau->couches[reseau->nb_couches-1];
+
+    for (int i=0; i < reseau->nb_couches-1; i++) {
+        if (i==numero_voulu) {
+            erreur += (1-derniere_couche->neurones[i]->z)*(1-derniere_couche->neurones[i]->z);
+        }
+        else {
+            erreur += derniere_couche->neurones[i]->z*derniere_couche->neurones[i]->z;
+        }
+    }
+    return erreur;
+}
