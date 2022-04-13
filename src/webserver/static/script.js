@@ -27,6 +27,10 @@ function init() {
         canvas.addEventListener('mousemove', s_mouseMove, false);          
         window.addEventListener('mouseup', s_mouseUp, false);
         document.getElementById('clear').addEventListener("click", clear);
+
+        canvas.addEventListener('touchstart', s_mouseDown, false);
+        canvas.addEventListener('touchmove', s_touchMove, false);
+        canvas.addEventListener('touchend', s_mouseUp, false);
     }
 }
 
@@ -52,23 +56,25 @@ function draw(ctx, x, y, isDown) {
 
 // Mouse moves
 function s_mouseDown() {
-    mouseDown = 1;
+    mouseDown = true;
     draw(ctx, mouseX, mouseY, false);
 }
 
 function s_mouseUp() {
-    mouseDown = 0;
+    mouseDown = false;
 }
 
 function s_mouseMove(e) {
     // Si la souris bouge et est cliquée, on souhaite dessiner un trait
     getMousePos(e);
-    if (mouseDown == 1) {
+    if (mouseDown) {
         draw(ctx, mouseX, mouseY, true);
     }
 }
 
 function getMousePos(e) {
+    e.preventDefault();
+    e.stopPropagation();
     if (e.offsetX) {
         mouseX = e.offsetX;
         mouseY = e.offsetY;
@@ -78,8 +84,18 @@ function getMousePos(e) {
     }
 }
 
+function s_touchMove(e) {
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousemove", {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+  }
+
 
 function clear() {
+    document.getElementById("result").innerHTML = "";
     ctx.clearRect(0, 0, canvas.width, canvas.height);  
     ctx.fillStyle = "black"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
