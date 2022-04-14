@@ -87,7 +87,7 @@ void forward_propagation(Reseau* reseau) {
             couche->neurones[j]->z = couche->neurones[j]->biais;
 
             for (int k=0; k < pre_couche->nb_neurones; k++) {
-                couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[i]; // CHECK: ->poids_sortants[k] plutôt que i
+                couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[j];
             }
 
             if (i < reseau->nb_couches-1) { // Pour toutes les couches sauf la dernière on utilise la fonction ReLU (0 si z<0,  z sinon)
