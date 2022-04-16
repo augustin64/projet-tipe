@@ -7,6 +7,7 @@
 #include "struct/neuron.h"
 
 #define TAUX_APPRENTISSAGE 0.15 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
+#define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
 
 
 float max(float a, float b){
@@ -87,7 +88,7 @@ void forward_propagation(Reseau* reseau) {
             couche->neurones[j]->z = couche->neurones[j]->biais;
 
             for (int k=0; k < pre_couche->nb_neurones; k++) {
-                couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[j];
+                couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[j] * pre_couche->neurones[k]->activation;
             }
 
             if (i < reseau->nb_couches-1) { // Pour toutes les couches sauf la dernière on utilise la fonction ReLU (0 si z<0,  z sinon)
@@ -194,6 +195,7 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
     Neurone* neurone;
     double borne_superieure;
     double borne_inferieure;
+    double ecart_bornes;
 
     srand(time(0));
     for (int i=0; i < reseau->nb_couches-1; i++) { // On exclut la dernière couche
@@ -203,25 +205,26 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
             // Initialisation des bornes supérieure et inférieure
             borne_superieure = 1/sqrt(reseau->couches[i]->nb_neurones);
             borne_inferieure = - borne_superieure;
+            ecart_bornes = borne_superieure - borne_inferieure;
 
-            neurone->activation = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure);
+            neurone->activation = borne_inferieure + RAND_DOUBLE()*ecart_bornes;
 
             for (int k=0; k < reseau->couches[i+1]->nb_neurones-1; k++) { // Pour chaque neurone de la couche suivante auquel le neurone est relié
-                neurone->poids_sortants[k] = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure); // Initialisation des poids sortants aléatoirement
-                neurone->d_poids_sortants[k] = 0.0; // ... ???
+                neurone->poids_sortants[k] = borne_inferieure + RAND_DOUBLE()*ecart_bornes; // Initialisation des poids sortants aléatoirement
             }
             if (i > 0) {// Pour tous les neurones n'étant pas dans la première couche
-                neurone->biais = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure); // On initialise le biais aléatoirement
+                neurone->biais = borne_inferieure + RAND_DOUBLE()*ecart_bornes; // On initialise le biais aléatoirement
             }
         }
     }
     borne_superieure = 1/sqrt(reseau->couches[reseau->nb_couches-1]->nb_neurones);
     borne_inferieure = - borne_superieure;
+    ecart_bornes = borne_superieure - borne_inferieure;;
 
     for (int j=0; j < reseau->couches[reseau->nb_couches-1]->nb_neurones; j++) {// Intialisation de la dernière couche exclue ci-dessus
         neurone = reseau->couches[reseau->nb_couches-1]->neurones[j];
-        neurone->activation = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure);
-        neurone->biais = borne_inferieure + ((double)rand())/((double)RAND_MAX)*(borne_superieure - borne_inferieure); // On initialise le biais aléatoirement
+        neurone->activation = borne_inferieure + RAND_DOUBLE()*ecart_bornes;
+        neurone->biais = borne_inferieure + RAND_DOUBLE()*ecart_bornes; // On initialise le biais aléatoirement
     }
 }
 
