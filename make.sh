@@ -54,11 +54,13 @@ fi
 if [[ $1 == "train" ]]; then
 	[[ -f "$OUT/main" ]] || $0 build
 	[[ $2 ]] || set -- "$1" "train"
+	[[ $3 == "-r" || $3 == "--recover" ]] && RECOVER="-r .cache/reseau.bin"
 	mkdir -p .cache
 	"$OUT/main" train \
 		--images "data/mnist/$2-images-idx3-ubyte" \
 		--labels "data/mnist/$2-labels-idx1-ubyte" \
-		--out ".cache/reseau.bin"
+		--out ".cache/reseau.bin" \
+		$RECOVER
 	exit 0
 fi
 
@@ -89,6 +91,7 @@ echo "Usage:"
 echo -e "\t$0 preview ( build | train | t10k )"
 echo -e "\t$0 test    ( build | run )"
 echo -e "\t$0 build"
-echo -e "\t$0 train   ( train | t10k )"
-echo -e "\t$0 recognize [FILENAME] ( text | json )\n"
+echo -e "\t$0 train   ( train | t10k ) ( -r | --recover )"
+echo -e "\t$0 recognize [FILENAME] ( text | json )"
+echo -e "\t$0 webserver\n"
 echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants"
