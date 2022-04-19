@@ -8,7 +8,7 @@
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 //Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
-#define TAUX_APPRENTISSAGE 0.1
+#define TAUX_APPRENTISSAGE 0.2
 //Retourne un nombre aléatoire entre 0 et 1
 #define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
 //Coefficient leaking ReLU
@@ -98,7 +98,7 @@ void forward_propagation(Reseau* reseau) {
         pre_couche = reseau->couches[i-1];
 
         for (int j=0; j < couche->nb_neurones; j++) {
-            couche->neurones[j]->z = couche->neurones[j]->biais;
+            couche->neurones[j]->z = sigmoid(couche->neurones[j]->biais)-0.5;
 
             for (int k=0; k < pre_couche->nb_neurones; k++) {
                 couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[j];
@@ -134,21 +134,6 @@ int* creation_de_la_sortie_voulue(Reseau* reseau, int pos_nombre_voulu) {
 
 
 
-void mise_a_jour_parametres(Reseau* reseau){
-    /* Met à jour le réseau neuronal à partir des données de la backpropagation */
-    for (int i=0; i<reseau->nb_couches-1; i++) {
-        for (int j=0; j<reseau->couches[i]->nb_neurones; j++) {
-            if (i!=0) {
-                reseau->couches[i]->neurones[j]->biais -= reseau->couches[i]->neurones[j]->d_biais;
-            }
-            for (int k=0; k<reseau->couches[i+1]->nb_neurones; k++) {
-                reseau->couches[i]->neurones[j]->poids_sortants[k] -= reseau->couches[i]->neurones[j]->d_poids_sortants[k];
-            }
-        }
-    }
-}
-
-
 void backward_propagation(Reseau* reseau, int* sortie_voulue) {
     /* Effectue une propagation en arrière du réseau neuronal */
     Neurone* neurone;
@@ -163,7 +148,7 @@ void backward_propagation(Reseau* reseau, int* sortie_voulue) {
                 changes = sigmoid_derivee(neurone->z)*2*(neurone->z - sortie_voulue[i]);
                 //neurone->biais = neurone->biais - TAUX_APPRENTISSAGE*changes;
                 for (int k=0; k<reseau->couches[i+1]->nb_neurones; k++) {
-                    reseau->couches[i]->neurones[j]->d_poids_sortants[k] = TAUX_APPRENTISSAGE*reseau->couches[i-1]->neurones[k]->poids_sortants[j]*changes;
+                    reseau->couches[i]->neurones[j]->d_poids_sortants[k] += reseau->couches[i-1]->neurones[k]->poids_sortants[j]*changes;
                 }
             }
         }
@@ -174,14 +159,14 @@ void backward_propagation(Reseau* reseau, int* sortie_voulue) {
                     changes += reseau->couches[i+1]->neurones[j]->poids_sortants[k]*reseau->couches[i+1]->neurones[j]->d_poids_sortants[k];
                 }
                 changes = changes*leaky_ReLU_derivee(reseau->couches[i+1]->neurones[j]->z);
-                reseau->couches[i+1]->neurones[j]->d_biais = TAUX_APPRENTISSAGE*changes;
+                reseau->couches[i+1]->neurones[j]->d_biais += changes;
                 for (int k=0; k<reseau->couches[i]->nb_neurones; k++){
-                    reseau->couches[i]->neurones[k]->d_poids_sortants[j] = TAUX_APPRENTISSAGE*reseau->couches[i]->neurones[k]->poids_sortants[j]*changes;
+                    reseau->couches[i]->neurones[k]->d_poids_sortants[j] += reseau->couches[i]->neurones[k]->poids_sortants[j]*changes;
                 }
             }
         }
     }
-    mise_a_jour_parametres(reseau);
+    //mise_a_jour_parametres(reseau);
 }
 
 
@@ -195,10 +180,20 @@ void modification_du_reseau_neuronal(Reseau* reseau) {
     for (int i=0; i < reseau->nb_couches-1; i++) { // on exclut la dernière couche
         for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
             neurone = reseau->couches[i]->neurones[j];
-            neurone->biais = neurone->biais - (TAUX_APPRENTISSAGE * neurone->d_biais); // On modifie le biais du neurone à partir des données de la propagation en arrière
+            neurone->biais = neurone->biais - TAUX_APPRENTISSAGE * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
+            neurone->d_biais = 0;
+            if (neurone->biais > 1)
+                neurone->biais = 1;
+            else if (neurone->biais < -1)
+                neurone->biais = -1;
 
             for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) {
                 neurone->poids_sortants[k] = neurone->poids_sortants[k] - (TAUX_APPRENTISSAGE * neurone->d_poids_sortants[k]); // On modifie le poids du neurone à partir des données de la propagation en arrière
+                neurone->d_poids_sortants[k] = 0;
+                if (neurone->poids_sortants[k] > 1)
+                    neurone->poids_sortants[k] = 1;
+                else if (neurone->poids_sortants[k] < -1)
+                    neurone->poids_sortants[k] = -1;
             }
         }
     }
@@ -221,8 +216,8 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
 
             neurone = reseau->couches[i]->neurones[j];
             // Initialisation des bornes supérieure et inférieure
-            borne_superieure = 1/sqrt(reseau->couches[i]->nb_neurones);
-            borne_inferieure = 0;
+            borne_superieure = 1/sqrt((double)reseau->couches[reseau->nb_couches-1]->nb_neurones);
+            borne_inferieure = -borne_superieure;
             ecart_bornes = borne_superieure - borne_inferieure;
 
             neurone->activation = borne_inferieure + RAND_DOUBLE()*ecart_bornes;
@@ -235,9 +230,9 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
             }
         }
     }
-    borne_superieure = 1/sqrt(reseau->couches[reseau->nb_couches-1]->nb_neurones);
-    borne_inferieure = 0;
-    ecart_bornes = borne_superieure - borne_inferieure;;
+    borne_superieure = 1/sqrt((double)reseau->couches[reseau->nb_couches-1]->nb_neurones);
+    borne_inferieure = -borne_superieure;
+    ecart_bornes = borne_superieure - borne_inferieure;
 
     for (int j=0; j < reseau->couches[reseau->nb_couches-1]->nb_neurones; j++) {// Intialisation de la dernière couche exclue ci-dessus
         neurone = reseau->couches[reseau->nb_couches-1]->neurones[j];
