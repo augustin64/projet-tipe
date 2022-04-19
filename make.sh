@@ -44,6 +44,7 @@ if [[ $1 == "test" ]]; then
 fi
 
 if [[ $1 == "build" ]]; then
+	mkdir -p "$OUT"
 	echo "Compilation de src/mnist/main.c"
 	gcc src/mnist/main.c -o "$OUT/main" $FLAGS
 	echo "Fait."
