@@ -8,11 +8,12 @@
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 //Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
-#define TAUX_APPRENTISSAGE 0.2
+#define TAUX_APPRENTISSAGE 0.15
 //Retourne un nombre aléatoire entre 0 et 1
 #define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
 //Coefficient leaking ReLU
 #define COEFF_LEAKY_RELU 0.2
+#define MAX_RESEAU 10
 
 
 float max(float a, float b){
@@ -180,20 +181,20 @@ void modification_du_reseau_neuronal(Reseau* reseau) {
     for (int i=0; i < reseau->nb_couches-1; i++) { // on exclut la dernière couche
         for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
             neurone = reseau->couches[i]->neurones[j];
-            neurone->biais = neurone->biais - TAUX_APPRENTISSAGE * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
+            neurone->biais = neurone->biais + TAUX_APPRENTISSAGE * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
             neurone->d_biais = 0;
-            if (neurone->biais > 1)
-                neurone->biais = 1;
-            else if (neurone->biais < -1)
-                neurone->biais = -1;
+            if (neurone->biais > MAX_RESEAU)
+                neurone->biais = MAX_RESEAU;
+            else if (neurone->biais < -MAX_RESEAU)
+                neurone->biais = -MAX_RESEAU;
 
             for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) {
                 neurone->poids_sortants[k] = neurone->poids_sortants[k] - (TAUX_APPRENTISSAGE * neurone->d_poids_sortants[k]); // On modifie le poids du neurone à partir des données de la propagation en arrière
                 neurone->d_poids_sortants[k] = 0;
-                if (neurone->poids_sortants[k] > 1)
-                    neurone->poids_sortants[k] = 1;
-                else if (neurone->poids_sortants[k] < -1)
-                    neurone->poids_sortants[k] = -1;
+                if (neurone->poids_sortants[k] > MAX_RESEAU)
+                    neurone->poids_sortants[k] = MAX_RESEAU;
+                else if (neurone->poids_sortants[k] < -MAX_RESEAU)
+                    neurone->poids_sortants[k] = -MAX_RESEAU;
             }
         }
     }
