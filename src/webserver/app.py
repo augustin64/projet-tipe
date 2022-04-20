@@ -37,14 +37,15 @@ def recognize_mnist(image):
     write_image_to_binary(image, ".cache/image.bin")
 
     try:
-        return {"status": 200, "data":
-            json.loads(subprocess.check_output([
-                'out/main',
-                'recognize',
-                '--modele', '.cache/reseau.bin',
-                '--in', '.cache/image.bin',
-                '--out', 'json'
-            ]))["0"]}
+        output = subprocess.check_output([
+            'out/main',
+            'recognize',
+            '--modele', '.cache/reseau.bin',
+            '--in', '.cache/image.bin',
+            '--out', 'json'
+        ]).decode("utf-8")
+        json_data = json.loads(output.replace("nan", "0.0"))["0"]
+        return {"status": 200, "data": json_data}
     except subprocess.CalledProcessError:
         return {
             "status": 500,
