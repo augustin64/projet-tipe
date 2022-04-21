@@ -17,16 +17,16 @@
 
 
 float max(float a, float b){
-    return a<b?b:a;
+    return a < b ? b : a;
 }
 
 float sigmoid(float x){
-    return 1/(1 + exp(x));
+    return 1/(1 - exp(-x));
 }
 
 float sigmoid_derivee(float x){
-    float tmp = sigmoid(x);
-    return tmp*(1-tmp);
+    float tmp = exp(-x);
+    return tmp/((1+tmp)*(1+tmp));
 }
 
 float leaky_ReLU(float x){
