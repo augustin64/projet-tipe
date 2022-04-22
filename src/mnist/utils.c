@@ -5,6 +5,7 @@
 
 #include "neural_network.c"
 #include "neuron_io.c"
+#include "mnist.c"
 
 /*
 Contient un ensemble de fonctions utiles pour le débogage
@@ -16,6 +17,8 @@ void help(char* call) {
     printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\tprint-biais:\n");
     printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\tcount-labels:\n");
+    printf("\t\t--labels | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\tcreer-reseau:\n");
     printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
     printf("\t\t--number | -n [int]\tNuméro à privilégier\n");
@@ -28,7 +31,7 @@ void print_biais(char* filename) {
     for (int i=1; i < reseau->nb_couches -1; i++) {
         printf("Couche %d\n", i);
         for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
-            printf("Couche %d\tNeurone %d\tBiais: %0.1f\n", i, j, reseau->couches[i]->neurones[j]->biais);
+            printf("Couche %d\tNeurone %d\tBiais: %f\n", i, j, reseau->couches[i]->neurones[j]->biais);
         }
     }
     suppression_du_reseau_neuronal(reseau);
@@ -42,12 +45,33 @@ void print_poids(char* filename) {
         for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
             printf("Couche %d\tNeurone %d\tPoids: [", i, j);
             for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) {
-                printf("%0.01f, ", reseau->couches[i]->neurones[j]->poids_sortants[k]);
+                printf("%f, ", reseau->couches[i]->neurones[j]->poids_sortants[k]);
             }
             printf("]\n");
         }
     }
     suppression_du_reseau_neuronal(reseau);
+}
+
+void count_labels(char* filename) {
+    uint32_t number_of_images = read_mnist_labels_nb_images(filename);
+
+    unsigned int* labels = malloc(sizeof(unsigned int)*number_of_images);
+    labels = read_mnist_labels(filename);
+
+    unsigned int* tab[10];
+
+    for (int i=0; i < 10; i++) {
+        tab[i] = 0;
+    }
+
+    for (int i=0; i < number_of_images; i++) {
+        tab[(int)labels[i]]++;
+    }
+
+    for (int i=0; i < 10; i++) {
+        printf("Nombre de %d: %d\n", i, tab[i]);
+    }
 }
 
 void creer_reseau(char* filename, int sortie) {
@@ -152,15 +176,23 @@ int main(int argc, char* argv[]) {
                 i++;
             }
         }
-        if (! out) {
-            printf("Pas de fichier spécifié, défaut: '.cache/reseau.bin'\n");
-            out = ".cache/reseau.bin";
+    } else if (! strcmp(argv[1], "count-labels")) {
+        char* labels = NULL;
+        int i = 2;
+        while (i < argc) {
+            if ((! strcmp(argv[i], "--labels"))||(! strcmp(argv[i], "-l"))) {
+                labels = argv[i+1];
+                i += 2;
+            } else {
+                printf("%s : Argument non reconnu\n", argv[i]);
+                i++;
+            }
         }
-        if (n == -1) {
-            printf("Pas de numéro spécifié, défaut: 0\n");
-            n = 0;
+        if (! labels) {
+            printf("Pas de fichier spécifié, défaut: 'data/mnist/train-labels-idx1-ubyte'\n");
+            labels = "data/mnist/train-labels-idx1-ubyte";
         }
-        creer_reseau(out, n);
+        count_labels(labels);
         exit(1);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

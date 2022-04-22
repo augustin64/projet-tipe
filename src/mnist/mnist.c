@@ -61,6 +61,27 @@ int* read_mnist_images_parameters(char* filename) {
     return tab;
 }
 
+uint32_t read_mnist_labels_nb_images(char* filename) {
+    FILE *ptr;
+    
+    ptr = fopen(filename, "rb");
+
+    uint32_t magic_number;
+    uint32_t number_of_images;
+
+    fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    magic_number = swap_endian(magic_number);
+
+    if (magic_number != 2049) {
+        printf("Incorrect magic number !\n");
+        exit(1);
+    }
+
+    fread(&number_of_images, sizeof(uint32_t), 1, ptr);
+    number_of_images = swap_endian(number_of_images);
+
+    return number_of_images;
+}
 
 // Lit un set de données images sous format de la base de données MNIST
 int*** read_mnist_images(char* filename) {
