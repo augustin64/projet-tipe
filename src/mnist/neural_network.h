@@ -18,9 +18,8 @@ void creation_du_reseau_neuronal(Reseau* reseau_neuronal, int* neurones_par_couc
 void suppression_du_reseau_neuronal(Reseau* reseau_neuronal);
 void forward_propagation(Reseau* reseau_neuronal);
 int* creation_de_la_sortie_voulue(Reseau* reseau_neuronal, int pos_nombre_voulu);
-void mise_a_jour_parametres(Reseau* reseau);
 void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue);
-void modification_du_reseau_neuronal(Reseau* reseau_neuronal);
+void modification_du_reseau_neuronal(Reseau* reseau_neuronal, uint32_t nb_modifs);
 void initialisation_du_reseau_neuronal(Reseau* reseau_neuronal);
 float erreur_sortie(Reseau* reseau, int numero_voulu);
 

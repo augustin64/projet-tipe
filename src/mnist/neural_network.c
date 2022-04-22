@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
@@ -8,12 +10,15 @@
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 //Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
-#define TAUX_APPRENTISSAGE 0.15
+#define TAUX_APPRENTISSAGE 0.015
 //Retourne un nombre aléatoire entre 0 et 1
 #define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
 //Coefficient leaking ReLU
 #define COEFF_LEAKY_RELU 0.2
-#define MAX_RESEAU 10
+#define MAX_RESEAU 100000
+
+#define PRINT_POIDS false
+#define PRINT_BIAIS false
 
 
 float max(float a, float b){
@@ -21,7 +26,7 @@ float max(float a, float b){
 }
 
 float sigmoid(float x){
-    return 1/(1 - exp(-x));
+    return 1/(1 + exp(-x));
 }
 
 float sigmoid_derivee(float x){
@@ -30,13 +35,13 @@ float sigmoid_derivee(float x){
 }
 
 float leaky_ReLU(float x){
-    if (x>0)
+    if (x > 0)
         return x;
-    return x*COEFF_LEAKY_RELU;
+    return COEFF_LEAKY_RELU;
 }
 
 float leaky_ReLU_derivee(float x){
-    if (x>0)
+    if (x > 0)
         return 1;
     return COEFF_LEAKY_RELU;
 }
@@ -99,7 +104,7 @@ void forward_propagation(Reseau* reseau) {
         pre_couche = reseau->couches[i-1];
 
         for (int j=0; j < couche->nb_neurones; j++) {
-            couche->neurones[j]->z = sigmoid(couche->neurones[j]->biais)-0.5;
+            couche->neurones[j]->z = couche->neurones[j]->biais;
 
             for (int k=0; k < pre_couche->nb_neurones; k++) {
                 couche->neurones[j]->z += pre_couche->neurones[k]->z * pre_couche->neurones[k]->poids_sortants[j];
@@ -107,8 +112,7 @@ void forward_propagation(Reseau* reseau) {
 
             if (i < reseau->nb_couches-1) { // Pour toutes les couches sauf la dernière on utilise la fonction leaky_ReLU (a*z si z<0,  z sinon)
                 couche->neurones[j]->z = leaky_ReLU(couche->neurones[j]->z);  
-            }
-            else { // Pour la dernière couche on utilise la fonction sigmoid permettant d'obtenir un résultat entre 0 et 1 à savoir une probabilité
+            } else { // Pour la dernière couche on utilise la fonction sigmoid permettant d'obtenir un résultat entre 0 et 1 à savoir une probabilité
                 couche->neurones[j]->z = sigmoid(couche->neurones[j]->z);
             }
         }
@@ -141,39 +145,37 @@ void backward_propagation(Reseau* reseau, int* sortie_voulue) {
     Neurone* neurone2;
     float changes;
 
+    int i = reseau->nb_couches-2;
     // On commence par parcourir tous les neurones de la couche finale
-    for (int i=reseau->nb_couches-2; i>=0; i--) {
-        if (i==reseau->nb_couches-2){
-            for (int j=0; j<reseau->couches[i]->nb_neurones; j++) {
-                neurone = reseau->couches[reseau->nb_couches-1]->neurones[i];
-                changes = sigmoid_derivee(neurone->z)*2*(neurone->z - sortie_voulue[i]);
-                //neurone->biais = neurone->biais - TAUX_APPRENTISSAGE*changes;
-                for (int k=0; k<reseau->couches[i+1]->nb_neurones; k++) {
-                    reseau->couches[i]->neurones[j]->d_poids_sortants[k] += reseau->couches[i-1]->neurones[k]->poids_sortants[j]*changes;
-                }
-            }
+    for (int j=0; j < reseau->couches[i+1]->nb_neurones; j++) {
+        neurone = reseau->couches[i+1]->neurones[j];
+        changes = sigmoid_derivee(neurone->z)*2*(neurone->z - sortie_voulue[j]);
+        for (int k=0; k < reseau->couches[i]->nb_neurones; k++) {
+            reseau->couches[i]->neurones[k]->d_poids_sortants[j] += reseau->couches[i]->neurones[k]->poids_sortants[j]*changes;
         }
-        else {
-            for (int j=0; j<reseau->couches[i+1]->nb_neurones; j++) {
-                float changes = 0;
-                for (int k=0; k<reseau->couches[i+2]->nb_neurones; k++) {
-                    changes += reseau->couches[i+1]->neurones[j]->poids_sortants[k]*reseau->couches[i+1]->neurones[j]->d_poids_sortants[k];
-                }
-                changes = changes*leaky_ReLU_derivee(reseau->couches[i+1]->neurones[j]->z);
-                reseau->couches[i+1]->neurones[j]->d_biais += changes;
-                for (int k=0; k<reseau->couches[i]->nb_neurones; k++){
-                    reseau->couches[i]->neurones[k]->d_poids_sortants[j] += reseau->couches[i]->neurones[k]->poids_sortants[j]*changes;
-                }
+    }
+    i--;
+    for (; i >= 0; i--) {
+        for (int j=0; j < reseau->couches[i+1]->nb_neurones; j++) {
+            changes = 0;
+            for (int k=0; k < reseau->couches[i+2]->nb_neurones; k++) {
+                //printf("Couche %d Neurone %d Poids %f\n", i+1, j, reseau->couches[i+1]->neurones[j]->poids_sortants[k]);
+                changes += (reseau->couches[i+1]->neurones[j]->poids_sortants[k]*reseau->couches[i+1]->neurones[j]->d_poids_sortants[k])/reseau->couches[i+1]->nb_neurones;
+            }
+            changes = changes*leaky_ReLU_derivee(reseau->couches[i+1]->neurones[j]->z);
+            reseau->couches[i+1]->neurones[j]->d_biais += changes;
+            for (int l=0; l < reseau->couches[i]->nb_neurones; l++){
+                //printf("%f\n", changes);
+                reseau->couches[i]->neurones[l]->d_poids_sortants[j] += reseau->couches[i]->neurones[l]->poids_sortants[j]*changes;
             }
         }
     }
-    //mise_a_jour_parametres(reseau);
 }
 
 
 
 
-void modification_du_reseau_neuronal(Reseau* reseau) {
+void modification_du_reseau_neuronal(Reseau* reseau, uint32_t nb_modifs) {
     /* Modifie les poids et le biais des neurones du réseau neuronal à partir
     du nombre de couches et de la liste du nombre de neurone par couche */
     Neurone* neurone;
@@ -181,16 +183,23 @@ void modification_du_reseau_neuronal(Reseau* reseau) {
     for (int i=0; i < reseau->nb_couches-1; i++) { // on exclut la dernière couche
         for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
             neurone = reseau->couches[i]->neurones[j];
-            neurone->biais = neurone->biais + TAUX_APPRENTISSAGE * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
+            if (neurone->biais != 0 && PRINT_BIAIS)
+                printf("C %d\tN %d\tb: %f      \tDb: %f\n", i, j, neurone->biais,  (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_biais);
+            neurone->biais -= (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
+
             neurone->d_biais = 0;
+
             if (neurone->biais > MAX_RESEAU)
                 neurone->biais = MAX_RESEAU;
             else if (neurone->biais < -MAX_RESEAU)
                 neurone->biais = -MAX_RESEAU;
 
             for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) {
-                neurone->poids_sortants[k] = neurone->poids_sortants[k] - (TAUX_APPRENTISSAGE * neurone->d_poids_sortants[k]); // On modifie le poids du neurone à partir des données de la propagation en arrière
+                if (neurone->poids_sortants[k] != 0 && PRINT_POIDS)
+                    printf("C %d\tN %d -> %d\tp: %f  \tDp: %f\n", i, j, k, neurone->poids_sortants[k],  (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_poids_sortants[k]);
+                neurone->poids_sortants[k] -= (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_poids_sortants[k]; // On modifie le poids du neurone à partir des données de la propagation en arrière
                 neurone->d_poids_sortants[k] = 0;
+
                 if (neurone->poids_sortants[k] > MAX_RESEAU)
                     neurone->poids_sortants[k] = MAX_RESEAU;
                 else if (neurone->poids_sortants[k] < -MAX_RESEAU)
@@ -213,7 +222,7 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
 
     srand(time(0));
     for (int i=0; i < reseau->nb_couches-1; i++) { // On exclut la dernière couche
-        for (int j=0; j < reseau->couches[i]->nb_neurones-1; j++) {
+        for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
 
             neurone = reseau->couches[i]->neurones[j];
             // Initialisation des bornes supérieure et inférieure
@@ -223,7 +232,7 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
 
             neurone->activation = borne_inferieure + RAND_DOUBLE()*ecart_bornes;
 
-            for (int k=0; k < reseau->couches[i+1]->nb_neurones-1; k++) { // Pour chaque neurone de la couche suivante auquel le neurone est relié
+            for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) { // Pour chaque neurone de la couche suivante auquel le neurone est relié
                 neurone->poids_sortants[k] = borne_inferieure + RAND_DOUBLE()*ecart_bornes; // Initialisation des poids sortants aléatoirement
             }
             if (i > 0) {// Pour tous les neurones n'étant pas dans la première couche
@@ -254,7 +263,7 @@ float erreur_sortie(Reseau* reseau, int numero_voulu){
     for (int i=0; i < reseau->nb_couches-1; i++) {
         neurone_value = reseau->couches[reseau->nb_couches-1]->neurones[i]->z;
 
-        if (i==numero_voulu) {
+        if (i == numero_voulu) {
             erreur += (1-neurone_value)*(1-neurone_value);
         }
         else {

@@ -46,7 +46,7 @@ void help(char* call) {
 void ecrire_image_dans_reseau(int** image, Reseau* reseau, int height, int width) {
     for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
-            reseau->couches[0]->neurones[i*height+j]->z = (float)image[i][j] / 255.0;
+            reseau->couches[0]->neurones[i*height+j]->z = (float)image[i][j] / 255.0f;
         }
     }
 }
@@ -58,7 +58,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
 
     //int* repartition = malloc(sizeof(int)*couches);
     int nb_neurones_der = 10;
-    int repartition[5] = {784, 100, 75, 40, nb_neurones_der};
+    int repartition[4] = {784, 16, 16, nb_neurones_der};
 
     float* sortie = malloc(sizeof(float)*nb_neurones_der);
     int* sortie_voulue;
@@ -112,7 +112,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
         }
         printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n",i, batches, nb_images, nb_images, accuracy*100);
 
-        modification_du_reseau_neuronal(reseau);
+        modification_du_reseau_neuronal(reseau, nb_images);
         ecrire_reseau(out, reseau);
     }
     suppression_du_reseau_neuronal(reseau);
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "train")) {
         int batches = 5;
-        int couches = 5;
+        int couches = 4;
         int neurons = 784;
         char* images = NULL;
         char* labels = NULL;
