@@ -1,9 +1,9 @@
 # Compte rendu
 
 ### **22 Avril 2022** [b30bedd](https://github.com/julienChemillier/TIPE/commit/b30bedd375e23ec7c2e5b10acf397a10885d8b5e)
-Le réseau minimise la fonction d'erreur (différence entre sortie voulue et obtenue).
-Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieux qu'aléatoire.
-Chaque image renvoie les mêmes poids sur la dernière couche.
+Le réseau minimise la fonction d'erreur (différence entre sortie voulue et obtenue).  
+Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieux qu'aléatoire.  
+Chaque image renvoie les mêmes poids sur la dernière couche.  
 Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'activation associée sur la dernière couche :
 
 | Chiffre | Nombre d'occurences dans le set d'entraînement | Activation du neurone sortant | Rapport |
@@ -24,9 +24,9 @@ Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'act
 <br/>
 
 ### **25 Avril 2022** [698e72f](https://github.com/julienChemillier/TIPE/commit/698e72f56ed93aa6f5d9c81912ee98461f534410)
-Le réseau donne des probabilités dont la somme est de 1 (grâce à softmax).
-Un problème d'overfitting (sur-ajustement) apparait, résultant à de mauvais résultats sur des nouvelles données.
-Plus le réseau contient de couches, plus sa convergence vers des probabilités convenables est longue.
+Le réseau donne des probabilités dont la somme est de 1 (grâce à softmax).  
+Un problème d'overfitting (sur-ajustement) apparait, résultant à de mauvais résultats sur des nouvelles données.  
+Plus le réseau contient de couches, plus sa convergence vers des probabilités convenables est longue.  
 Voici un tableau comparant les exactitudes des différentes époques et les dimensions du réseau sur les 60 000 images (train) :
 
 
