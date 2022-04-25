@@ -34,14 +34,14 @@ def post_json_handler():
 def recognize_mnist(image):
     """Appelle le programme C reconnaissant les images"""
     # Créer le fichier binaire
-    write_image_to_binary(image, ".cache/image.bin")
+    write_image_to_binary(image, ".cache/image-idx3-ubyte")
 
     try:
         output = subprocess.check_output([
             'out/main',
             'recognize',
             '--modele', '.cache/reseau.bin',
-            '--in', '.cache/image.bin',
+            '--in', '.cache/image-idx3-ubyte',
             '--out', 'json'
         ]).decode("utf-8")
         json_data = json.loads(output.replace("nan", "0.0"))["0"]
