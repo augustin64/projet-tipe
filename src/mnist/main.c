@@ -58,7 +58,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
 
     //int* repartition = malloc(sizeof(int)*couches);
     int nb_neurones_der = 10;
-    int repartition[4] = {784, 16, 16, nb_neurones_der};
+    int repartition[3] = {784, 32, nb_neurones_der};
 
     float* sortie = malloc(sizeof(float)*nb_neurones_der);
     int* sortie_voulue;
@@ -99,6 +99,7 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
             ecrire_image_dans_reseau(images[j], reseau, height, width);
             sortie_voulue = creation_de_la_sortie_voulue(reseau, labels[j]);
             forward_propagation(reseau);
+            backward_propagation(reseau, sortie_voulue);
 
             for (int k=0; k < nb_neurones_der; k++) {
                 sortie[k] = der_couche->neurones[k]->z;
@@ -106,13 +107,10 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
             if (indice_max(sortie, nb_neurones_der) == labels[j]) {
                 accuracy += 1. / (float)nb_images;
             }
-
-            backward_propagation(reseau, sortie_voulue);
-
+            free(sortie_voulue);
         }
-        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n",i, batches, nb_images, nb_images, accuracy*100);
-
         modification_du_reseau_neuronal(reseau, nb_images);
+        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n",i, batches, nb_images, nb_images, accuracy*100);
         ecrire_reseau(out, reseau);
     }
     suppression_du_reseau_neuronal(reseau);
@@ -217,8 +215,8 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     if (! strcmp(argv[1], "train")) {
-        int batches = 5;
-        int couches = 4;
+        int batches = 100;
+        int couches = 3;
         int neurons = 784;
         char* images = NULL;
         char* labels = NULL;

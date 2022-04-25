@@ -9,7 +9,9 @@ typedef struct Neurone{
 
     float d_activation; // Changement d'activation lors de la backpropagation
     float *d_poids_sortants; // Changement des poids sortants lors de la backpropagation
+    float *last_d_poids_sortants;
     float d_biais; // Changement du biais lors de la backpropagation
+    float last_d_biais;
     float d_z; // Quantité de changements générals à effectuer lors de la backpropagation
 } Neurone;
 
