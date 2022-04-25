@@ -54,12 +54,12 @@ fi
 if [[ $1 == "train" ]]; then
 	[[ -f "$OUT/main" ]] || $0 build
 	[[ $2 ]] || set -- "$1" "train"
-	[[ $3 == "-r" || $3 == "--recover" ]] && RECOVER="-r .cache/reseau.bin"
+	[[ $3 == "-r" || $3 == "--recover" ]] && RECOVER="-r .cache/network.bin"
 	mkdir -p .cache
 	"$OUT/main" train \
 		--images "data/mnist/$2-images-idx3-ubyte" \
 		--labels "data/mnist/$2-labels-idx1-ubyte" \
-		--out ".cache/reseau.bin" \
+		--out ".cache/network.bin" \
 		$RECOVER
 	exit 0
 fi
@@ -68,9 +68,9 @@ if [[ $1 == "recognize" ]]; then
 	if [[ $2 ]]; then
 		[[ $3 ]] || set -- "$1" "$2" "text"
 		[[ -f "$OUT/main" ]] || $0 build
-		[[ -f ".cache/reseau.bin" ]] || $0 train train
+		[[ -f ".cache/network.bin" ]] || $0 train train
 		"$OUT/main" recognize \
-			--modele ".cache/reseau.bin" \
+			--modele ".cache/network.bin" \
 			--in "$2" \
 			--out "$3"
 		exit 0
@@ -82,7 +82,7 @@ fi
 
 if [[ $1 == "webserver" ]]; then
 	[[ -f "$OUT/main" ]] || $0 build
-	[[ -f ".cache/reseau.bin" ]] || $0 train train
+	[[ -f ".cache/network.bin" ]] || $0 train train
 	FLASK_APP="src/webserver/app.py" flask run
 	exit 0
 fi

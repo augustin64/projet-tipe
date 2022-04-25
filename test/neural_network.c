@@ -9,19 +9,19 @@
 int main() {
     printf("Création du réseau\n");
 
-    Reseau* reseau_neuronal = malloc(sizeof(Reseau));
+    Network* network_neuronal = malloc(sizeof(Network));
     int tab[5] = {30, 25, 20, 15, 10};
-    creation_du_reseau_neuronal(reseau_neuronal, tab, 5);
+    network_creation(network_neuronal, tab, 5);
 
     printf("OK\n");
     printf("Initialisation du réseau\n");
 
-    initialisation_du_reseau_neuronal(reseau_neuronal);
+    network_initialisation(network_neuronal);
 
     printf("OK\n");
     printf("Enregistrement du réseau\n");
 
-    ecrire_reseau(".test-cache/random_reseau.bin", reseau_neuronal);
+    write_network(".test-cache/random_network.bin", network_neuronal);
 
     printf("OK\n");
     return 1;

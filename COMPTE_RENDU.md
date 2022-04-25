@@ -3,10 +3,10 @@
 ### 22 Avril 2022 [b30bedd](https://github.com/julienChemillier/TIPE/commit/b30bedd375e23ec7c2e5b10acf397a10885d8b5e)
 Le réseau minimise la fonction d'erreur (différence entre sortie voulue et obtenue).  
 Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieux qu'aléatoire.  
-Chaque image renvoie les mêmes poids sur la dernière couche.
-Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'activation associée sur la dernière couche :  
+Chaque image renvoie les mêmes poids sur la dernière layer.
+Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'activation associée sur la dernière layer :  
 
-| Chiffre | Nombre d'occurences dans le set d'entraînement | Activation du neurone sortant | Rapport |
+| Chiffre | Nombre d'occurences dans le set d'entraînement | Activation du neuron sortant | Rapport |
 | --- | --- | --- | --- |
 | 0 | 23692 | 0.483112 | 49040 |
 | 1 | 26968 | 0.508133 | 53072 |

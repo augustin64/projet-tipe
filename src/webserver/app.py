@@ -40,7 +40,7 @@ def recognize_mnist(image):
         output = subprocess.check_output([
             'out/main',
             'recognize',
-            '--modele', '.cache/reseau.bin',
+            '--modele', '.cache/network.bin',
             '--in', '.cache/image.bin',
             '--out', 'json'
         ]).decode("utf-8")
