@@ -208,7 +208,6 @@ void modification_du_reseau_neuronal(Reseau* reseau, uint32_t nb_modifs) {
             if (neurone->biais != 0 && PRINT_BIAIS)
                 printf("C %d\tN %d\tb: %f      \tDb: %f\n", i, j, neurone->biais,  (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_biais);
             neurone->biais -= (TAUX_APPRENTISSAGE/nb_modifs) * neurone->d_biais; // On modifie le biais du neurone à partir des données de la propagation en arrière
-
             neurone->d_biais = 0;
 
             if (neurone->biais > MAX_RESEAU)
@@ -241,7 +240,7 @@ void modification_du_reseau_neuronal(Reseau* reseau, uint32_t nb_modifs) {
 
 
 void initialisation_du_reseau_neuronal(Reseau* reseau) {
-    /* Initialise les variables du réseau neuronal (activation, biais, poids, ...)
+    /* Initialise les variables du réseau neuronal (biais, poids, ...)
     en suivant de la méthode de Xavier ...... à partir du nombre de couches et de la liste du nombre de neurone par couche */
     Neurone* neurone;
     double borne_superieure;
@@ -257,8 +256,6 @@ void initialisation_du_reseau_neuronal(Reseau* reseau) {
             borne_superieure = 1/sqrt((double)reseau->couches[reseau->nb_couches-1]->nb_neurones);
             borne_inferieure = -borne_superieure;
             ecart_bornes = borne_superieure - borne_inferieure;
-
-            neurone->activation = borne_inferieure + RAND_DOUBLE()*ecart_bornes;
 
             for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) { // Pour chaque neurone de la couche suivante auquel le neurone est relié
                 neurone->poids_sortants[k] = borne_inferieure + RAND_DOUBLE()*ecart_bornes;

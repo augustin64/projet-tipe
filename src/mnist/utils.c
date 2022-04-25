@@ -91,19 +91,19 @@ void creer_reseau(char* filename, int sortie) {
             couche->neurones[j] = malloc(sizeof(Neurone));
             neurone = couche->neurones[j];
 
-            neurone->activation = 0.;
             neurone->biais = 0.;
             neurone->z = 0.;
 
-            neurone->d_activation = 0.;
             neurone->d_biais = 0.;
-            neurone->d_z = 0.;
+            neurone->last_d_biais = 0.;
 
             neurone->poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
             neurone->d_poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
+            neurone->last_d_poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
             for (int k=0; k < neurones_par_couche[i+1]; k++) {
                 neurone->poids_sortants[k] = 0.;
                 neurone->d_poids_sortants[k] = 0.;
+                neurone->last_d_poids_sortants[k] = 0.;
             }
         }
     }

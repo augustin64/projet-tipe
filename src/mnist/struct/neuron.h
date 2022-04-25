@@ -2,17 +2,14 @@
 #define DEF_NEURON_H
 
 typedef struct Neurone{
-    float activation; // Caractérise l'activation du neurone
     float* poids_sortants; // Liste de tous les poids des arêtes sortants du neurone
     float biais; // Caractérise le biais du neurone
     float z; // Sauvegarde des calculs faits sur le neurone (programmation dynamique)
 
-    float d_activation; // Changement d'activation lors de la backpropagation
     float *d_poids_sortants; // Changement des poids sortants lors de la backpropagation
-    float *last_d_poids_sortants;
+    float *last_d_poids_sortants; // Dernier changement de d_poid_sortants
     float d_biais; // Changement du biais lors de la backpropagation
-    float last_d_biais;
-    float d_z; // Quantité de changements générals à effectuer lors de la backpropagation
+    float last_d_biais; // Dernier changement de d_biais
 } Neurone;
 
 
