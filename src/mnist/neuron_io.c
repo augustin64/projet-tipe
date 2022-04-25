@@ -17,16 +17,15 @@ Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
     fread(&activation, sizeof(float), 1, ptr);
     fread(&biais, sizeof(float), 1, ptr);
 
-    neurone->activation = activation;
     neurone->biais = biais;
 
     neurone->z = 0.0;
-    neurone->d_activation = 0.0;
+    neurone->last_d_biais = 0.0;
     neurone->d_biais = 0.0;
-    neurone->d_z = 0.0;
 
     float* poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
 
+    neurone->last_d_poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
     neurone->d_poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
     neurone->poids_sortants = poids_sortants;
 
@@ -34,6 +33,7 @@ Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
         fread(&tmp, sizeof(float), 1, ptr);
         neurone->poids_sortants[i] = tmp;
         neurone->d_poids_sortants[i] = 0.0;
+        neurone->last_d_poids_sortants[i] = 0.0;
     }
 
     return neurone;
@@ -99,7 +99,6 @@ Reseau* lire_reseau(char* filename) {
 void ecrire_neurone(Neurone* neurone, int poids_sortants, FILE *ptr) {
     float buffer[poids_sortants+2];
 
-    buffer[0] = neurone->activation;
     buffer[1] = neurone->biais;
     for (int i=0; i < poids_sortants; i++) {
         buffer[i+2] = neurone->poids_sortants[i];
