@@ -26,59 +26,59 @@ void help(char* call) {
     printf("OPTIONS:\n");
     printf("\ttrain:\n");
     printf("\t\t--batches | -b [int]\tNombre de batches.\n");
-    printf("\t\t--couches | -c [int]\tNombres de couches.\n");
-    printf("\t\t--neurons | -n [int]\tNombre de neurones sur la première couche.\n");
+    printf("\t\t--layers | -c [int]\tNombres de layers.\n");
+    printf("\t\t--neurons | -n [int]\tNombre de neurons sur la première layer.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
+    printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurons.\n");
     printf("\trecognize:\n");
-    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurons.\n");
     printf("\t\t--in      | -i [FILENAME]\tFichier contenant les images à reconnaître.\n");
     printf("\t\t--out     | -o (text|json)\tFormat de sortie.\n");
     printf("\ttest:\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurons.\n");
 }
 
 
-void ecrire_image_dans_reseau(int** image, Reseau* reseau, int height, int width) {
+void write_image_in_network(int** image, Network* network, int height, int width) {
     for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
-            reseau->couches[0]->neurones[i*height+j]->z = (float)image[i][j] / 255.0f;
+            network->layers[0]->neurons[i*height+j]->z = (float)image[i][j] / 255.0f;
         }
     }
 }
 
 
-void train(int batches, int couches, int neurons, char* recovery, char* image_file, char* label_file, char* out) {
+void train(int batches, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out) {
     // Entraînement du réseau sur le set de données MNIST
-    Reseau* reseau;
+    Network* network;
 
-    //int* repartition = malloc(sizeof(int)*couches);
-    int nb_neurones_der = 10;
-    int repartition[3] = {784, 32, nb_neurones_der};
+    //int* repartition = malloc(sizeof(int)*layers);
+    int nb_neurons_der = 10;
+    int repartition[3] = {784, 32, nb_neurons_der};
 
-    float* sortie = malloc(sizeof(float)*nb_neurones_der);
-    int* sortie_voulue;
+    float* sortie = malloc(sizeof(float)*nb_neurons_der);
+    int* desired_output;
     float accuracy;
-    //generer_repartition(couches, repartition);
+    //generer_repartition(layers, repartition);
 
     /*
     * On repart d'un réseau déjà créée stocké dans un fichier
     * ou on repart de zéro si aucune backup n'est fournie
     * */
     if (! recovery) {
-        reseau = malloc(sizeof(Reseau));
-        creation_du_reseau_neuronal(reseau, repartition, couches);
-        initialisation_du_reseau_neuronal(reseau);
+        network = malloc(sizeof(Network));
+        network_creation(network, repartition, layers);
+        network_initialisation(network);
     } else {
-        reseau = lire_reseau(recovery);
+        network = read_network(recovery);
         printf("Backup restaurée.\n");
     }
 
-    Couche* der_couche = reseau->couches[reseau->nb_couches-1];
+    Layer* der_layer = network->layers[network->nb_layers-1];
 
     // Chargement des images du set de données MNIST
     int* parameters = read_mnist_images_parameters(image_file);
@@ -96,29 +96,29 @@ void train(int batches, int couches, int neurons, char* recovery, char* image_fi
         for (int j=0; j < nb_images; j++) {
             printf("\rBatch [%d/%d]\tImage [%d/%d]",i, batches, j, nb_images);
 
-            ecrire_image_dans_reseau(images[j], reseau, height, width);
-            sortie_voulue = creation_de_la_sortie_voulue(reseau, labels[j]);
-            forward_propagation(reseau);
-            backward_propagation(reseau, sortie_voulue);
+            write_image_in_network(images[j], network, height, width);
+            desired_output = desired_output_creation(network, labels[j]);
+            forward_propagation(network);
+            backward_propagation(network, desired_output);
 
-            for (int k=0; k < nb_neurones_der; k++) {
-                sortie[k] = der_couche->neurones[k]->z;
+            for (int k=0; k < nb_neurons_der; k++) {
+                sortie[k] = der_layer->neurons[k]->z;
             }
-            if (indice_max(sortie, nb_neurones_der) == labels[j]) {
+            if (indice_max(sortie, nb_neurons_der) == labels[j]) {
                 accuracy += 1. / (float)nb_images;
             }
-            free(sortie_voulue);
+            free(desired_output);
         }
-        modification_du_reseau_neuronal(reseau, nb_images);
+        network_modification(network, nb_images);
         printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n",i, batches, nb_images, nb_images, accuracy*100);
-        ecrire_reseau(out, reseau);
+        write_network(out, network);
     }
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 }
 
 float** recognize(char* modele, char* entree) {
-    Reseau* reseau = lire_reseau(modele);
-    Couche* derniere_couche = reseau->couches[reseau->nb_couches-1];
+    Network* network = read_network(modele);
+    Layer* derniere_layer = network->layers[network->nb_layers-1];
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -129,25 +129,25 @@ float** recognize(char* modele, char* entree) {
     float** results = malloc(sizeof(float*)*nb_images);
 
     for (int i=0; i < nb_images; i++) {
-        results[i] = malloc(sizeof(float)*derniere_couche->nb_neurones);
+        results[i] = malloc(sizeof(float)*derniere_layer->nb_neurons);
 
-        ecrire_image_dans_reseau(images[i], reseau, height, width);
-        forward_propagation(reseau);
+        write_image_in_network(images[i], network, height, width);
+        forward_propagation(network);
 
-        for (int j=0; j < derniere_couche->nb_neurones; j++) {
-            results[i][j] = derniere_couche->neurones[j]->z;
+        for (int j=0; j < derniere_layer->nb_neurons; j++) {
+            results[i][j] = derniere_layer->neurons[j]->z;
         }
     }
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 
     return results;
 }
 
 void print_recognize(char* modele, char* entree, char* sortie) {
-    Reseau* reseau = lire_reseau(modele);
-    int nb_der_couche = reseau->couches[reseau->nb_couches-1]->nb_neurones;
+    Network* network = read_network(modele);
+    int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -163,11 +163,11 @@ void print_recognize(char* modele, char* entree, char* sortie) {
         else
             printf("\"%d\" : [", i);
 
-        for (int j=0; j < nb_der_couche; j++) {
+        for (int j=0; j < nb_der_layer; j++) {
             if (! strcmp(sortie, "json")) {
                 printf("%f", resultats[i][j]);
 
-                if (j+1 < nb_der_couche) {
+                if (j+1 < nb_der_layer) {
                     printf(", ");
                 }
             } else
@@ -187,10 +187,10 @@ void print_recognize(char* modele, char* entree, char* sortie) {
 }
 
 void test(char* modele, char* fichier_images, char* fichier_labels) {
-    Reseau* reseau = lire_reseau(modele);
-    int nb_der_couche = reseau->couches[reseau->nb_couches-1]->nb_neurones;
+    Network* network = read_network(modele);
+    int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 
     int* parameters = read_mnist_images_parameters(fichier_images);
     int nb_images = parameters[0];
@@ -200,7 +200,7 @@ void test(char* modele, char* fichier_images, char* fichier_labels) {
     float accuracy;
 
     for (int i=0; i < nb_images; i++) {
-        if (indice_max(resultats[i], nb_der_couche) == labels[i]) {
+        if (indice_max(resultats[i], nb_der_layer) == labels[i]) {
                 accuracy += 1. / (float)nb_images;
         }
     }
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "train")) {
         int batches = 100;
-        int couches = 3;
+        int layers = 3;
         int neurons = 784;
         char* images = NULL;
         char* labels = NULL;
@@ -229,8 +229,8 @@ int main(int argc, char* argv[]) {
                 batches = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else
-                if ((! strcmp(argv[i], "--couches"))||(! strcmp(argv[i], "-c"))) {
-                couches = strtol(argv[i+1], NULL, 10);
+                if ((! strcmp(argv[i], "--layers"))||(! strcmp(argv[i], "-c"))) {
+                layers = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else if ((! strcmp(argv[i], "--neurons"))||(! strcmp(argv[i], "-n"))) {
                 neurons = strtol(argv[i+1], NULL, 10);
@@ -265,7 +265,7 @@ int main(int argc, char* argv[]) {
             out = "out.bin";
         }
         // Entraînement en sourçant neural_network.c
-        train(batches, couches, neurons, recovery, images, labels, out);
+        train(batches, layers, neurons, recovery, images, labels, out);
         exit(0);
     }
     if (! strcmp(argv[1], "recognize")) {

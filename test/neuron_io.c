@@ -6,61 +6,61 @@
 #include "../src/mnist/neuron_io.c"
 
 
-Neurone* creer_neurone(int nb_sortants) {
-    Neurone* neurone = malloc(2*sizeof(float*)+6*sizeof(float));
-    neurone->poids_sortants = malloc(sizeof(float)*nb_sortants);
-    neurone->d_poids_sortants = malloc(sizeof(float)*nb_sortants);
-    neurone->last_d_poids_sortants = malloc(sizeof(float)*nb_sortants);
+Neuron* creer_neuron(int nb_sortants) {
+    Neuron* neuron = malloc(2*sizeof(float*)+6*sizeof(float));
+    neuron->weights = malloc(sizeof(float)*nb_sortants);
+    neuron->back_weights = malloc(sizeof(float)*nb_sortants);
+    neuron->last_back_weights = malloc(sizeof(float)*nb_sortants);
 
     for (int i=0; i < nb_sortants; i++) {
-        neurone->poids_sortants[i] = 0.5;
-        neurone->d_poids_sortants[i] = 0.0;
-        neurone->last_d_poids_sortants[i] = 0.0;
+        neuron->weights[i] = 0.5;
+        neuron->back_weights[i] = 0.0;
+        neuron->last_back_weights[i] = 0.0;
     }
-    neurone->z = 0.0;
-    neurone->biais = 0.0;
-    neurone->d_biais = 0.0;
-    neurone->last_d_biais = 0.0;
+    neuron->z = 0.0;
+    neuron->bias = 0.0;
+    neuron->back_bias = 0.0;
+    neuron->last_back_bias = 0.0;
 
-    return neurone;
+    return neuron;
 }
 
 
-Couche* creer_couche(int nb_neurones, int nb_sortants) {
-    Couche* couche = malloc(sizeof(int)+sizeof(Neurone**));
-    Neurone** tab = malloc(sizeof(Neurone*)*nb_neurones);
+Layer* creer_layer(int nb_neurons, int nb_sortants) {
+    Layer* layer = malloc(sizeof(int)+sizeof(Neuron**));
+    Neuron** tab = malloc(sizeof(Neuron*)*nb_neurons);
 
-    couche->nb_neurones = nb_neurones;
-    couche->neurones = tab;
+    layer->nb_neurons = nb_neurons;
+    layer->neurons = tab;
 
-    for (int i=0; i<nb_neurones; i++) {
-        tab[i] = creer_neurone(nb_sortants);
+    for (int i=0; i<nb_neurons; i++) {
+        tab[i] = creer_neuron(nb_sortants);
     }
-    return couche;
+    return layer;
 };
 
 
-Reseau* creer_reseau(int nb_couches, int nb_max_neurones, int nb_min_neurones) {
-    Reseau* reseau = malloc(sizeof(int)+sizeof(Couche**));
-    reseau->couches = malloc(sizeof(Couche*)*nb_couches);
-    int nb_neurones[nb_couches+1];
+Network* create_network(int nb_layers, int nb_max_neurons, int nb_min_neurons) {
+    Network* network = malloc(sizeof(int)+sizeof(Layer**));
+    network->layers = malloc(sizeof(Layer*)*nb_layers);
+    int nb_neurons[nb_layers+1];
 
-    reseau->nb_couches = nb_couches;
+    network->nb_layers = nb_layers;
 
-    for (int i=0; i < nb_couches; i++) {
-        nb_neurones[i] = i*(nb_min_neurones-nb_max_neurones)/(nb_couches-1) + nb_max_neurones;
+    for (int i=0; i < nb_layers; i++) {
+        nb_neurons[i] = i*(nb_min_neurons-nb_max_neurons)/(nb_layers-1) + nb_max_neurons;
     }
-    nb_neurones[nb_couches] = 0;
+    nb_neurons[nb_layers] = 0;
 
-    for (int i=0; i < nb_couches; i++) {
-        reseau->couches[i] = creer_couche(nb_neurones[i], nb_neurones[i+1]);
+    for (int i=0; i < nb_layers; i++) {
+        network->layers[i] = creer_layer(nb_neurons[i], nb_neurons[i+1]);
     }
-    return reseau;
+    return network;
 }
 
 int main() {
-    Reseau* reseau = creer_reseau(5, 300, 10);
-    ecrire_reseau(".test-cache/neuron_io.bin", reseau);
-    Reseau* reseau2 = lire_reseau(".test-cache/neuron_io.bin");
+    Network* network = create_network(5, 300, 10);
+    write_network(".test-cache/neuron_io.bin", network);
+    Network* network2 = read_network(".test-cache/neuron_io.bin");
     return 1;
 }

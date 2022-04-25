@@ -11,46 +11,46 @@
 Contient un ensemble de fonctions utiles pour le débogage
 */
 void help(char* call) {
-    printf("Usage: %s ( print-poids | print-biais | creer-reseau ) [OPTIONS]\n\n", call);
+    printf("Usage: %s ( print-poids | print-bias | creer-network ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
     printf("\tprint-poids:\n");
-    printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
-    printf("\tprint-biais:\n");
-    printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\t\t--network | -r [FILENAME]\tFichier contenant le réseau de neurons.\n");
+    printf("\tprint-bias:\n");
+    printf("\t\t--network | -r [FILENAME]\tFichier contenant le réseau de neurons.\n");
     printf("\tcount-labels:\n");
     printf("\t\t--labels | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\tcreer-reseau:\n");
-    printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
+    printf("\tcreer-network:\n");
+    printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurons.\n");
     printf("\t\t--number | -n [int]\tNuméro à privilégier\n");
 }
 
 
-void print_biais(char* filename) {
-    Reseau* reseau = lire_reseau(".cache/reseau.bin");
+void print_bias(char* filename) {
+    Network* network = read_network(".cache/network.bin");
 
-    for (int i=1; i < reseau->nb_couches -1; i++) {
-        printf("Couche %d\n", i);
-        for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
-            printf("Couche %d\tNeurone %d\tBiais: %f\n", i, j, reseau->couches[i]->neurones[j]->biais);
+    for (int i=1; i < network->nb_layers -1; i++) {
+        printf("Layer %d\n", i);
+        for (int j=0; j < network->layers[i]->nb_neurons; j++) {
+            printf("Layer %d\tNeuron %d\tBiais: %f\n", i, j, network->layers[i]->neurons[j]->bias);
         }
     }
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 }
 
 void print_poids(char* filename) {
-    Reseau* reseau = lire_reseau(".cache/reseau.bin");
+    Network* network = read_network(".cache/network.bin");
 
-    for (int i=0; i < reseau->nb_couches -1; i++) {
-        printf("Couche %d\n", i);
-        for (int j=0; j < reseau->couches[i]->nb_neurones; j++) {
-            printf("Couche %d\tNeurone %d\tPoids: [", i, j);
-            for (int k=0; k < reseau->couches[i+1]->nb_neurones; k++) {
-                printf("%f, ", reseau->couches[i]->neurones[j]->poids_sortants[k]);
+    for (int i=0; i < network->nb_layers -1; i++) {
+        printf("Layer %d\n", i);
+        for (int j=0; j < network->layers[i]->nb_neurons; j++) {
+            printf("Layer %d\tNeuron %d\tPoids: [", i, j);
+            for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
+                printf("%f, ", network->layers[i]->neurons[j]->weights[k]);
             }
             printf("]\n");
         }
     }
-    suppression_du_reseau_neuronal(reseau);
+    deletion_of_network(network);
 }
 
 void count_labels(char* filename) {
@@ -74,46 +74,46 @@ void count_labels(char* filename) {
     }
 }
 
-void creer_reseau(char* filename, int sortie) {
-    Reseau* reseau = malloc(sizeof(Reseau));
-    Couche* couche;
-    Neurone* neurone;
-    reseau->nb_couches = 3;
+void create_network(char* filename, int sortie) {
+    Network* network = malloc(sizeof(Network));
+    Layer* layer;
+    Neuron* neuron;
+    network->nb_layers = 3;
     
-    reseau->couches = malloc(sizeof(Couche*)*reseau->nb_couches);
-    int neurones_par_couche[4] = {784, 1, 10, 0};
-    for (int i=0; i < reseau->nb_couches; i++) {
-        reseau->couches[i] = malloc(sizeof(Couche));
-        couche = reseau->couches[i];
-        couche->nb_neurones = neurones_par_couche[i];
-        couche->neurones = malloc(sizeof(Neurone*)*couche->nb_neurones);
-        for (int j=0; j < couche->nb_neurones; j++) {
-            couche->neurones[j] = malloc(sizeof(Neurone));
-            neurone = couche->neurones[j];
+    network->layers = malloc(sizeof(Layer*)*network->nb_layers);
+    int neurons_per_layer[4] = {784, 1, 10, 0};
+    for (int i=0; i < network->nb_layers; i++) {
+        network->layers[i] = malloc(sizeof(Layer));
+        layer = network->layers[i];
+        layer->nb_neurons = neurons_per_layer[i];
+        layer->neurons = malloc(sizeof(Neuron*)*layer->nb_neurons);
+        for (int j=0; j < layer->nb_neurons; j++) {
+            layer->neurons[j] = malloc(sizeof(Neuron));
+            neuron = layer->neurons[j];
 
-            neurone->biais = 0.;
-            neurone->z = 0.;
+            neuron->bias = 0.;
+            neuron->z = 0.;
 
-            neurone->d_biais = 0.;
-            neurone->last_d_biais = 0.;
+            neuron->back_bias = 0.;
+            neuron->last_back_bias = 0.;
 
-            neurone->poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
-            neurone->d_poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
-            neurone->last_d_poids_sortants = malloc(sizeof(float)*neurones_par_couche[i+1]);
-            for (int k=0; k < neurones_par_couche[i+1]; k++) {
-                neurone->poids_sortants[k] = 0.;
-                neurone->d_poids_sortants[k] = 0.;
-                neurone->last_d_poids_sortants[k] = 0.;
+            neuron->weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
+            neuron->back_weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
+            neuron->last_back_weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
+            for (int k=0; k < neurons_per_layer[i+1]; k++) {
+                neuron->weights[k] = 0.;
+                neuron->back_weights[k] = 0.;
+                neuron->last_back_weights[k] = 0.;
             }
         }
     }
 
-    for (int j=0; j < neurones_par_couche[0]; j++) {
-        reseau->couches[0]->neurones[j]->poids_sortants[0] = 1;
+    for (int j=0; j < neurons_per_layer[0]; j++) {
+        network->layers[0]->neurons[j]->weights[0] = 1;
     }
-    reseau->couches[1]->neurones[0]->poids_sortants[sortie] = 1;
-    ecrire_reseau(filename, reseau);
-    suppression_du_reseau_neuronal(reseau);
+    network->layers[1]->neurons[0]->weights[sortie] = 1;
+    write_network(filename, network);
+    deletion_of_network(network);
 }
 
 
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         char* filename = NULL;
         int i = 2;
         while (i < argc) {
-            if ((! strcmp(argv[i], "--reseau"))||(! strcmp(argv[i], "-r"))) {
+            if ((! strcmp(argv[i], "--network"))||(! strcmp(argv[i], "-r"))) {
                 filename = argv[i+1];
                 i += 2;
             } else {
@@ -137,16 +137,16 @@ int main(int argc, char* argv[]) {
             }
         }
         if (! filename) {
-            printf("Pas de fichier spécifié, utilisation de '.cache/reseau.bin'\n");
-            filename = ".cache/reseau.bin";
+            printf("Pas de fichier spécifié, utilisation de '.cache/network.bin'\n");
+            filename = ".cache/network.bin";
         }
         print_poids(filename);
         exit(1);
-    } else if (! strcmp(argv[1], "print-biais")) {
+    } else if (! strcmp(argv[1], "print-bias")) {
         char* filename = NULL;
         int i = 2;
         while (i < argc) {
-            if ((! strcmp(argv[i], "--reseau"))||(! strcmp(argv[i], "-r"))) {
+            if ((! strcmp(argv[i], "--network"))||(! strcmp(argv[i], "-r"))) {
                 filename = argv[i+1];
                 i += 2;
             } else {
@@ -155,12 +155,12 @@ int main(int argc, char* argv[]) {
             }
         }
         if (! filename) {
-            printf("Pas de fichier spécifié, utilisation de '.cache/reseau.bin'\n");
-            filename = ".cache/reseau.bin";
+            printf("Pas de fichier spécifié, utilisation de '.cache/network.bin'\n");
+            filename = ".cache/network.bin";
         }
-        print_biais(filename);
+        print_bias(filename);
         exit(1);
-    } else if (! strcmp(argv[1], "creer-reseau")) {
+    } else if (! strcmp(argv[1], "creer-network")) {
         char* out = NULL;
         int n = -1;
         int i = 2;

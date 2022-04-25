@@ -5,7 +5,7 @@
 #include "../src/mnist/mnist.c"
 
 
-void test_lecture(int nb_images, int width, int height, int*** images, unsigned int* labels) {
+void read_test(int nb_images, int width, int height, int*** images, unsigned int* labels) {
     printf("\tLecture des labels\n");
     for (int i=0; i < nb_images; i++) {
         (void)labels[i];
@@ -45,7 +45,7 @@ int main() {
     printf("OK\n");
     printf("Vérification de l'accès en lecture\n");
 
-    test_lecture(nb_images, width, height, images, labels);
+    read_test(nb_images, width, height, images, labels);
 
     printf("OK\n");
     return 1;

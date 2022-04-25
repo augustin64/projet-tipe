@@ -8,57 +8,57 @@
 
 
 
-Neurone* lire_neurone(uint32_t nb_poids_sortants, FILE *ptr) {
-    Neurone* neurone = malloc(sizeof(Neurone));
+Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
+    Neuron* neuron = malloc(sizeof(Neuron));
     float activation;
-    float biais;
+    float bias;
     float tmp;
 
     fread(&activation, sizeof(float), 1, ptr);
-    fread(&biais, sizeof(float), 1, ptr);
+    fread(&bias, sizeof(float), 1, ptr);
 
-    neurone->biais = biais;
+    neuron->bias = bias;
 
-    neurone->z = 0.0;
-    neurone->last_d_biais = 0.0;
-    neurone->d_biais = 0.0;
+    neuron->z = 0.0;
+    neuron->last_back_bias = 0.0;
+    neuron->back_bias = 0.0;
 
-    float* poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
+    float* weights = malloc(sizeof(float)*nb_weights);
 
-    neurone->last_d_poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
-    neurone->d_poids_sortants = malloc(sizeof(float)*nb_poids_sortants);
-    neurone->poids_sortants = poids_sortants;
+    neuron->last_back_weights = malloc(sizeof(float)*nb_weights);
+    neuron->back_weights = malloc(sizeof(float)*nb_weights);
+    neuron->weights = weights;
 
-    for (int i=0; i < nb_poids_sortants; i++) {
+    for (int i=0; i < nb_weights; i++) {
         fread(&tmp, sizeof(float), 1, ptr);
-        neurone->poids_sortants[i] = tmp;
-        neurone->d_poids_sortants[i] = 0.0;
-        neurone->last_d_poids_sortants[i] = 0.0;
+        neuron->weights[i] = tmp;
+        neuron->back_weights[i] = 0.0;
+        neuron->last_back_weights[i] = 0.0;
     }
 
-    return neurone;
+    return neuron;
 }
 
 
 // Lit une couche de neurones
-Neurone** lire_neurones(uint32_t nb_neurones, uint32_t nb_poids_sortants, FILE *ptr) {
-    Neurone** neurones = malloc(sizeof(Neurone*)*nb_neurones);
-    for (int i=0; i < nb_neurones; i++) {
-        neurones[i] = lire_neurone(nb_poids_sortants, ptr);
+Neuron** read_neurons(uint32_t nb_neurons, uint32_t nb_weights, FILE *ptr) {
+    Neuron** neurons = malloc(sizeof(Neuron*)*nb_neurons);
+    for (int i=0; i < nb_neurons; i++) {
+        neurons[i] = read_neuron(nb_weights, ptr);
     }
-    return neurones;
+    return neurons;
 }
 
 
 // Charge l'entièreté du réseau neuronal depuis un fichier binaire
-Reseau* lire_reseau(char* filename) {
+Network* read_network(char* filename) {
     FILE *ptr;
-    Reseau* reseau = malloc(sizeof(Reseau));
+    Network* network = malloc(sizeof(Network));
     
     ptr = fopen(filename, "rb");
 
     uint32_t magic_number;
-    uint32_t nb_couches;
+    uint32_t nb_layers;
     uint32_t tmp;
 
     fread(&magic_number, sizeof(uint32_t), 1, ptr);
@@ -67,41 +67,41 @@ Reseau* lire_reseau(char* filename) {
         exit(1);
     }
 
-    fread(&nb_couches, sizeof(uint32_t), 1, ptr);
-    reseau->nb_couches = nb_couches;
+    fread(&nb_layers, sizeof(uint32_t), 1, ptr);
+    network->nb_layers = nb_layers;
 
 
-    Couche** couches = malloc(sizeof(Couche*)*nb_couches);
-    uint32_t nb_neurones_couche[nb_couches+1];
+    Layer** layers = malloc(sizeof(Layer*)*nb_layers);
+    uint32_t nb_neurons_layer[nb_layers+1];
 
-    reseau->couches  = couches;
+    network->layers  = layers;
 
-    for (int i=0; i < nb_couches; i++) {
-        couches[i] = malloc(sizeof(Couche));
+    for (int i=0; i < nb_layers; i++) {
+        layers[i] = malloc(sizeof(Layer));
         fread(&tmp, sizeof(tmp), 1, ptr);
-        couches[i]->nb_neurones = tmp;
-        nb_neurones_couche[i] = tmp;
+        layers[i]->nb_neurons = tmp;
+        nb_neurons_layer[i] = tmp;
     }
-    nb_neurones_couche[nb_couches] = 0;
+    nb_neurons_layer[nb_layers] = 0;
 
-    for (int i=0; i < nb_couches; i++) {
-        couches[i]->neurones = lire_neurones(couches[i]->nb_neurones, nb_neurones_couche[i+1], ptr);
+    for (int i=0; i < nb_layers; i++) {
+        layers[i]->neurons = read_neurons(layers[i]->nb_neurons, nb_neurons_layer[i+1], ptr);
     }
 
     fclose(ptr);
-    return reseau;
+    return network;
 }
 
 
 
 
 // Écrit un neurone dans le fichier pointé par *ptr
-void ecrire_neurone(Neurone* neurone, int poids_sortants, FILE *ptr) {
-    float buffer[poids_sortants+2];
+void ecrire_neuron(Neuron* neuron, int weights, FILE *ptr) {
+    float buffer[weights+2];
 
-    buffer[1] = neurone->biais;
-    for (int i=0; i < poids_sortants; i++) {
-        buffer[i+2] = neurone->poids_sortants[i];
+    buffer[1] = neuron->bias;
+    for (int i=0; i < weights; i++) {
+        buffer[i+2] = neuron->weights[i];
     }
 
     fwrite(buffer, sizeof(buffer), 1, ptr);
@@ -109,28 +109,28 @@ void ecrire_neurone(Neurone* neurone, int poids_sortants, FILE *ptr) {
 
 
 // Stocke l'entièreté du réseau neuronal dans un fichier binaire
-int ecrire_reseau(char* filename, Reseau* reseau) {
+int write_network(char* filename, Network* network) {
     FILE *ptr;
-    int nb_couches = reseau->nb_couches;
-    int nb_neurones[nb_couches+1];
+    int nb_layers = network->nb_layers;
+    int nb_neurons[nb_layers+1];
 
     ptr = fopen(filename, "wb");
 
-    uint32_t buffer[nb_couches+2];
+    uint32_t buffer[nb_layers+2];
 
     buffer[0] = MAGIC_NUMBER;
-    buffer[1] = nb_couches;
-    for (int i=0; i < nb_couches; i++) {
-        buffer[i+2] = reseau->couches[i]->nb_neurones;
-        nb_neurones[i] = reseau->couches[i]->nb_neurones;
+    buffer[1] = nb_layers;
+    for (int i=0; i < nb_layers; i++) {
+        buffer[i+2] = network->layers[i]->nb_neurons;
+        nb_neurons[i] = network->layers[i]->nb_neurons;
     }
-    nb_neurones[nb_couches] = 0;
+    nb_neurons[nb_layers] = 0;
 
     fwrite(buffer, sizeof(buffer), 1, ptr);
 
-    for (int i=0; i < nb_couches; i++) {
-        for (int j=0; j < nb_neurones[i]; j++) {
-            ecrire_neurone(reseau->couches[i]->neurones[j], nb_neurones[i+1], ptr);
+    for (int i=0; i < nb_layers; i++) {
+        for (int j=0; j < nb_neurons[i]; j++) {
+            ecrire_neuron(network->layers[i]->neurons[j], nb_neurons[i+1], ptr);
         }
     }
 

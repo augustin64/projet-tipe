@@ -12,16 +12,16 @@
 
 float max(float a, float b);
 float sigmoid(float x);
-float sigmoid_derivee(float x);
+float sigmoid_derivative(float x);
 float leaky_ReLU(float x);
-float leaky_ReLU_derivee(float x);
-void creation_du_reseau_neuronal(Reseau* reseau_neuronal, int* neurones_par_couche, int nb_couches);
-void suppression_du_reseau_neuronal(Reseau* reseau_neuronal);
-void forward_propagation(Reseau* reseau_neuronal);
-int* creation_de_la_sortie_voulue(Reseau* reseau_neuronal, int pos_nombre_voulu);
-void backward_propagation(Reseau* reseau_neuronal, int* sortie_voulue);
-void modification_du_reseau_neuronal(Reseau* reseau_neuronal, uint32_t nb_modifs);
-void initialisation_du_reseau_neuronal(Reseau* reseau_neuronal);
-float erreur_sortie(Reseau* reseau, int numero_voulu);
+float leaky_ReLU_derivative(float x);
+void network_creation(Network* network_neuronal, int* neurons_per_layer, int nb_layers);
+void deletion_of_network(Network* network_neuronal);
+void forward_propagation(Network* network_neuronal);
+int* desired_output_creation(Network* network_neuronal, int wanted_number);
+void backward_propagation(Network* network_neuronal, int* desired_output);
+void network_modification(Network* network_neuronal, uint32_t nb_modifs);
+void network_initialisation(Network* network_neuronal);
+float loss_computing(Network* network, int numero_voulu);
 
 #endif
