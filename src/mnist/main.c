@@ -7,6 +7,9 @@
 #include "neuron_io.c"
 #include "mnist.c"
 
+#define EPOCHS 10
+#define BATCHES 50
+
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
@@ -125,8 +128,15 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
             }
             loss += loss_computing(network, labels[j]) / (float)nb_images;
             free(desired_output);
+
+            if (j%BATCHES==BATCHES-1)
+                network_modification(network, BATCHES);
+            
         }
-        network_modification(network, nb_images);
+
+        if (nb_images%BATCHES != 0)
+            network_modification(network, nb_images%BATCHES);
+
         printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\tLoss: %f\n",i, batches, nb_images, nb_images, accuracy*100, loss);
         write_network(out, network);
     }
@@ -238,7 +248,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     if (! strcmp(argv[1], "train")) {
-        int batches = 100;
+        int batches = EPOCHS;
         int layers = 2;
         int neurons = 784;
         char* images = NULL;
