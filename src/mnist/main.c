@@ -222,7 +222,7 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
     for (int i=0; i < nb_images; i++) {
         if (indice_max(resultats[i], nb_der_layer) == labels[i]) {
             accuracy += 1. / (float)nb_images;
-        } else {
+        } else if (preview_fails) {
             printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_der_layer));
             print_image(width, height, images[i], resultats[i]);
         }
