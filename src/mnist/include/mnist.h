@@ -7,6 +7,7 @@
 #define DEF_MNIST_H
 
 uint32_t swap_endian(uint32_t val);
+uint32_t read_mnist_labels_nb_images(char* filename);
 int** read_image(unsigned int width, unsigned int height, FILE* ptr);
 int* read_mnist_images_parameters(char* filename);
 int* read_mnist_labels_parameters(char* filename);
