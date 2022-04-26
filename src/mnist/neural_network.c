@@ -6,7 +6,7 @@
 #include <math.h>
 #include <time.h>
 
-#include "struct/neuron.h"
+#include "include/neuron.h"
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 // Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)

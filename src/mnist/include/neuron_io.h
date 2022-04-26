@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-#include "struct/neuron.h"
+
+#include "neuron.h"
 
 #ifndef DEF_NEURON_IO_H
 #define DEF_NEURON_IO_H

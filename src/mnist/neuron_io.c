@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "struct/neuron.h"
+#include "include/neuron.h"
 #define MAGIC_NUMBER 2023
 
 

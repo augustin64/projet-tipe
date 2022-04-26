@@ -5,7 +5,7 @@
 #include <math.h>
 #include <time.h>
 
-#include "struct/neuron.h"
+#include "neuron.h"
 
 #ifndef DEF_NEURAL_NETWORK_H
 #define DEF_NEURAL_NETWORK_H
