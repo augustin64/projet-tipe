@@ -211,6 +211,8 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
 
     int* parameters = read_mnist_images_parameters(fichier_images);
     int nb_images = parameters[0];
+    int width = parameters[1];
+    int height = parameters[2];
     int*** images = read_mnist_images(fichier_images);
 
     float** resultats = recognize(modele, fichier_images);
@@ -222,7 +224,7 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
             accuracy += 1. / (float)nb_images;
         } else {
             printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_der_layer));
-            print_image(28, 28, images[i], resultats[i]);
+            print_image(width, height, images[i], resultats[i]);
         }
     }
     printf("%d Images\tAccuracy: %0.1f%%\n", nb_images, accuracy*100);
