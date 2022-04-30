@@ -11,16 +11,16 @@
 Contient un ensemble de fonctions utiles pour le débogage
 */
 void help(char* call) {
-    printf("Usage: %s ( print-poids | print-bias | creer-network ) [OPTIONS]\n\n", call);
+    printf("Usage: %s ( print-poids | print-biais | creer-reseau ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
     printf("\tprint-poids:\n");
-    printf("\t\t--network | -r [FILENAME]\tFichier contenant le réseau de neurons.\n");
-    printf("\tprint-bias:\n");
-    printf("\t\t--network | -r [FILENAME]\tFichier contenant le réseau de neurons.\n");
+    printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\tprint-biais:\n");
+    printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\tcount-labels:\n");
     printf("\t\t--labels | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\tcreer-network:\n");
-    printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurons.\n");
+    printf("\tcreer-reseau:\n");
+    printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
     printf("\t\t--number | -n [int]\tNuméro à privilégier\n");
 }
 
@@ -29,9 +29,9 @@ void print_bias(char* filename) {
     Network* network = read_network(".cache/network.bin");
 
     for (int i=1; i < network->nb_layers -1; i++) {
-        printf("Layer %d\n", i);
+        printf("Couche %d\n", i);
         for (int j=0; j < network->layers[i]->nb_neurons; j++) {
-            printf("Layer %d\tNeuron %d\tBiais: %f\n", i, j, network->layers[i]->neurons[j]->bias);
+            printf("Couche %d\tNeurone %d\tBiais: %f\n", i, j, network->layers[i]->neurons[j]->bias);
         }
     }
     deletion_of_network(network);
@@ -41,9 +41,9 @@ void print_poids(char* filename) {
     Network* network = read_network(".cache/network.bin");
 
     for (int i=0; i < network->nb_layers -1; i++) {
-        printf("Layer %d\n", i);
+        printf("Couche %d\n", i);
         for (int j=0; j < network->layers[i]->nb_neurons; j++) {
-            printf("Layer %d\tNeuron %d\tPoids: [", i, j);
+            printf("Couche %d\tNeurone %d\tPoids: [", i, j);
             for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
                 printf("%f, ", network->layers[i]->neurons[j]->weights[k]);
             }
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         char* filename = NULL;
         int i = 2;
         while (i < argc) {
-            if ((! strcmp(argv[i], "--network"))||(! strcmp(argv[i], "-r"))) {
+            if ((! strcmp(argv[i], "--reseau"))||(! strcmp(argv[i], "-r"))) {
                 filename = argv[i+1];
                 i += 2;
             } else {
@@ -142,11 +142,11 @@ int main(int argc, char* argv[]) {
         }
         print_poids(filename);
         exit(1);
-    } else if (! strcmp(argv[1], "print-bias")) {
+    } else if (! strcmp(argv[1], "print-biais")) {
         char* filename = NULL;
         int i = 2;
         while (i < argc) {
-            if ((! strcmp(argv[i], "--network"))||(! strcmp(argv[i], "-r"))) {
+            if ((! strcmp(argv[i], "--reseau"))||(! strcmp(argv[i], "-r"))) {
                 filename = argv[i+1];
                 i += 2;
             } else {
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
         }
         print_bias(filename);
         exit(1);
-    } else if (! strcmp(argv[1], "creer-network")) {
+    } else if (! strcmp(argv[1], "creer-reseau")) {
         char* out = NULL;
         int n = -1;
         int i = 2;

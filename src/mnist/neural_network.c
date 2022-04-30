@@ -57,7 +57,7 @@ void network_creation(Network* network, int* neurons_per_layer, int nb_layers) {
     for (int i=0; i < nb_layers; i++) {
         network->layers[i] = (Layer*)malloc(sizeof(Layer));
         layer = network->layers[i];
-        layer->nb_neurons = neurons_per_layer[i]; // Nombre de neurones pour la layer
+        layer->nb_neurons = neurons_per_layer[i]; // Nombre de neurones pour la couche
         layer->neurons = (Neuron**)malloc(sizeof(Neuron*)*network->layers[i]->nb_neurons); // Création des différents neurones dans la couche
 
         for (int j=0; j < layer->nb_neurons; j++) {
@@ -83,7 +83,7 @@ void deletion_of_network(Network* network) {
 
     for (int i=0; i<network->nb_layers; i++) {
         layer = network->layers[i];
-        if (i!=network->nb_layers-1) { // On exclut la dernière couche dont les neurons ne contiennent pas de poids sortants
+        if (i!=network->nb_layers-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
             for (int j=0; j<network->layers[i]->nb_neurons; j++) {
                 neuron = layer->neurons[j];
                 free(neuron->weights);
@@ -124,7 +124,7 @@ void forward_propagation(Network* network) {
 
             if (i < network->nb_layers-1) { // Pour toutes les couches sauf la dernière on utilise la fonction leaky_ReLU (a*z si z<0,  z sinon)
                 neuron->z = leaky_ReLU(neuron->z);  
-            } else { // Pour la dernière layer on utilise la fonction sigmoid permettant d'obtenir un résultat entre 0 et 1 à savoir une probabilité
+            } else { // Pour la dernière couche on utilise la fonction softmax
                 max_z = max(max_z, neuron->z);
             }
         }

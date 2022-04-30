@@ -7,8 +7,11 @@
 #include "neuron_io.c"
 #include "mnist.c"
 
-#define EPOCHS 10
-#define BATCHES 50
+#define EPOCHS 100
+#define BATCHES 100
+
+#define IS_LEARNING true
+
 
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
@@ -42,20 +45,20 @@ void help(char* call) {
     printf("OPTIONS:\n");
     printf("\ttrain:\n");
     printf("\t\t--batches | -b [int]\tNombre de batches.\n");
-    printf("\t\t--layers  | -c [int]\tNombres de layers.\n");
-    printf("\t\t--neurons | -n [int]\tNombre de neurons sur la première layer.\n");
+    printf("\t\t--couches  | -c [int]\tNombres de couches.\n");
+    printf("\t\t--neurones | -n [int]\tNombre de neurones sur la première couche.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurons.\n");
+    printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
     printf("\trecognize:\n");
-    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurons.\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--in      | -i [FILENAME]\tFichier contenant les images à reconnaître.\n");
     printf("\t\t--out     | -o (text|json)\tFormat de sortie.\n");
     printf("\ttest:\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
-    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurons.\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--preview-fails | -p\tAfficher les images ayant échoué.\n");
 }
 
@@ -129,12 +132,12 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
             loss += loss_computing(network, labels[j]) / (float)nb_images;
             free(desired_output);
 
-            if (j%BATCHES==BATCHES-1)
+            if (j%BATCHES==BATCHES-1 && IS_LEARNING)
                 network_modification(network, BATCHES);
             
         }
 
-        if (nb_images%BATCHES != 0)
+        if (nb_images%BATCHES != 0 && IS_LEARNING)
             network_modification(network, nb_images%BATCHES);
 
         printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\tLoss: %f\n",i, batches, nb_images, nb_images, accuracy*100, loss);
@@ -262,10 +265,10 @@ int main(int argc, char* argv[]) {
                 batches = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else
-                if ((! strcmp(argv[i], "--layers"))||(! strcmp(argv[i], "-c"))) {
+                if ((! strcmp(argv[i], "--couches"))||(! strcmp(argv[i], "-c"))) {
                 layers = strtol(argv[i+1], NULL, 10);
                 i += 2;
-            } else if ((! strcmp(argv[i], "--neurons"))||(! strcmp(argv[i], "-n"))) {
+            } else if ((! strcmp(argv[i], "--neurones"))||(! strcmp(argv[i], "-n"))) {
                 neurons = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
