@@ -1,12 +1,3 @@
-/* 
-Version du module Matrice avec des matrices 2d
-Une version 3d doit s'inspirer de celle-ci
-*/
-
-
-
-
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,6 +11,18 @@ typedef struct Matrix {
     float** value; // Tableau 2d comportant les valeurs de matrice
 
 } Matrix;
+
+// Mis ici jusqu'à le rassemblement des fichiers
+typedef struct Neuron{
+    float* weights; // Liste de tous les poids des arêtes sortants du neurone
+    float bias; // Caractérise le bias du neurone
+    float z; // Sauvegarde des calculs faits sur le neurone (programmation dynamique)
+
+    float *back_weights; // Changement des poids sortants lors de la backpropagation
+    float *last_back_weights; // Dernier changement de d_poid_sortants
+    float back_bias; // Changement du bias lors de la backpropagation
+    float last_back_bias; // Dernier changement de back_bias
+} Neuron;
 
 
 
@@ -480,14 +483,16 @@ void average_pooling_step_forward(Matrix** layer_input, Matrix*** layer_kernel, 
 }
 
 
-void reshape_step_forward(Matrix** layer_input, Matrix*** layer_kernel, Matrix** layer_bias, Matrix** layer_output, int len_layer, int depth_kernel, int stride) {
+void reshape_step_forward(Matrix** layer_input, Neuron** output, int len_layer) {
     /* Effectue une étape de la forward-propagation 
     en redimensionnant la matrice */
-    for (int i=0; i < depth_kernel; i++) {
-        copy_matrix(layer_bias[i], layer_output[i]);
-
-        for (int j=0; j < len_layer; j++) {
-            average_pooling_matrix(layer_input[j], layer_kernel[i][j], stride, layer_output[j]);
+    int cpt = 0;
+    for (int i=0; i < len_layer; i++) {
+        for (int j=0; j < layer_input[i]->rows; j++) {
+            for (int k=0; k < layer_input[i]->columns; k++) {
+                output[cpt]->z = layer_input[i]->value[j][k];
+                cpt++;
+            }
         }
     }
 }
