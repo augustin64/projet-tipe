@@ -26,7 +26,7 @@ void help(char* call) {
 
 
 void print_bias(char* filename) {
-    Network* network = read_network(".cache/network.bin");
+    Network* network = read_network(filename);
 
     for (int i=1; i < network->nb_layers -1; i++) {
         printf("Couche %d\n", i);
@@ -38,7 +38,7 @@ void print_bias(char* filename) {
 }
 
 void print_poids(char* filename) {
-    Network* network = read_network(".cache/network.bin");
+    Network* network = read_network(filename);
 
     for (int i=0; i < network->nb_layers -1; i++) {
         printf("Couche %d\n", i);
@@ -137,8 +137,8 @@ int main(int argc, char* argv[]) {
             }
         }
         if (! filename) {
-            printf("Pas de fichier spécifié, utilisation de '.cache/network.bin'\n");
-            filename = ".cache/network.bin";
+            printf("Pas de fichier spécifié, utilisation de '.cache/reseau.bin'\n");
+            filename = ".cache/reseau.bin";
         }
         print_poids(filename);
         exit(1);
@@ -155,8 +155,8 @@ int main(int argc, char* argv[]) {
             }
         }
         if (! filename) {
-            printf("Pas de fichier spécifié, utilisation de '.cache/network.bin'\n");
-            filename = ".cache/network.bin";
+            printf("Pas de fichier spécifié, utilisation de '.cache/reseau.bin'\n");
+            filename = ".cache/reseau.bin";
         }
         print_bias(filename);
         exit(1);
