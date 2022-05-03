@@ -41,7 +41,7 @@ int indice_max(float* tab, int n) {
 }
 
 void help(char* call) {
-    printf("Usage: %s ( train | recognize ) [OPTIONS]\n\n", call);
+    printf("Usage: %s ( train | recognize | test ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
     printf("\ttrain:\n");
     printf("\t\t--batches | -b [int]\tNombre de batches.\n");

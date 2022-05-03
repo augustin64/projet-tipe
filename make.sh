@@ -78,6 +78,17 @@ if [[ $1 == "train" ]]; then
 	exit 0
 fi
 
+if [[ $1 == "test_reseau" ]]; then
+	[[ -f "$OUT/main" ]] || $0 build main
+	[[ $2 ]] || set -- "$1" "train"
+	[[ -f ".cache/reseau.bin" ]] || $0 train train
+	"$OUT/main" test \
+		--images "data/mnist/$2-images-idx3-ubyte" \
+		--labels "data/mnist/$2-labels-idx1-ubyte" \
+		--modele ".cache/reseau.bin"
+	exit 0
+fi
+
 if [[ $1 == "recognize" ]]; then
 	if [[ $2 ]]; then
 		[[ $3 ]] || set -- "$1" "$2" "text"
@@ -108,11 +119,14 @@ if [[ $1 == "webserver" ]]; then
 fi
 
 echo "Usage:"
-echo -e "\t$0 preview ( train | t10k )"
-echo -e "\t$0 test    ( run )"
-echo -e "\t$0 build   ( main | preview | train | utils | all )"
-echo -e "\t$0 train   ( train | t10k ) ( -r | --recover )"
-echo -e "\t$0 recognize [FILENAME] ( text | json )"
-echo -e "\t$0 utils   ( help )"
+echo -e "\t$0 build       ( main | preview | train | utils | all )\n"
+echo -e "\t$0 train       ( train | t10k ) ( -r | --recover )"
+echo -e "\t$0 preview     ( train | t10k )"
+echo -e "\t$0 test_reseau ( train | t10k )\n"
+echo -e "\t$0 recognize   [FILENAME] ( text | json )"
+echo -e "\t$0 utils       ( help )\n"
+echo -e "\t$0 test        ( run )"
 echo -e "\t$0 webserver\n"
-echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants"
+echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants\n"
+echo -e "La plupart des options listées ici sont juste faites pour une utilisation plus rapide des commandes fréquentes,"
+echo -e "d'autres options sont uniquement disponibles via les fichiers binaires dans '$OUT'"
