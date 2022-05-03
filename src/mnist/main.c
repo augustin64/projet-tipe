@@ -10,8 +10,6 @@
 #define EPOCHS 100
 #define BATCHES 100
 
-#define IS_LEARNING true
-
 
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
@@ -132,12 +130,12 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
             loss += loss_computing(network, labels[j]) / (float)nb_images;
             free(desired_output);
 
-            if (j%BATCHES==BATCHES-1 && IS_LEARNING)
+            if (j%BATCHES==BATCHES-1)
                 network_modification(network, BATCHES);
             
         }
 
-        if (nb_images%BATCHES != 0 && IS_LEARNING)
+        if (nb_images%BATCHES != 0)
             network_modification(network, nb_images%BATCHES);
 
         printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\tLoss: %f\n",i, batches, nb_images, nb_images, accuracy*100, loss);
