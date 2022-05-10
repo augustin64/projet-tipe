@@ -15,16 +15,16 @@ int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
     unsigned char buffer[width*height];
     int** image = (int**)malloc(sizeof(int*)*height);
     
-    size_t ligne_size = sizeof(int) * width;
+    size_t line_size = sizeof(int) * width;
 
     fread(buffer, sizeof(buffer), 1, ptr);
 
     for (int i=0; i<height; i++) {
-        int* ligne = (int*)malloc(ligne_size);
+        int* line = (int*)malloc(line_size);
         for (int j=0; j<width; j++) {
-            ligne[j] = (int)buffer[j+i*width];
+            line[j] = (int)buffer[j+i*width];
         }
-        image[i] = ligne;
+        image[i] = line;
     }
     return image;
 }

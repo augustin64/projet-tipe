@@ -37,7 +37,7 @@ void print_bias(char* filename) {
     deletion_of_network(network);
 }
 
-void print_poids(char* filename) {
+void print_weights(char* filename) {
     Network* network = read_network(filename);
 
     for (int i=0; i < network->nb_layers -1; i++) {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier spécifié, utilisation de '.cache/reseau.bin'\n");
             filename = ".cache/reseau.bin";
         }
-        print_poids(filename);
+        print_weights(filename);
         exit(1);
     } else if (! strcmp(argv[1], "print-biais")) {
         char* filename = NULL;

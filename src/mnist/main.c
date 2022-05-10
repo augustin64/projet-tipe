@@ -75,10 +75,10 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
     Network* network;
 
     //int* repartition = malloc(sizeof(int)*layers);
-    int nb_neurons_der = 10;
-    int repartition[2] = {784, nb_neurons_der};
+    int nb_neurons_last = 10;
+    int repartition[2] = {784, nb_neurons_last};
 
-    float* sortie = malloc(sizeof(float)*nb_neurons_der);
+    float* output = malloc(sizeof(float)*nb_neurons_last);
     int* desired_output;
     float accuracy;
     float loss;
@@ -121,10 +121,10 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
             forward_propagation(network);
             backward_propagation(network, desired_output);
 
-            for (int k=0; k < nb_neurons_der; k++) {
-                sortie[k] = der_layer->neurons[k]->z;
+            for (int k=0; k < nb_neurons_last; k++) {
+                output[k] = der_layer->neurons[k]->z;
             }
-            if (indice_max(sortie, nb_neurons_der) == labels[j]) {
+            if (indice_max(output, nb_neurons_last) == labels[j]) {
                 accuracy += 1. / (float)nb_images;
             }
             loss += loss_computing(network, labels[j]) / (float)nb_images;
@@ -144,9 +144,9 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
     deletion_of_network(network);
 }
 
-float** recognize(char* modele, char* entree) {
-    Network* network = read_network(modele);
-    Layer* derniere_layer = network->layers[network->nb_layers-1];
+float** recognize(char* model, char* entree) {
+    Network* network = read_network(model);
+    Layer* last_layer = network->layers[network->nb_layers-1];
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -157,13 +157,13 @@ float** recognize(char* modele, char* entree) {
     float** results = malloc(sizeof(float*)*nb_images);
 
     for (int i=0; i < nb_images; i++) {
-        results[i] = malloc(sizeof(float)*derniere_layer->nb_neurons);
+        results[i] = malloc(sizeof(float)*last_layer->nb_neurons);
 
         write_image_in_network(images[i], network, height, width);
         forward_propagation(network);
 
-        for (int j=0; j < derniere_layer->nb_neurons; j++) {
-            results[i][j] = derniere_layer->neurons[j]->z;
+        for (int j=0; j < last_layer->nb_neurons; j++) {
+            results[i][j] = last_layer->neurons[j]->z;
         }
     }
     deletion_of_network(network);
@@ -171,8 +171,8 @@ float** recognize(char* modele, char* entree) {
     return results;
 }
 
-void print_recognize(char* modele, char* entree, char* sortie) {
-    Network* network = read_network(modele);
+void print_recognize(char* model, char* entree, char* output) {
+    Network* network = read_network(model);
     int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
     deletion_of_network(network);
@@ -180,28 +180,28 @@ void print_recognize(char* modele, char* entree, char* sortie) {
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
 
-    float** resultats = recognize(modele, entree);
+    float** results = recognize(model, entree);
 
-    if (! strcmp(sortie, "json")) {
+    if (! strcmp(output, "json")) {
         printf("{\n");
     }
     for (int i=0; i < nb_images; i++) {
-        if (! strcmp(sortie, "text"))
+        if (! strcmp(output, "text"))
             printf("Image %d\n", i);
         else
             printf("\"%d\" : [", i);
 
         for (int j=0; j < nb_der_layer; j++) {
-            if (! strcmp(sortie, "json")) {
-                printf("%f", resultats[i][j]);
+            if (! strcmp(output, "json")) {
+                printf("%f", results[i][j]);
 
                 if (j+1 < nb_der_layer) {
                     printf(", ");
                 }
             } else
-                printf("Probabilité %d: %f\n", j, resultats[i][j]);
+                printf("Probabilité %d: %f\n", j, results[i][j]);
         }
-        if (! strcmp(sortie, "json")) {
+        if (! strcmp(output, "json")) {
             if (i+1 < nb_images) {
                 printf("],\n");
             } else {
@@ -209,13 +209,13 @@ void print_recognize(char* modele, char* entree, char* sortie) {
             }
         }
     }
-    if (! strcmp(sortie, "json"))
+    if (! strcmp(output, "json"))
         printf("}\n");
 
 }
 
-void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails) {
-    Network* network = read_network(modele);
+void test(char* model, char* fichier_images, char* fichier_labels, bool preview_fails) {
+    Network* network = read_network(model);
     int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
     deletion_of_network(network);
@@ -226,16 +226,16 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
     int height = parameters[2];
     int*** images = read_mnist_images(fichier_images);
 
-    float** resultats = recognize(modele, fichier_images);
+    float** results = recognize(model, fichier_images);
     unsigned int* labels = read_mnist_labels(fichier_labels);
     float accuracy;
 
     for (int i=0; i < nb_images; i++) {
-        if (indice_max(resultats[i], nb_der_layer) == labels[i]) {
+        if (indice_max(results[i], nb_der_layer) == labels[i]) {
             accuracy += 1. / (float)nb_images;
         } else if (preview_fails) {
-            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_der_layer));
-            print_image(width, height, images[i], resultats[i]);
+            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(results[i], nb_der_layer));
+            print_image(width, height, images[i], results[i]);
         }
     }
     printf("%d Images\tAccuracy: %0.1f%%\n", nb_images, accuracy*100);
@@ -304,7 +304,7 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "recognize")) {
         char* in = NULL;
-        char* modele = NULL;
+        char* model = NULL;
         char* out = NULL;
         int i = 2;
         while(i < argc) {
@@ -312,7 +312,7 @@ int main(int argc, char* argv[]) {
                 in = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
-                modele = argv[i+1];
+                model = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
@@ -326,19 +326,19 @@ int main(int argc, char* argv[]) {
             printf("Pas d'entrée spécifiée\n");
             exit(1);
         }
-        if (! modele) {
+        if (! model) {
             printf("Pas de modèle spécifié\n");
             exit(1);
         }
         if (! out) {
             out = "text";
         }
-        print_recognize(modele, in, out);
+        print_recognize(model, in, out);
         // Reconnaissance puis affichage des données sous le format spécifié
         exit(0);
     }
     if (! strcmp(argv[1], "test")) {
-        char* modele = NULL;
+        char* model = NULL;
         char* images = NULL;
         char* labels = NULL;
         bool preview_fails = false;
@@ -351,14 +351,14 @@ int main(int argc, char* argv[]) {
                 labels = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
-                modele = argv[i+1];
+                model = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
                 preview_fails = true;
                 i++;
             }
         }
-        test(modele, images, labels, preview_fails);
+        test(model, images, labels, preview_fails);
         exit(0);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

@@ -96,7 +96,7 @@ Network* read_network(char* filename) {
 
 
 // Écrit un neurone dans le fichier pointé par *ptr
-void ecrire_neuron(Neuron* neuron, int weights, FILE *ptr) {
+void write_neuron(Neuron* neuron, int weights, FILE *ptr) {
     float buffer[weights+2];
 
     buffer[1] = neuron->bias;
@@ -130,7 +130,7 @@ int write_network(char* filename, Network* network) {
 
     for (int i=0; i < nb_layers; i++) {
         for (int j=0; j < nb_neurons[i]; j++) {
-            ecrire_neuron(network->layers[i]->neurons[j], nb_neurons[i+1], ptr);
+            write_neuron(network->layers[i]->neurons[j], nb_neurons[i+1], ptr);
         }
     }
 
