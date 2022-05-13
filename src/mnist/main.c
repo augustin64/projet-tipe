@@ -7,7 +7,7 @@
 #include "neuron_io.c"
 #include "mnist.c"
 
-#define EPOCHS 100
+#define EPOCHS 10
 #define BATCHES 100
 
 
