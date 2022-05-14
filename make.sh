@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FLAGS="-std=c99 -lm"
+FLAGS="-std=c99 -lm -lpthread"
 OUT="out"
 
 if [[ $1 == "build" ]]; then
