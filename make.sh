@@ -3,6 +3,8 @@
 FLAGS="-std=c99 -lm -lpthread"
 OUT="out"
 
+set -eu
+
 if [[ $1 == "build" ]]; then
 	mkdir -p "$OUT"
 	[[ $2 ]] || set "$1" "main"
