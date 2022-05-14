@@ -48,5 +48,5 @@ int main() {
     read_test(nb_images, width, height, images, labels);
 
     printf("OK\n");
-    return 1;
+    return 0;
 }

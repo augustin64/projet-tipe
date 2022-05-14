@@ -7,10 +7,10 @@
 
 
 Neuron* creer_neuron(int nb_sortants) {
-    Neuron* neuron = malloc(2*sizeof(float*)+6*sizeof(float));
-    neuron->weights = malloc(sizeof(float)*nb_sortants);
-    neuron->back_weights = malloc(sizeof(float)*nb_sortants);
-    neuron->last_back_weights = malloc(sizeof(float)*nb_sortants);
+    Neuron* neuron = (Neuron*)malloc(sizeof(Neuron));
+    neuron->weights = (float*)malloc(sizeof(float)*nb_sortants);
+    neuron->back_weights = (float*)malloc(sizeof(float)*nb_sortants);
+    neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_sortants);
 
     for (int i=0; i < nb_sortants; i++) {
         neuron->weights[i] = 0.5;
@@ -27,8 +27,8 @@ Neuron* creer_neuron(int nb_sortants) {
 
 
 Layer* creer_layer(int nb_neurons, int nb_sortants) {
-    Layer* layer = malloc(sizeof(int)+sizeof(Neuron**));
-    Neuron** tab = malloc(sizeof(Neuron*)*nb_neurons);
+    Layer* layer = (Layer*)malloc(sizeof(Layer));
+    Neuron** tab = (Neuron**)malloc(sizeof(Neuron*)*nb_neurons);
 
     layer->nb_neurons = nb_neurons;
     layer->neurons = tab;
@@ -41,8 +41,8 @@ Layer* creer_layer(int nb_neurons, int nb_sortants) {
 
 
 Network* create_network(int nb_layers, int nb_max_neurons, int nb_min_neurons) {
-    Network* network = malloc(sizeof(int)+sizeof(Layer**));
-    network->layers = malloc(sizeof(Layer*)*nb_layers);
+    Network* network = (Network*)malloc(sizeof(Network));
+    network->layers = (Layer**)malloc(sizeof(Layer*)*nb_layers);
     int nb_neurons[nb_layers+1];
 
     network->nb_layers = nb_layers;
@@ -62,5 +62,5 @@ int main() {
     Network* network = create_network(5, 300, 10);
     write_network(".test-cache/neuron_io.bin", network);
     Network* network2 = read_network(".test-cache/neuron_io.bin");
-    return 1;
+    return 0;
 }
