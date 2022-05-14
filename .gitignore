@@ -1,5 +1,8 @@
 **/out
 **/a.out
-.cache/*
-.test-cache/*
 **/__pycache__
+
+.cache
+.test-cache
+.vscode
+
