@@ -3,7 +3,7 @@
 FLAGS="-std=c99 -lm -lpthread"
 OUT="out"
 
-set -eu
+set -e
 
 if [[ $1 == "build" ]]; then
 	mkdir -p "$OUT"
