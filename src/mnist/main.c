@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
+#include <pthread.h>
+#include <sys/sysinfo.h>
 
 #include "neural_network.c"
 #include "neuron_io.c"
@@ -11,11 +13,23 @@
 #define BATCHES 100
 
 
+typedef struct TrainParameters {
+    Network* network;
+    int*** images;
+    int* labels;
+    int start;
+    int nb_images;
+    int height;
+    int width;
+    float accuracy;
+} TrainParameters;
+
+
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
-    for (int i=0; i < height; i++) {
-        for (int j=0; j < width; j++) {
+    for (int i=0; i < (int)height; i++) {
+        for (int j=0; j < (int)width; j++) {
             printf("%c", tab[image[i][j]/52]);
         }
         if (i < 10) {
@@ -69,19 +83,54 @@ void write_image_in_network(int** image, Network* network, int height, int width
     }
 }
 
+void* train_images(void* parameters) {
+    TrainParameters* param = (TrainParameters*)parameters;
+    Network* network = param->network;
+    Layer* last_layer = network->layers[network->nb_layers-1];
+    int nb_neurons_last_layer = last_layer->nb_neurons;
+
+    int*** images = param->images;
+    int* labels = param->labels;
+
+    int start = param->start;
+    int nb_images = param->nb_images;
+    int height = param->height;
+    int width = param->width;
+    float accuracy = 0.;
+    float* sortie = (float*)malloc(sizeof(float)*nb_neurons_last_layer);
+    int* desired_output;
+
+    for (int i=start; i < start+nb_images; i++) {
+        write_image_in_network(images[i], network, height, width);
+        desired_output = desired_output_creation(network, labels[i]);
+        forward_propagation(network);
+        backward_propagation(network, desired_output);
+
+        for (int k=0; k < nb_neurons_last_layer; k++) {
+            sortie[k] = last_layer->neurons[k]->z;
+        }
+        if (indice_max(sortie, nb_neurons_last_layer) == labels[i]) {
+            accuracy += 1.;
+        }
+        free(desired_output);
+    }
+    free(sortie);
+    param->accuracy = accuracy;
+}
+
 
 void train(int batches, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out) {
     // Entraînement du réseau sur le set de données MNIST
     Network* network;
 
     //int* repartition = malloc(sizeof(int)*layers);
-    int nb_neurons_last = 10;
-    int repartition[2] = {784, nb_neurons_last};
+    int nb_neurons_last_layer = 10;
+    int repartition[2] = {784, nb_neurons_last_layer};
 
-    float* output = malloc(sizeof(float)*nb_neurons_last);
-    int* desired_output;
     float accuracy;
-    float loss;
+
+    int nb_threads = get_nprocs();
+    pthread_t *tid = (pthread_t *)malloc(nb_threads * sizeof(pthread_t));
     //generer_repartition(layers, repartition);
 
     /*
@@ -89,7 +138,7 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
     * ou on repart de zéro si aucune backup n'est fournie
     * */
     if (! recovery) {
-        network = malloc(sizeof(Network));
+        network = (Network*)malloc(sizeof(Network));
         network_creation(network, repartition, layers);
         network_initialisation(network);
     } else {
@@ -97,56 +146,58 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
         printf("Backup restaurée.\n");
     }
 
-    Layer* der_layer = network->layers[network->nb_layers-1];
-
     // Chargement des images du set de données MNIST
     int* parameters = read_mnist_images_parameters(image_file);
-    int nb_images = parameters[0];
+    int nb_images_total = parameters[0];
+    int nb_remaining_images = 0; // Nombre d'images restantes dans un batch
     int height = parameters[1];
     int width = parameters[2];
 
     int*** images = read_mnist_images(image_file);
     unsigned int* labels = read_mnist_labels(label_file);
 
+    TrainParameters** train_parameters = (TrainParameters**)malloc(sizeof(TrainParameters*)*nb_threads);
     for (int i=0; i < batches; i++) {
-        printf("Batch [%d/%d]", i, batches);
         accuracy = 0.;
-        loss = 0.;
+        for (int k=0; k < nb_images_total / BATCHES; k++) {
+            nb_remaining_images = BATCHES;
 
-        for (int j=0; j < nb_images; j++) {
-            printf("\rBatch [%d/%d]\tImage [%d/%d]",i, batches, j, nb_images);
+            for (int j=0; j < nb_threads; j++) {
+                train_parameters[j] = (TrainParameters*)malloc(sizeof(TrainParameters));
+                train_parameters[j]->network = copy_network(network);
+                train_parameters[j]->images = (int***)images;
+                train_parameters[j]->labels = (int*)labels;
+                train_parameters[j]->nb_images = BATCHES / nb_threads;
+                train_parameters[j]->start = nb_images_total - BATCHES*(nb_images_total / BATCHES - k -1) - nb_remaining_images;
+                train_parameters[j]->height = height;
+                train_parameters[j]->width = width;
 
-            write_image_in_network(images[j], network, height, width);
-            desired_output = desired_output_creation(network, labels[j]);
-            forward_propagation(network);
-            backward_propagation(network, desired_output);
+                if (j == nb_threads-1) {
+                    train_parameters[j]->nb_images = nb_remaining_images;
+                }
+                nb_remaining_images -= train_parameters[j]->nb_images;
 
-            for (int k=0; k < nb_neurons_last; k++) {
-                output[k] = der_layer->neurons[k]->z;
+                pthread_create( &tid[j], NULL, train_images, (void*) train_parameters[j]);
             }
-            if (indice_max(output, nb_neurons_last) == labels[j]) {
-                accuracy += 1. / (float)nb_images;
+            for(int j=0; j < nb_threads; j++ ) {
+                pthread_join( tid[j], NULL );
+                accuracy += train_parameters[j]->accuracy / (float) nb_images_total;
+                patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
+                deletion_of_network(train_parameters[j]->network);
+                free(train_parameters[j]);
             }
-            loss += loss_computing(network, labels[j]) / (float)nb_images;
-            free(desired_output);
-
-            if (j%BATCHES==BATCHES-1)
-                network_modification(network, BATCHES);
-            
+            printf("\rThread [%d/%d]\tBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, nb_threads, i, batches, BATCHES*(k+1), nb_images_total, accuracy*100);
         }
-
-        if (nb_images%BATCHES != 0)
-            network_modification(network, nb_images%BATCHES);
-
-        printf("\rBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\tLoss: %f\n",i, batches, nb_images, nb_images, accuracy*100, loss);
+        printf("\rThread [%d/%d]\tBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, nb_threads, i, batches, nb_images_total, nb_images_total, accuracy*100);
         write_network(out, network);
     }
     deletion_of_network(network);
+    free(tid);
 }
 
-float** recognize(char* model, char* entree) {
-    Network* network = read_network(model);
-    Layer* last_layer = network->layers[network->nb_layers-1];
+float** recognize(char* modele, char* entree) {
+    Network* network = read_network(modele);
+    Layer* derniere_layer = network->layers[network->nb_layers-1];
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -154,16 +205,16 @@ float** recognize(char* model, char* entree) {
     int width = parameters[2];
 
     int*** images = read_mnist_images(entree);
-    float** results = malloc(sizeof(float*)*nb_images);
+    float** results = (float**)malloc(sizeof(float*)*nb_images);
 
     for (int i=0; i < nb_images; i++) {
-        results[i] = malloc(sizeof(float)*last_layer->nb_neurons);
+        results[i] = (float*)malloc(sizeof(float)*derniere_layer->nb_neurons);
 
         write_image_in_network(images[i], network, height, width);
         forward_propagation(network);
 
-        for (int j=0; j < last_layer->nb_neurons; j++) {
-            results[i][j] = last_layer->neurons[j]->z;
+        for (int j=0; j < derniere_layer->nb_neurons; j++) {
+            results[i][j] = derniere_layer->neurons[j]->z;
         }
     }
     deletion_of_network(network);
@@ -171,37 +222,37 @@ float** recognize(char* model, char* entree) {
     return results;
 }
 
-void print_recognize(char* model, char* entree, char* output) {
-    Network* network = read_network(model);
-    int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
+void print_recognize(char* modele, char* entree, char* sortie) {
+    Network* network = read_network(modele);
+    int nb_last_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
     deletion_of_network(network);
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
 
-    float** results = recognize(model, entree);
+    float** resultats = recognize(modele, entree);
 
-    if (! strcmp(output, "json")) {
+    if (! strcmp(sortie, "json")) {
         printf("{\n");
     }
     for (int i=0; i < nb_images; i++) {
-        if (! strcmp(output, "text"))
+        if (! strcmp(sortie, "text"))
             printf("Image %d\n", i);
         else
             printf("\"%d\" : [", i);
 
-        for (int j=0; j < nb_der_layer; j++) {
-            if (! strcmp(output, "json")) {
-                printf("%f", results[i][j]);
+        for (int j=0; j < nb_last_layer; j++) {
+            if (! strcmp(sortie, "json")) {
+                printf("%f", resultats[i][j]);
 
-                if (j+1 < nb_der_layer) {
+                if (j+1 < nb_last_layer) {
                     printf(", ");
                 }
             } else
-                printf("Probabilité %d: %f\n", j, results[i][j]);
+                printf("Probabilité %d: %f\n", j, resultats[i][j]);
         }
-        if (! strcmp(output, "json")) {
+        if (! strcmp(sortie, "json")) {
             if (i+1 < nb_images) {
                 printf("],\n");
             } else {
@@ -209,14 +260,15 @@ void print_recognize(char* model, char* entree, char* output) {
             }
         }
     }
-    if (! strcmp(output, "json"))
+    if (! strcmp(sortie, "json")) {
         printf("}\n");
+    }
 
 }
 
-void test(char* model, char* fichier_images, char* fichier_labels, bool preview_fails) {
-    Network* network = read_network(model);
-    int nb_der_layer = network->layers[network->nb_layers-1]->nb_neurons;
+void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails) {
+    Network* network = read_network(modele);
+    int nb_last_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
     deletion_of_network(network);
 
@@ -226,16 +278,16 @@ void test(char* model, char* fichier_images, char* fichier_labels, bool preview_
     int height = parameters[2];
     int*** images = read_mnist_images(fichier_images);
 
-    float** results = recognize(model, fichier_images);
+    float** resultats = recognize(modele, fichier_images);
     unsigned int* labels = read_mnist_labels(fichier_labels);
-    float accuracy;
+    float accuracy = 0.;
 
     for (int i=0; i < nb_images; i++) {
-        if (indice_max(results[i], nb_der_layer) == labels[i]) {
+        if (indice_max(resultats[i], nb_last_layer) == (int)labels[i]) {
             accuracy += 1. / (float)nb_images;
         } else if (preview_fails) {
-            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(results[i], nb_der_layer));
-            print_image(width, height, images[i], results[i]);
+            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_last_layer));
+            print_image(width, height, images[i], resultats[i]);
         }
     }
     printf("%d Images\tAccuracy: %0.1f%%\n", nb_images, accuracy*100);
@@ -304,7 +356,7 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "recognize")) {
         char* in = NULL;
-        char* model = NULL;
+        char* modele = NULL;
         char* out = NULL;
         int i = 2;
         while(i < argc) {
@@ -312,7 +364,7 @@ int main(int argc, char* argv[]) {
                 in = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
-                model = argv[i+1];
+                modele = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
@@ -326,19 +378,19 @@ int main(int argc, char* argv[]) {
             printf("Pas d'entrée spécifiée\n");
             exit(1);
         }
-        if (! model) {
+        if (! modele) {
             printf("Pas de modèle spécifié\n");
             exit(1);
         }
         if (! out) {
             out = "text";
         }
-        print_recognize(model, in, out);
+        print_recognize(modele, in, out);
         // Reconnaissance puis affichage des données sous le format spécifié
         exit(0);
     }
     if (! strcmp(argv[1], "test")) {
-        char* model = NULL;
+        char* modele = NULL;
         char* images = NULL;
         char* labels = NULL;
         bool preview_fails = false;
@@ -351,14 +403,14 @@ int main(int argc, char* argv[]) {
                 labels = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
-                model = argv[i+1];
+                modele = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
                 preview_fails = true;
                 i++;
             }
         }
-        test(model, images, labels, preview_fails);
+        test(modele, images, labels, preview_fails);
         exit(0);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);
