@@ -13,12 +13,24 @@ var mouseX;
 var mouseY;
 var mouseDown = 0;
 
+const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+var canvasSize;
+
 function init() {
+    if (vw <= 1024) {
+        canvasSize = vw * 0.95;
+    } else {
+        canvasSize = 280;
+    }
+
     canvas = document.getElementById('digit-canvas');
     ctx = canvas.getContext('2d');
     
     ctx.fillStyle = "black";
     // Créer une zone de dessin
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if(ctx)
@@ -133,19 +145,20 @@ function sendJSON(data,callback){
 
 
 function getPrediction() {
-    let totalWidth = 280;
-    let totalHeight = 280;
+    let imageSize = 28;
+    let totalWidth = canvasSize;
+    let totalHeight = canvasSize;
     let curWidth = 0;
     let curHeight = 0;
-    let stepSize = 10;
+    let stepSize = totalWidth / imageSize;
 
     let tableau = [];
     let tmp_tableau = [];
 
-    while (curHeight < totalHeight) {
+    while (curHeight < totalHeight && tableau.length < imageSize) {
         curWidth = 0;
         tmp_tableau = [];
-        while (curWidth < totalWidth) {
+        while (curWidth < totalWidth  && tmp_tableau.length < imageSize) {
             data = ctx.getImageData(curWidth, curHeight, stepSize, stepSize);
             size = data.width * data.height;
             density = 0;
@@ -171,14 +184,22 @@ function getPrediction() {
         if (data["status"] != 200) {
             document.getElementById("result").innerHTML = "500 Internal Server Error";
         } else {
-            let resultat = document.getElementById("result");
-            resultat.innerHTML = "Résultat:";
-            let dict = {};
-            let i = 0;
-            data["data"].map((e) => { dict[e] = i; i++; });
-            let res = Object.keys(dict).sort().reverse();
+            let result = document.getElementById("result");
+            result.innerHTML = "Résultat:";
+            var elements = [];
+
+            for (let i=0; i < data["data"].length; i++) elements.push([data["data"][i], i]);
+            
+            elements.sort(function(a, b) {
+                a = a[1];
+                b = b[1];
+            
+                return a < b ? -1 : (a > b ? 1 : 0);
+            });
+
+            let res = elements.sort().reverse();
             for (let j=0; j < res.length; j++) {
-                resultat.innerHTML += "<br/>"+dict[res[j]]+" : "+res[j];
+                result  .innerHTML += "<br/>"+res[j][1]+" : "+res[j][0];
             }
         }
     })
