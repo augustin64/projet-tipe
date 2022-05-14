@@ -125,9 +125,7 @@ int write_network(char* filename, Network* network) {
         nb_neurons[i] = network->layers[i]->nb_neurons;
     }
     nb_neurons[nb_layers] = 0;
-
     fwrite(buffer, sizeof(buffer), 1, ptr);
-
     for (int i=0; i < nb_layers; i++) {
         for (int j=0; j < nb_neurons[i]; j++) {
             write_neuron(network->layers[i]->neurons[j], nb_neurons[i+1], ptr);

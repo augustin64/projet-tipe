@@ -56,58 +56,56 @@ void print_weights(char* filename) {
 void count_labels(char* filename) {
     uint32_t number_of_images = read_mnist_labels_nb_images(filename);
 
-    unsigned int* labels = malloc(sizeof(unsigned int)*number_of_images);
+    unsigned int* labels = (unsigned int*)malloc(sizeof(unsigned int)*number_of_images);
     labels = read_mnist_labels(filename);
 
-    unsigned int* tab[10];
+    unsigned int tab[10];
 
     for (int i=0; i < 10; i++) {
         tab[i] = 0;
     }
 
-    for (int i=0; i < number_of_images; i++) {
+    for (int i=0; i < (int)number_of_images; i++) {
         tab[(int)labels[i]]++;
     }
 
     for (int i=0; i < 10; i++) {
-        printf("Nombre de %d: %d\n", i, tab[i]);
+        printf("Nombre de %d: %x\n", i, tab[i]);
     }
 }
 
 void create_network(char* filename, int sortie) {
-    Network* network = malloc(sizeof(Network));
+    Network* network = (Network*)malloc(sizeof(Network));
     Layer* layer;
     Neuron* neuron;
     network->nb_layers = 3;
     
-    network->layers = malloc(sizeof(Layer*)*network->nb_layers);
+    network->layers = (Layer**)malloc(sizeof(Layer*)*network->nb_layers);
     int neurons_per_layer[4] = {784, 1, 10, 0};
     for (int i=0; i < network->nb_layers; i++) {
-        network->layers[i] = malloc(sizeof(Layer));
-        layer = network->layers[i];
+        layer = (Layer*)malloc(sizeof(Layer));
         layer->nb_neurons = neurons_per_layer[i];
-        layer->neurons = malloc(sizeof(Neuron*)*layer->nb_neurons);
+        layer->neurons = (Neuron**)malloc(sizeof(Neuron*)*layer->nb_neurons);
         for (int j=0; j < layer->nb_neurons; j++) {
-            layer->neurons[j] = malloc(sizeof(Neuron));
-            neuron = layer->neurons[j];
+            neuron = (Neuron*)malloc(sizeof(Neuron));
 
             neuron->bias = 0.;
             neuron->z = 0.;
 
             neuron->back_bias = 0.;
             neuron->last_back_bias = 0.;
-
-            neuron->weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
-            neuron->back_weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
-            neuron->last_back_weights = malloc(sizeof(float)*neurons_per_layer[i+1]);
+            neuron->weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
+            neuron->back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
+            neuron->last_back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
             for (int k=0; k < neurons_per_layer[i+1]; k++) {
                 neuron->weights[k] = 0.;
                 neuron->back_weights[k] = 0.;
                 neuron->last_back_weights[k] = 0.;
             }
+            layer->neurons[j] = neuron;
         }
+        network->layers[i] = layer;
     }
-
     for (int j=0; j < neurons_per_layer[0]; j++) {
         network->layers[0]->neurons[j]->weights[0] = 1;
     }
@@ -176,6 +174,8 @@ int main(int argc, char* argv[]) {
                 i++;
             }
         }
+        create_network(out, n);
+        exit(1);
     } else if (! strcmp(argv[1], "count-labels")) {
         char* labels = NULL;
         int i = 2;
