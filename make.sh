@@ -59,7 +59,7 @@ if [[ $1 == "test" ]]; then
 	elif [[ $2 == "run" ]]; then
 		$0 build test
 		mkdir -p .test-cache
-		for i in $(ls "$OUT/test_"*); do
+		for i in "$OUT/test_"*; do
 			echo "--- $i ---"
 			$i
 		done
