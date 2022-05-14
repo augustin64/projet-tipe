@@ -15,13 +15,15 @@ float sigmoid(float x);
 float sigmoid_derivative(float x);
 float leaky_ReLU(float x);
 float leaky_ReLU_derivative(float x);
-void network_creation(Network* network_neuronal, int* neurons_per_layer, int nb_layers);
-void deletion_of_network(Network* network_neuronal);
-void forward_propagation(Network* network_neuronal);
-int* desired_output_creation(Network* network_neuronal, int wanted_number);
-void backward_propagation(Network* network_neuronal, int* desired_output);
-void network_modification(Network* network_neuronal, uint32_t nb_modifs);
-void network_initialisation(Network* network_neuronal);
+void network_creation(Network* network, int* neurons_per_layer, int nb_layers);
+void deletion_of_network(Network* network);
+void forward_propagation(Network* network);
+int* desired_output_creation(Network* network, int wanted_number);
+void backward_propagation(Network* network, int* desired_output);
+void network_modification(Network* network, uint32_t nb_modifs);
+void network_initialisation(Network* network);
+void patch_network(Network* network, Network* delta, uint32_t nb_modifs);
+Network* copy_network(Network* network);
 float loss_computing(Network* network, int numero_voulu);
 
 #endif
