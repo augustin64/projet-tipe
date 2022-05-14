@@ -9,7 +9,7 @@
 
 
 Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
-    Neuron* neuron = malloc(sizeof(Neuron));
+    Neuron* neuron = (Neuron*)malloc(sizeof(Neuron));
     float activation;
     float bias;
     float tmp;
@@ -23,13 +23,13 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
     neuron->last_back_bias = 0.0;
     neuron->back_bias = 0.0;
 
-    float* weights = malloc(sizeof(float)*nb_weights);
+    float* weights = (float*)malloc(sizeof(float)*nb_weights);
 
-    neuron->last_back_weights = malloc(sizeof(float)*nb_weights);
-    neuron->back_weights = malloc(sizeof(float)*nb_weights);
+    neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_weights);
+    neuron->back_weights = (float*)malloc(sizeof(float)*nb_weights);
     neuron->weights = weights;
 
-    for (int i=0; i < nb_weights; i++) {
+    for (int i=0; i < (int)nb_weights; i++) {
         fread(&tmp, sizeof(float), 1, ptr);
         neuron->weights[i] = tmp;
         neuron->back_weights[i] = 0.0;
@@ -42,8 +42,8 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
 
 // Lit une couche de neurones
 Neuron** read_neurons(uint32_t nb_neurons, uint32_t nb_weights, FILE *ptr) {
-    Neuron** neurons = malloc(sizeof(Neuron*)*nb_neurons);
-    for (int i=0; i < nb_neurons; i++) {
+    Neuron** neurons = (Neuron**)malloc(sizeof(Neuron*)*nb_neurons);
+    for (int i=0; i < (int)nb_neurons; i++) {
         neurons[i] = read_neuron(nb_weights, ptr);
     }
     return neurons;
@@ -53,7 +53,7 @@ Neuron** read_neurons(uint32_t nb_neurons, uint32_t nb_weights, FILE *ptr) {
 // Charge l'entièreté du réseau neuronal depuis un fichier binaire
 Network* read_network(char* filename) {
     FILE *ptr;
-    Network* network = malloc(sizeof(Network));
+    Network* network = (Network*)malloc(sizeof(Network));
     
     ptr = fopen(filename, "rb");
 
@@ -71,20 +71,20 @@ Network* read_network(char* filename) {
     network->nb_layers = nb_layers;
 
 
-    Layer** layers = malloc(sizeof(Layer*)*nb_layers);
+    Layer** layers = (Layer**)malloc(sizeof(Layer*)*nb_layers);
     uint32_t nb_neurons_layer[nb_layers+1];
 
-    network->layers  = layers;
+    network->layers = layers;
 
-    for (int i=0; i < nb_layers; i++) {
-        layers[i] = malloc(sizeof(Layer));
+    for (int i=0; i < (int)nb_layers; i++) {
+        layers[i] = (Layer*)malloc(sizeof(Layer));
         fread(&tmp, sizeof(tmp), 1, ptr);
         layers[i]->nb_neurons = tmp;
         nb_neurons_layer[i] = tmp;
     }
     nb_neurons_layer[nb_layers] = 0;
 
-    for (int i=0; i < nb_layers; i++) {
+    for (int i=0; i < (int)nb_layers; i++) {
         layers[i]->neurons = read_neurons(layers[i]->nb_neurons, nb_neurons_layer[i+1], ptr);
     }
 

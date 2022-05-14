@@ -19,9 +19,9 @@ int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
 
     fread(buffer, sizeof(buffer), 1, ptr);
 
-    for (int i=0; i<height; i++) {
+    for (int i=0; i < (int)height; i++) {
         int* line = (int*)malloc(line_size);
-        for (int j=0; j<width; j++) {
+        for (int j=0; j < (int)width; j++) {
             line[j] = (int)buffer[j+i*width];
         }
         image[i] = line;
@@ -31,7 +31,7 @@ int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
 
 // renvoie [nb_elem, width, height]
 int* read_mnist_images_parameters(char* filename) {
-    int* tab = malloc(sizeof(int)*3);
+    int* tab = (int*)malloc(sizeof(int)*3);
     FILE *ptr;
     
     ptr = fopen(filename, "rb");
@@ -113,7 +113,7 @@ int*** read_mnist_images(char* filename) {
 
     int*** tab = (int***)malloc(sizeof(int**)*number_of_images);
 
-    for (int i=0; i < number_of_images; i++) {
+    for (int i=0; i < (int)number_of_images; i++) {
         tab[i] = read_image(width, height, ptr);
     }
     return tab;
@@ -142,9 +142,9 @@ unsigned int* read_mnist_labels(char* filename) {
     unsigned char buffer[number_of_items];
     fread(buffer, sizeof(unsigned char), number_of_items, ptr);
 
-    unsigned int* labels = malloc(sizeof(unsigned int)*number_of_items);
+    unsigned int* labels = (unsigned int*)malloc(sizeof(unsigned int)*number_of_items);
 
-    for (int i=0; i< number_of_items; i++) {
+    for (int i=0; i < (int)number_of_items; i++) {
         labels[i] = (unsigned int)buffer[i];
     }
     return labels;

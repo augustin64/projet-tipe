@@ -1,7 +1,7 @@
 #ifndef DEF_NEURON_H
 #define DEF_NEURON_H
 
-typedef struct Neuron{
+typedef struct Neuron {
     float* weights; // Liste de tous les poids des arêtes sortants du neurone
     float bias; // Caractérise le bias du neurone
     float z; // Sauvegarde des calculs faits sur le neurone (programmation dynamique)
@@ -13,12 +13,12 @@ typedef struct Neuron{
 } Neuron;
 
 
-typedef struct Layer{
+typedef struct Layer {
     int nb_neurons; // Nombre de neurones dans la couche (longueur du tableau ci-dessous)
     Neuron** neurons; // Tableau des neurones dans la couche
 } Layer;
 
-typedef struct Network{
+typedef struct Network {
     int nb_layers; // Nombre de couches dans le réseau neuronal (longueur du tableau ci-dessous)
     Layer** layers; // Tableau des couches dans le réseau neuronal
 } Network;
