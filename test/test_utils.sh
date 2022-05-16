@@ -10,11 +10,11 @@ echo "Compte des labels"
 echo "OK"
 
 echo "Création du réseau"
-"$OUT/utils" creer-reseau -n 3 -n .test-cache/reseau.bin > /dev/null
+"$OUT/utils" creer-reseau -n 3 -o .test-cache/reseau.bin > /dev/null
 echo "OK"
 
 echo "Affichage poids"
-"$OUT/utils" print-poids -r .test-cache/reseau.bin
+"$OUT/utils" print-poids -r .test-cache/reseau.bin > /dev/null
 echo "OK"
 
 echo "Affichage biais"
