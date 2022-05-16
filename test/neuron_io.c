@@ -59,8 +59,16 @@ Network* create_network(int nb_layers, int nb_max_neurons, int nb_min_neurons) {
 }
 
 int main() {
+    printf("Création du réseau\n");
     Network* network = create_network(5, 300, 10);
+    printf("OK\n");
+
+    printf("Écriture du réseau\n");
     write_network(".test-cache/neuron_io.bin", network);
+    printf("OK\n");
+
+    printf("Vérification de l'accès en lecture\n");
     Network* network2 = read_network(".test-cache/neuron_io.bin");
+    printf("OK\n");
     return 0;
 }

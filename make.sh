@@ -19,14 +19,16 @@ if [[ $1 == "build" ]]; then
 		echo "Fait."
 		exit 0
 	elif [[ $2 == "test" ]]; then
-		for i in $(ls test); do
-			echo "Compilation de test/$i"
-			gcc "test/$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}')" $FLAGS
+		for i in "test/"*".c"; do
+			echo "Compilation de $i"
+			gcc "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
 			echo "Fait."
 		done
 		exit 0
 	elif [[ $2 == "utils" ]]; then
+		echo "Compilation de src/mnist/utils.c"
 		gcc "src/mnist/utils.c" -o "$OUT/utils" $FLAGS
+		echo "Fait."
 		exit 0
 	else
 		$0 build main
@@ -62,6 +64,11 @@ if [[ $1 == "test" ]]; then
 		for i in "$OUT/test_"*; do
 			echo "--- $i ---"
 			$i
+		done
+		for i in "test/"*".sh"; do
+			echo "--- $i ---"
+			chmod +x "$i"
+			"$i" "$OUT" "$0"
 		done
 		exit 0
 	fi

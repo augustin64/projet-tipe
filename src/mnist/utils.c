@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
             filename = ".cache/reseau.bin";
         }
         print_weights(filename);
-        exit(1);
+        exit(0);
     } else if (! strcmp(argv[1], "print-biais")) {
         char* filename = NULL;
         int i = 2;
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
             filename = ".cache/reseau.bin";
         }
         print_bias(filename);
-        exit(1);
+        exit(0);
     } else if (! strcmp(argv[1], "creer-reseau")) {
         char* out = NULL;
         int n = -1;
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
             }
         }
         create_network(out, n);
-        exit(1);
+        exit(0);
     } else if (! strcmp(argv[1], "count-labels")) {
         char* labels = NULL;
         int i = 2;
@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
             labels = "data/mnist/train-labels-idx1-ubyte";
         }
         count_labels(labels);
-        exit(1);
+        exit(0);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);
     help(argv[0]);
