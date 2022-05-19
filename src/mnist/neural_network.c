@@ -310,6 +310,26 @@ void patch_network(Network* network, Network* delta, uint32_t nb_modifs) {
     }
 }
 
+void patch_delta(Network* network, Network* delta, uint32_t nb_modifs) {
+    // Les deux réseaux donnés sont supposés de même dimensions
+    Neuron* neuron;
+    Neuron* dneuron;
+
+    for (int i=0; i < network->nb_layers; i++) {
+        for (int j=0; j < network->layers[i]->nb_neurons; j++) {
+            neuron = network->layers[i]->neurons[j];
+            dneuron = delta->layers[i]->neurons[j];
+            neuron->back_bias += dneuron->back_bias/nb_modifs;
+
+            if (i != network->nb_layers-1) {
+                for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
+                    neuron->back_weights[k] += dneuron->back_weights[k]/nb_modifs;
+                }
+            }
+        }
+    }
+}
+
 Network* copy_network(Network* network) {
     // Renvoie une copie modifiable d'un réseau de neurones
     Network* network2 = (Network*)malloc(sizeof(Network));

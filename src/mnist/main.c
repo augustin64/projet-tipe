@@ -56,13 +56,14 @@ void help(char* call) {
     printf("Usage: %s ( train | recognize | test ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
     printf("\ttrain:\n");
-    printf("\t\t--batches | -b [int]\tNombre de batches.\n");
+    printf("\t\t--epochs  | -e [int]\tNombre d'époques (itérations sur tout le set de données).\n");
     printf("\t\t--couches  | -c [int]\tNombres de couches.\n");
     printf("\t\t--neurones | -n [int]\tNombre de neurones sur la première couche.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
+    printf("\t\t--delta   | -d [FILENAME]\tFichier où écrire le réseau différentiel.\n");
     printf("\trecognize:\n");
     printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--in      | -i [FILENAME]\tFichier contenant les images à reconnaître.\n");
@@ -119,9 +120,10 @@ void* train_images(void* parameters) {
 }
 
 
-void train(int batches, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out) {
+void train(int epochs, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out, char* delta) {
     // Entraînement du réseau sur le set de données MNIST
     Network* network;
+    Network* delta_network;
 
     //int* repartition = malloc(sizeof(int)*layers);
     int nb_neurons_last_layer = 10;
@@ -146,6 +148,20 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
         printf("Backup restaurée.\n");
     }
 
+    if (delta != NULL) {
+        // On initialise un réseau complet mais la seule partie qui nous intéresse est la partie différentielle
+        delta_network = (Network*)malloc(sizeof(Network));
+
+        int* repart = (int*)malloc(sizeof(network->nb_layers));
+        for (int i=0; i < network->nb_layers; i++) {
+            repart[i] = network->layers[i]->nb_neurons;
+        }
+
+        network_creation(delta_network, repart, network->nb_layers);
+        network_initialisation(delta_network);
+        free(repart);
+    }
+
     // Chargement des images du set de données MNIST
     int* parameters = read_mnist_images_parameters(image_file);
     int nb_images_total = parameters[0];
@@ -157,7 +173,7 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
     unsigned int* labels = read_mnist_labels(label_file);
 
     TrainParameters** train_parameters = (TrainParameters**)malloc(sizeof(TrainParameters*)*nb_threads);
-    for (int i=0; i < batches; i++) {
+    for (int i=0; i < epochs; i++) {
         accuracy = 0.;
         for (int k=0; k < nb_images_total / BATCHES; k++) {
             nb_remaining_images = BATCHES;
@@ -183,15 +199,22 @@ void train(int batches, int layers, int neurons, char* recovery, char* image_fil
                 pthread_join( tid[j], NULL );
                 accuracy += train_parameters[j]->accuracy / (float) nb_images_total;
                 patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
+                if (delta != NULL)
+                    patch_delta(delta_network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 deletion_of_network(train_parameters[j]->network);
                 free(train_parameters[j]);
             }
-            printf("\rThread [%d/%d]\tBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, nb_threads, i, batches, BATCHES*(k+1), nb_images_total, accuracy*100);
+            printf("\rThread [%d/%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, nb_threads, i, epochs, BATCHES*(k+1), nb_images_total, accuracy*100);
         }
-        printf("\rThread [%d/%d]\tBatch [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, nb_threads, i, batches, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rThread [%d/%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
         write_network(out, network);
+        if (delta != NULL)
+            write_delta_network(delta, delta_network);
     }
+    if (delta != NULL)
+        deletion_of_network(delta_network);
     deletion_of_network(network);
+    free(train_parameters);
     free(tid);
 }
 
@@ -301,18 +324,19 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     if (! strcmp(argv[1], "train")) {
-        int batches = EPOCHS;
+        int epochs = EPOCHS;
         int layers = 2;
         int neurons = 784;
         char* images = NULL;
         char* labels = NULL;
         char* recovery = NULL;
         char* out = NULL;
+        char* delta = NULL;
         int i = 2;
         while (i < argc) {
             // Utiliser un switch serait sans doute plus élégant
-            if ((! strcmp(argv[i], "--batches"))||(! strcmp(argv[i], "-b"))) {
-                batches = strtol(argv[i+1], NULL, 10);
+            if ((! strcmp(argv[i], "--epochs"))||(! strcmp(argv[i], "-e"))) {
+                epochs = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else
                 if ((! strcmp(argv[i], "--couches"))||(! strcmp(argv[i], "-c"))) {
@@ -333,6 +357,9 @@ int main(int argc, char* argv[]) {
             } else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
                 i += 2;
+            } else if ((! strcmp(argv[i], "--delta"))||(! strcmp(argv[i], "-d"))) {
+                delta = argv[i+1];
+                i += 2;
             } else {
                 printf("%s : Argument non reconnu\n", argv[i]);
                 i++;
@@ -351,7 +378,7 @@ int main(int argc, char* argv[]) {
             out = "out.bin";
         }
         // Entraînement en sourçant neural_network.c
-        train(batches, layers, neurons, recovery, images, labels, out);
+        train(epochs, layers, neurons, recovery, images, labels, out, delta);
         exit(0);
     }
     if (! strcmp(argv[1], "recognize")) {

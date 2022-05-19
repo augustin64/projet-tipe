@@ -12,7 +12,7 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr);
 Neuron** read_neurons(uint32_t nb_neurons, uint32_t nb_weights, FILE *ptr);
 Network* read_network(char* filename);
 void ecrire_neuron(Neuron* neuron, int weights, FILE *ptr);
-int write_network(char* filename, Network* network);
-
+void write_network(char* filename, Network* network);
+void write_delta_network(char* filename, Network* network);
 
 #endif

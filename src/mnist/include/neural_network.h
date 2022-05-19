@@ -23,6 +23,7 @@ void backward_propagation(Network* network, int* desired_output);
 void network_modification(Network* network, uint32_t nb_modifs);
 void network_initialisation(Network* network);
 void patch_network(Network* network, Network* delta, uint32_t nb_modifs);
+void patch_delta(Network* network, Network* delta, uint32_t nb_modifs);
 Network* copy_network(Network* network);
 float loss_computing(Network* network, int numero_voulu);
 

@@ -109,7 +109,7 @@ void write_neuron(Neuron* neuron, int weights, FILE *ptr) {
 
 
 // Stocke l'entièreté du réseau neuronal dans un fichier binaire
-int write_network(char* filename, Network* network) {
+void write_network(char* filename, Network* network) {
     FILE *ptr;
     int nb_layers = network->nb_layers;
     int nb_neurons[nb_layers+1];
@@ -133,5 +133,8 @@ int write_network(char* filename, Network* network) {
     }
 
     fclose(ptr);
-    return 1;
+}
+
+void write_delta_network(char* filename, Network* network) {
+    // Not Implemented
 }
