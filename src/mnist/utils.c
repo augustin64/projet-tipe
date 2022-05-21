@@ -11,7 +11,7 @@
 Contient un ensemble de fonctions utiles pour le débogage
 */
 void help(char* call) {
-    printf("Usage: %s ( print-poids | print-biais | creer-reseau ) [OPTIONS]\n\n", call);
+    printf("Usage: %s ( print-poids | print-biais | creer-reseau | patch-network ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
     printf("\tprint-poids:\n");
     printf("\t\t--reseau | -r [FILENAME]\tFichier contenant le réseau de neurones.\n");
@@ -21,7 +21,10 @@ void help(char* call) {
     printf("\t\t--labels | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\tcreer-reseau:\n");
     printf("\t\t--out    | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
-    printf("\t\t--number | -n [int]\tNuméro à privilégier\n");
+    printf("\t\t--number | -n [int]\tNuméro à privilégier.\n");
+    printf("\tpatch-network:\n");
+    printf("\t\t--network | -n [FILENAME]\tFichier contenant le réseau de neurones.\n");
+    printf("\t\t--delta   | -d [FILENAME]\tFichier de patch à utiliser.\n");
 }
 
 
@@ -115,6 +118,18 @@ void create_network(char* filename, int sortie) {
 }
 
 
+void patch_stored_network(char* network_filename, char* delta_filename) {
+    // Apply patch to a network stored in a file
+    Network* network = read_network(network_filename);
+    Network* delta = read_delta_network(delta_filename);
+
+    patch_network(network, delta, 1);
+
+    write_network(network_filename, network);
+    deletion_of_network(network);
+    deletion_of_network(delta);
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -193,6 +208,32 @@ int main(int argc, char* argv[]) {
             labels = "data/mnist/train-labels-idx1-ubyte";
         }
         count_labels(labels);
+        exit(0);
+    }  else if (! strcmp(argv[1], "patch-network")) {
+        char* network = NULL;
+        char* delta = NULL;
+        int i = 2;
+        while (i < argc) {
+            if ((! strcmp(argv[i], "--network"))||(! strcmp(argv[i], "-n"))) {
+                network = argv[i+1];
+                i += 2;
+            } else if ((! strcmp(argv[i], "--delta"))||(! strcmp(argv[i], "-d"))) {
+                delta = argv[i+1];
+                i += 2;
+            } else {
+                printf("%s : Argument non reconnu\n", argv[i]);
+                i++;
+            }
+        }
+        if (!network) {
+            printf("--network: Argument obligatoire.\n");
+            exit(1);
+        }
+        if (!delta) {
+            printf("--delta: Argument obligatoire.\n");
+            exit(1);
+        }
+        patch_stored_network(network, delta);
         exit(0);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

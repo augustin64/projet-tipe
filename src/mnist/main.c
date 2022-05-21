@@ -217,8 +217,10 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
         if (delta != NULL)
             write_delta_network(delta, delta_network);
     }
-    if (delta != NULL)
+    write_network(out, network);
+    if (delta != NULL) {
         deletion_of_network(delta_network);
+    }
     deletion_of_network(network);
     free(train_parameters);
     free(tid);
