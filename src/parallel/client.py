@@ -136,7 +136,10 @@ def __main__():
 
     download_network()
     # train_shared s'appelle récursivement sur lui même jusqu'à la fin du programme
-    train_shared(dataset, start, nb_elem, epochs=1, out=DELTA)
+    try:
+        train_shared(dataset, start, nb_elem, epochs=1, out=DELTA)
+    except requests.exceptions.ConnectionError:
+        print("Host disconnected")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@
 Description des structures.
 """
 import os
-import sys
 import time
 import subprocess
 
@@ -104,7 +103,7 @@ class Training:
         self.cur_image = 0
         if self.cur_batch >= self.batchs:
             print("Done.")
-            sys.exit()
+            os._exit(0)
 
 
     def patch(self):
@@ -118,7 +117,7 @@ class Training:
         with open(self.reseau + ".lock", "w", encoding="utf8") as file:
             file.write("")
 
-        if not os.path.isfile("out/main"):
+        if not os.path.isfile("out/utils"):
             subprocess.call(["./make.sh", "build", "utils"])
         subprocess.call(
         [
