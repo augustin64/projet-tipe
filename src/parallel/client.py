@@ -108,7 +108,7 @@ def train_shared(dataset, start, nb_elem, epochs=1, out=DELTA):
 
     # On compile out/main si il n'existe pas encore
     if not os.path.isfile("out/main"):
-        subprocess.call(["make.sh", "main"])
+        subprocess.call(["./make.sh", "main"])
 
     # Entraînement du réseau
     subprocess.call(
