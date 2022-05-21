@@ -6,18 +6,19 @@ import os
 import time
 import random
 import subprocess
-from secrets import token_urlsafe
 from threading import Thread
+from secrets import token_urlsafe
 
 from flask import Flask, request, send_from_directory, session
 
-from structures import clients, Client, NoMoreJobAvailableError, TryLaterError, Training
+from structures import (Client, NoMoreJobAvailableError, Training,
+                        TryLaterError, clients)
 
 # Définitions de variables
 DATASET = "mnist-train"
 TEST_SET = "mnist-t10k"
 SECRET = str(random.randint(1000, 10000))
-CACHE = ".cache"  # À remplacer avec un chemin absolu
+CACHE = "/tmp/parallel/app_cache"  # À remplacer avec un chemin absolu
 BATCHS = 10
 RESEAU = os.path.join(CACHE, "reseau.bin")
 
@@ -28,13 +29,13 @@ os.makedirs(CACHE, exist_ok=True)
 if not os.path.isfile(RESEAU):
     if not os.path.isfile("out/main"):
         subprocess.call(["./make.sh", "build", "main"])
-    subprocess.call
-    ([
+    subprocess.call(
+    [
         "out/main", "train",
         "--epochs", "0",
         "--images", "data/mnist/train-images-idx3-ubyte",
         "--labels", "data/mnist/train-labels-idx1-ubyte",
-        "--out", RESEAU,
+        "--out", RESEAU
     ])
     print(f" * Created {RESEAU}")
 else:

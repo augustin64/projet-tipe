@@ -3,6 +3,7 @@
 Description des structures.
 """
 import os
+import sys
 import time
 import subprocess
 
@@ -101,6 +102,9 @@ class Training:
         ])
         self.cur_batch += 1
         self.cur_image = 0
+        if self.cur_batch >= self.batchs:
+            print("Done.")
+            sys.exit()
 
 
     def patch(self):
@@ -116,8 +120,8 @@ class Training:
 
         if not os.path.isfile("out/main"):
             subprocess.call(["./make.sh", "build", "utils"])
-        subprocess.call
-        ([
+        subprocess.call(
+        [
             "out/utils", "patch-network",
             "--network", self.reseau,
             "--delta", self.delta,

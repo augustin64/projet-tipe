@@ -12,7 +12,7 @@ import psutil
 import requests
 
 # Définition de constantes
-CACHE = ".cache"  # Replace with an absolute path
+CACHE = "/tmp/parallel/client_cache"  # Replace with an absolute path
 DELTA = os.path.join(CACHE, "delta_shared.bin")
 RESEAU = os.path.join(CACHE, "reseau_shared.bin")
 SECRET = input("SECRET : ")
