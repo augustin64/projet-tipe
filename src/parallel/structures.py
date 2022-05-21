@@ -90,7 +90,7 @@ class Training:
         Teste les performances du réseau avant le batch suivant
         """
         if not os.path.isfile("out/main"):
-            subprocess.call(["./make.sh", "main"])
+            subprocess.call(["./make.sh", "build", "main"])
 
         subprocess.call(
         [
@@ -115,7 +115,7 @@ class Training:
             file.write("")
 
         if not os.path.isfile("out/main"):
-            subprocess.call(["./make.sh", "utils"])
+            subprocess.call(["./make.sh", "build", "utils"])
         subprocess.call
         ([
             "out/utils", "patch-network",

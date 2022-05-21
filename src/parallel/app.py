@@ -27,7 +27,7 @@ os.makedirs(CACHE, exist_ok=True)
 # On crée un réseau aléatoire si il n'existe pas encore
 if not os.path.isfile(RESEAU):
     if not os.path.isfile("out/main"):
-        subprocess.call(["./make.sh", "main"])
+        subprocess.call(["./make.sh", "build", "main"])
     subprocess.call
     ([
         "out/main", "train",
