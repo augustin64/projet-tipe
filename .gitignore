@@ -6,3 +6,4 @@
 .test-cache
 .vscode
 *.bin
+app-secret

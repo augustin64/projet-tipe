@@ -47,6 +47,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = token_urlsafe(40)
 print(f" * Secret: {SECRET}")
 
+with open("app-secret", "w", encoding="utf8") as file:
+    file.write(SECRET)
+
 
 @app.route("/authenticate", methods=["POST"])
 def authenticate():

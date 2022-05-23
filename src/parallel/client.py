@@ -15,8 +15,16 @@ import requests
 CACHE = "/tmp/parallel/client_cache"  # Replace with an absolute path
 DELTA = os.path.join(CACHE, "delta_shared.bin")
 RESEAU = os.path.join(CACHE, "reseau_shared.bin")
-SECRET = input("SECRET : ")
-HOST = input("HOST : ")
+
+if len(sys.argv) > 1:
+    HOST = sys.argv[1]
+else:
+    HOST = input("HOST : ")
+
+if len(sys.argv) > 2:
+    SECRET = sys.argv[2]
+else:
+    SECRET = input("SECRET : ")
 
 session = requests.Session()
 os.makedirs(CACHE, exist_ok=True)
