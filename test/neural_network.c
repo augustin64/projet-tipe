@@ -24,5 +24,6 @@ int main() {
     write_network(".test-cache/random_network.bin", network);
 
     printf("OK\n");
+    deletion_of_network(network);
     return 0;
 }

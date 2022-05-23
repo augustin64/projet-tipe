@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "../src/mnist/neuron_io.c"
+#include "../src/mnist/neural_network.c"
 
 
 Neuron* creer_neuron(int nb_sortants) {
@@ -70,5 +71,7 @@ int main() {
     printf("Vérification de l'accès en lecture\n");
     Network* network2 = read_network(".test-cache/neuron_io.bin");
     printf("OK\n");
+    deletion_of_network(network);
+    deletion_of_network(network2);
     return 0;
 }

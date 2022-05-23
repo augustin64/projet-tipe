@@ -89,9 +89,11 @@ void deletion_of_network(Network* network) {
                 free(neuron->weights);
                 free(neuron->back_weights);
                 free(neuron->last_back_weights);
+                free(neuron);
             }
         }
         free(layer->neurons); // On libère enfin la liste des neurones de la couche
+        free(network->layers[i]);
     }
     free(network->layers);
     free(network); // Pour finir, on libère le réseau neuronal contenant la liste des couches

@@ -249,7 +249,7 @@ float** recognize(char* modele, char* entree) {
         }
     }
     deletion_of_network(network);
-
+    free(parameters);
     return results;
 }
 
@@ -283,6 +283,7 @@ void print_recognize(char* modele, char* entree, char* sortie) {
             } else
                 printf("Probabilité %d: %f\n", j, resultats[i][j]);
         }
+        free(resultats[i]);
         if (! strcmp(sortie, "json")) {
             if (i+1 < nb_images) {
                 printf("],\n");
@@ -291,10 +292,11 @@ void print_recognize(char* modele, char* entree, char* sortie) {
             }
         }
     }
+    free(resultats);
+    free(parameters);
     if (! strcmp(sortie, "json")) {
         printf("}\n");
     }
-
 }
 
 void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails) {
@@ -320,8 +322,11 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
             printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_last_layer));
             print_image(width, height, images[i], resultats[i]);
         }
+        free(resultats[i]);
     }
     printf("%d Images\tAccuracy: %0.1f%%\n", nb_images, accuracy*100);
+    free(parameters);
+    free(resultats);
 }
 
 
