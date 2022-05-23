@@ -32,7 +32,7 @@ class Client:
         """
         Donne un travail au client
         """
-        if training.nb_images == training.cur_image:
+        if training.nb_images <= training.computed_images:
             if training.batchs == training.cur_batch:
                 raise NoMoreJobAvailableError
             raise TryLaterError
@@ -54,6 +54,8 @@ class Training:
         self.batchs = batchs
         self.cur_batch = 1
         self.cur_image = 0
+        self.computed_images = 0
+        self.lock_test = False
         self.dataset = dataset
         self.test_set = test_set
         self.cache = cache
@@ -89,6 +91,10 @@ class Training:
         """
         Teste les performances du réseau avant le batch suivant
         """
+        if self.lock_test:
+            return
+        
+        self.lock_test = True
         if not os.path.isfile("out/main"):
             subprocess.call(["./make.sh", "build", "main"])
 
@@ -101,9 +107,13 @@ class Training:
         ])
         self.cur_batch += 1
         self.cur_image = 0
+        self.computed_images = 0
         if self.cur_batch >= self.batchs:
             print("Done.")
             os._exit(0)
+        
+        self.lock_test = False
+        return
 
 
     def patch(self):

@@ -107,7 +107,7 @@ def post_network():
 
     request.files["file"].save(training.delta)
     training.patch()
-
+    training.computed_images += clients[token].performance
     # Préparation de la réponse
     data = {}
     data["status"] = "ok"
@@ -132,7 +132,7 @@ def post_network():
         data["nb_elem"] = 0
         data["start"] = 0
         data["instruction"] = "sleep"
-        data["sleep_time"] = 0.2
+        data["sleep_time"] = 0.02
 
     return data
 
