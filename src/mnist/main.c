@@ -204,9 +204,9 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
             for(int j=0; j < nb_threads; j++ ) {
                 pthread_join( tid[j], NULL );
                 accuracy += train_parameters[j]->accuracy / (float) nb_images_total;
-                patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 if (delta != NULL)
                     patch_delta(delta_network, train_parameters[j]->network, train_parameters[j]->nb_images);
+                patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 deletion_of_network(train_parameters[j]->network);
                 free(train_parameters[j]);
             }

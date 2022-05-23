@@ -88,7 +88,7 @@ def authenticate():
         data["nb_elem"] = 0
         data["start"] = 0
         data["instruction"] = "sleep"
-        data["sleep_time"] = 1
+        data["sleep_time"] = 0.2
 
     return data
 
@@ -132,7 +132,7 @@ def post_network():
         data["nb_elem"] = 0
         data["start"] = 0
         data["instruction"] = "sleep"
-        data["sleep_time"] = 1
+        data["sleep_time"] = 0.2
 
     return data
 
