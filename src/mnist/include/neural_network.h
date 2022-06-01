@@ -27,4 +27,7 @@ void patch_delta(Network* network, Network* delta, uint32_t nb_modifs);
 Network* copy_network(Network* network);
 float loss_computing(Network* network, int numero_voulu);
 
+#ifdef __CUDACC__
+Network* copy_network_cuda(Network* network);
+#endif
 #endif

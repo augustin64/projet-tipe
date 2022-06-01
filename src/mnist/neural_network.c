@@ -11,20 +11,24 @@
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 // Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
 #define LEARNING_RATE 0.5
-//Retourne un nombre aléatoire entre 0 et 1
+// Retourne un nombre aléatoire entre 0 et 1
 #define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
 //Coefficient leaking ReLU
 #define COEFF_LEAKY_RELU 0.2
 #define MAX_RESEAU 100000
-#define INT_MIN -2147483648
 
 #define PRINT_POIDS false
 #define PRINT_BIAIS false
 
+#ifndef __CUDACC__
+// The functions and macros below are already defined when using NVCC
+#define INT_MIN -2147483648
 
 float max(float a, float b){
     return a < b ? b : a;
 }
+
+#endif
 
 float sigmoid(float x){
     return 1/(1 + exp(-x));
@@ -128,7 +132,7 @@ void forward_propagation(Network* network) {
 
             if (i < network->nb_layers-1) { // Pour toutes les couches sauf la dernière on utilise la fonction leaky_ReLU (a*z si z<0,  z sinon)
                 neuron->z = leaky_ReLU(neuron->z);  
-            } else { // Pour la dernière couche on utilise la fonction softmax
+            } else { // Pour la dernière couche on utilise la fonction soft max
                 max_z = max(max_z, neuron->z);
             }
         }
@@ -390,3 +394,48 @@ float loss_computing(Network* network, int numero_voulu){
     
     return erreur;
 }
+
+#ifdef __CUDACC__
+
+Network* copy_network_cuda(Network* network) {
+    // Renvoie une copie modifiable d'un réseau de neurones
+    Network* network2 = NULL;
+    Layer* layer;
+    Neuron* neuron1;
+    Neuron* neuron;
+
+    cudaMalloc((void**)&network2, sizeof(Network));
+
+    network2->nb_layers = network->nb_layers;
+    cudaMalloc((void***)&network2->layers, sizeof(Layer*)*network->nb_layers);
+    for (int i=0; i < network2->nb_layers; i++) {
+        cudaMalloc((void**)&layer, sizeof(Layer));
+        layer->nb_neurons = network->layers[i]->nb_neurons;
+        cudaMalloc((void***)&layer->neurons, sizeof(Neuron*)*layer->nb_neurons);
+        for (int j=0; j < layer->nb_neurons; j++) {
+            cudaMalloc((void**)neuron, sizeof(Neuron));
+
+            neuron1 = network->layers[i]->neurons[j];
+            neuron->bias = neuron1->bias;
+            neuron->z = neuron1->z;
+            neuron->back_bias = neuron1->back_bias;
+            neuron->last_back_bias = neuron1->last_back_bias;
+            if (i != network2->nb_layers-1) {
+                (void)network2->layers[i+1]->nb_neurons;
+                cudaMalloc((float**)&neuron->weights, sizeof(float)*network->layers[i+1]->nb_neurons);
+                cudaMalloc((float**)&neuron->back_weights, sizeof(float)*network->layers[i+1]->nb_neurons);
+                cudaMalloc((float**)&neuron->last_back_weights, sizeof(float)*network->layers[i+1]->nb_neurons);
+                for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
+                    neuron->weights[k] = neuron1->weights[k];
+                    neuron->back_weights[k] = neuron1->back_weights[k];
+                    neuron->last_back_weights[k] = neuron1->last_back_weights[k];
+                }
+            }
+            layer->neurons[j] = neuron;
+        }
+    network2->layers[i] = layer;
+    }
+    return network2;
+}
+
+#endif
