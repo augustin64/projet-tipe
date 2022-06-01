@@ -1,65 +1,64 @@
 #!/bin/bash
-
-FLAGS="-std=c99 -lm -lpthread"
+# C compiler can be defined with the $CC environment variable
 OUT="out"
 
 set -e
 
-if [[ $1 == "build" ]]; then
+build () {
 	mkdir -p "$OUT"
-	[[ $2 ]] || set "$1" "main"
-	if [[ $2 == "main" ]]; then
+	[[ $1 ]] || set "main"
+	if [[ $1 == "main" ]]; then
 		echo "Compilation de src/mnist/main.c"
-		gcc src/mnist/main.c -o "$OUT/main" $FLAGS
+		$CC src/mnist/main.c -o "$OUT/main" $FLAGS
 		echo "Fait."
-		exit 0
-	elif [[ $2 == "preview" ]]; then
+		return 0
+	elif [[ $1 == "preview" ]]; then
 		echo "Compilation de src/mnist/preview.c"
-		gcc src/mnist/preview.c -o "$OUT/preview_mnist" $FLAGS
+		$CC src/mnist/preview.c -o "$OUT/preview_mnist" $FLAGS
 		echo "Fait."
-		exit 0
-	elif [[ $2 == "test" ]]; then
+		return 0
+	elif [[ $1 == "test" ]]; then
 		for i in "test/"*".c"; do
 			echo "Compilation de $i"
-			gcc "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
+			$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
 			echo "Fait."
 		done
-		exit 0
-	elif [[ $2 == "utils" ]]; then
+		return 0
+	elif [[ $1 == "utils" ]]; then
 		echo "Compilation de src/mnist/utils.c"
-		gcc "src/mnist/utils.c" -o "$OUT/utils" $FLAGS
+		$CC "src/mnist/utils.c" -o "$OUT/utils" $FLAGS
 		echo "Fait."
-		exit 0
+		return 0
 	else
-		$0 build main
-		$0 build preview
-		$0 build test
-		$0 build utils
-		exit 0
+		build main
+		build preview
+		build test
+		build utils
+		return 0
 	fi
-fi
+}
 
-if [[ $1 == "preview" ]]; then
-	if [[ ! $2 ]]; then
-		$0 build preview
-		exit 0
-	elif [[ $2 == "train" ]]; then
+preview () {
+	if [[ ! $1 ]]; then
+		build preview
+		return 0
+	elif [[ $1 == "train" ]]; then
 		[[ -f "$OUT/preview_mnist" ]] || $0 build preview
 		"$OUT/preview_mnist" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
-		exit 0
-	elif [[ $2 == "t10k" ]]; then
+		return 0
+	elif [[ $1 == "t10k" ]]; then
 		[[ -f "$OUT/preview_mnist" ]] || $0 build preview
 		"$OUT/preview_mnist" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
-		exit 0
+		return 0
 	fi
-fi
+}
 
-if [[ $1 == "test" ]]; then
-	if [[ ! $2 ]]; then
-		$0 build test
-		exit 0
-	elif [[ $2 == "run" ]]; then
-		$0 build test
+test () {
+	if [[ ! $1 ]]; then
+		build test
+		return 0
+	elif [[ $1 == "run" ]]; then
+		build test
 		mkdir -p .test-cache
 		for i in "$OUT/test_"*; do
 			echo "--- $i ---"
@@ -70,72 +69,92 @@ if [[ $1 == "test" ]]; then
 			chmod +x "$i"
 			"$i" "$OUT" "$0"
 		done
-		exit 0
+		return 0
 	fi
-fi
+}
 
-if [[ $1 == "train" ]]; then
-	[[ -f "$OUT/main" ]] || $0 build main
-	[[ $2 ]] || set -- "$1" "train"
-	[[ $3 == "-r" || $3 == "--recover" ]] && RECOVER="-r .cache/reseau.bin"
+train () {
+	[[ -f "$OUT/main" ]] || build main
+	[[ $1 ]] || set -- "train"
+	[[ $2 == "-r" || $2 == "--recover" ]] && RECOVER="-r .cache/reseau.bin"
 	mkdir -p .cache
 	"$OUT/main" train \
-		--images "data/mnist/$2-images-idx3-ubyte" \
-		--labels "data/mnist/$2-labels-idx1-ubyte" \
+		--images "data/mnist/$1-images-idx3-ubyte" \
+		--labels "data/mnist/$1-labels-idx1-ubyte" \
 		--out ".cache/reseau.bin" \
 		$RECOVER
-	exit 0
-fi
+	return 0
+}
 
-if [[ $1 == "test_reseau" ]]; then
-	[[ -f "$OUT/main" ]] || $0 build main
-	[[ $2 ]] || set -- "$1" "train"
-	[[ -f ".cache/reseau.bin" ]] || $0 train train
+test_reseau () {
+	[[ -f "$OUT/main" ]] || build main
+	[[ $1 ]] || set -- "train"
+	[[ -f ".cache/reseau.bin" ]] || train train
 	"$OUT/main" test \
-		--images "data/mnist/$2-images-idx3-ubyte" \
-		--labels "data/mnist/$2-labels-idx1-ubyte" \
+		--images "data/mnist/$1-images-idx3-ubyte" \
+		--labels "data/mnist/$1-labels-idx1-ubyte" \
 		--modele ".cache/reseau.bin"
-	exit 0
-fi
+	return 0
+}
 
-if [[ $1 == "recognize" ]]; then
-	if [[ $2 ]]; then
-		[[ $3 ]] || set -- "$1" "$2" "text"
-		[[ -f "$OUT/main" ]] || $0 build main
-		[[ -f ".cache/reseau.bin" ]] || $0 train train
+recognize () {
+	if [[ $1 ]]; then
+		[[ $2 ]] || set -- "$2" "text"
+		[[ -f "$OUT/main" ]] || build main
+		[[ -f ".cache/reseau.bin" ]] || train train
 		"$OUT/main" recognize \
 			--modele ".cache/reseau.bin" \
-			--in "$2" \
-			--out "$3"
-		exit 0
+			--in "$1" \
+			--out "$2"
+		return 0
 	else
 		echo "Pas de fichier d'entrée spécifié. Abandon"
-		exit 1
+		return 1
 	fi
-fi
+}
 
-if [[ $1 == "utils" ]]; then
-	[[ -f "$OUT/utils" ]] || $0 build utils
-	"$OUT/utils" ${*:2}
-	exit 0
-fi
+utils () {
+	[[ -f "$OUT/utils" ]] || build utils
+	"$OUT/utils" ${*:1}
+	return 0
+}
 
-if [[ $1 == "webserver" ]]; then
-	[[ -f "$OUT/main" ]] || $0 build main
-	[[ -f ".cache/reseau.bin" ]] || $0 train train
+webserver () {
+	[[ -f "$OUT/main" ]] || build main
+	[[ -f ".cache/reseau.bin" ]] || train train
 	FLASK_APP="src/webserver/app.py" flask run
-	exit 0
+	return 0
+}
+
+usage () {
+	echo "Usage:"
+	echo -e "\t$0 build       ( main | preview | train | utils | all )\n"
+	echo -e "\t$0 train       ( train | t10k ) ( -r | --recover )"
+	echo -e "\t$0 preview     ( train | t10k )"
+	echo -e "\t$0 test_reseau ( train | t10k )\n"
+	echo -e "\t$0 recognize   [FILENAME] ( text | json )"
+	echo -e "\t$0 utils       ( help )\n"
+	echo -e "\t$0 test        ( run )"
+	echo -e "\t$0 webserver\n"
+	echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants\n"
+	echo -e "La plupart des options listées ici sont juste faites pour une utilisation plus rapide des commandes fréquentes,"
+	echo -e "d'autres options sont uniquement disponibles via les fichiers binaires dans '$OUT'"
+}
+
+
+[[ $CC ]] || CC=gcc
+if [[ "$CC" == "gcc" ]]; then
+	FLAGS="-std=c99 -lm -lpthread" # GCC flags
+elif [[ "$CC" == "nvcc" ]]; then
+	FLAGS="" # NVCC flags
+else
+	FLAGS=""
 fi
 
-echo "Usage:"
-echo -e "\t$0 build       ( main | preview | train | utils | all )\n"
-echo -e "\t$0 train       ( train | t10k ) ( -r | --recover )"
-echo -e "\t$0 preview     ( train | t10k )"
-echo -e "\t$0 test_reseau ( train | t10k )\n"
-echo -e "\t$0 recognize   [FILENAME] ( text | json )"
-echo -e "\t$0 utils       ( help )\n"
-echo -e "\t$0 test        ( run )"
-echo -e "\t$0 webserver\n"
-echo -e "Les fichiers de test sont recompilés à chaque exécution,\nles autres programmes sont compilés automatiquement si manquants\n"
-echo -e "La plupart des options listées ici sont juste faites pour une utilisation plus rapide des commandes fréquentes,"
-echo -e "d'autres options sont uniquement disponibles via les fichiers binaires dans '$OUT'"
+if [[ $1 && $(type "$1") = *"is a shell function"* || $(type "$1") == *"est une fonction"* ]]; then
+	$1 ${*:2} # Call the function
+else
+	usage
+	echo $(type "$1")
+	exit 1
+fi;
