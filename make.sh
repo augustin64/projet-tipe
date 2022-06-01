@@ -4,6 +4,14 @@ OUT="out"
 
 set -e
 
+compile_cuda () {
+	# nvcc will compile .c files as if they did not have
+	# CUDA program parts so we need to copy them to .cu
+	cp $1 "$1"u
+	nvcc "$1"u ${*:1}
+	rm "$1"u
+}
+
 build () {
 	mkdir -p "$OUT"
 	[[ $1 ]] || set "main"
@@ -146,6 +154,7 @@ usage () {
 if [[ "$CC" == "gcc" ]]; then
 	FLAGS="-std=c99 -lm -lpthread" # GCC flags
 elif [[ "$CC" == "nvcc" ]]; then
+	CC=compile_cuda
 	FLAGS="" # NVCC flags
 else
 	FLAGS=""
