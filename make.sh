@@ -7,9 +7,10 @@ set -e
 compile_cuda () {
 	# nvcc will compile .c files as if they did not have
 	# CUDA program parts so we need to copy them to .cu
-	cp $1 "$1"u
+	mv $1 "$1"u
+	echo "" > "$1" # If we compile file.cu, file.c needs to exist to, even if it is empty
 	nvcc "$1"u ${*:1}
-	rm "$1"u
+	mv "$1"u "$1"
 }
 
 build () {
@@ -152,7 +153,7 @@ usage () {
 
 [[ $CC ]] || CC=gcc
 if [[ "$CC" == "gcc" ]]; then
-	FLAGS="-std=c99 -lm -lpthread" # GCC flags
+	FLAGS="-std=c99 -lm -lpthread -Wall -Wextra" # GCC flags
 elif [[ "$CC" == "nvcc" ]]; then
 	CC=compile_cuda
 	FLAGS="" # NVCC flags
