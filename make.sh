@@ -151,7 +151,7 @@ else
 	FLAGS=""
 fi
 
-if [[ $1 && $(type "$1") = *"is a shell function"* || $(type "$1") == *"est une fonction"* ]]; then
+if [[ $1 && $(type "$1") = *"is a"*"function"* || $(type "$1") == *"est une fonction"* ]]; then
 	$1 ${*:2} # Call the function
 else
 	usage
