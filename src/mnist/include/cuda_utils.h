@@ -6,5 +6,6 @@
 
 int*** copy_images_cuda(int*** images, int nb_images, int width, int height);
 unsigned int* copy_labels_cuda(unsigned int* labels);
+void check_cuda_compatibility();
 
 #endif

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "include/mnist.h"
 
 uint32_t swap_endian(uint32_t val) {
     val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);

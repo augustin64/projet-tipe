@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "mnist.c"
+#include "include/preview.h"
 
 
 // Prévisualise un chiffre écrit à la main
@@ -11,8 +12,8 @@
 void print_image(unsigned int width, unsigned int height, int** image) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
-    for (int i=0; i < height; i++) {
-        for (int j=0; j < width; j++) {
+    for (int i=0; i < (int)height; i++) {
+        for (int j=0; j < (int)width; j++) {
             printf("%c", tab[image[i][j]/52]);
         }
         printf("\n");

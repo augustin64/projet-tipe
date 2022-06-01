@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "include/neuron.h"
+#include "include/neural_network.h"
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 // Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
@@ -404,16 +405,16 @@ Network* copy_network_cuda(Network* network) {
     Neuron* neuron1;
     Neuron* neuron;
 
-    cudaMalloc((void**)&network2, sizeof(Network));
+    cudaMalloc(&network2, (size_t)sizeof(Network));
 
     network2->nb_layers = network->nb_layers;
-    cudaMalloc((void***)&network2->layers, sizeof(Layer*)*network->nb_layers);
+    cudaMalloc(&network2->layers, (size_t)sizeof(Layer*)*network->nb_layers);
     for (int i=0; i < network2->nb_layers; i++) {
-        cudaMalloc((void**)&layer, sizeof(Layer));
+        cudaMalloc(&layer, (size_t)sizeof(Layer));
         layer->nb_neurons = network->layers[i]->nb_neurons;
-        cudaMalloc((void***)&layer->neurons, sizeof(Neuron*)*layer->nb_neurons);
+        cudaMalloc(&layer->neurons, (size_t)sizeof(Neuron*)*layer->nb_neurons);
         for (int j=0; j < layer->nb_neurons; j++) {
-            cudaMalloc((void**)neuron, sizeof(Neuron));
+            cudaMalloc(&neuron, (size_t)sizeof(Neuron));
 
             neuron1 = network->layers[i]->neurons[j];
             neuron->bias = neuron1->bias;
@@ -422,9 +423,10 @@ Network* copy_network_cuda(Network* network) {
             neuron->last_back_bias = neuron1->last_back_bias;
             if (i != network2->nb_layers-1) {
                 (void)network2->layers[i+1]->nb_neurons;
-                cudaMalloc((float**)&neuron->weights, sizeof(float)*network->layers[i+1]->nb_neurons);
-                cudaMalloc((float**)&neuron->back_weights, sizeof(float)*network->layers[i+1]->nb_neurons);
-                cudaMalloc((float**)&neuron->last_back_weights, sizeof(float)*network->layers[i+1]->nb_neurons);
+                cudaMalloc(&neuron->weights,            (size_t)sizeof(float)*network->layers[i+1]->nb_neurons);
+                cudaMalloc(&neuron->back_weights,       (size_t)sizeof(float)*network->layers[i+1]->nb_neurons);
+                cudaMalloc(&neuron->last_back_weights,  (size_t)sizeof(float)*network->layers[i+1]->nb_neurons);
+
                 for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
                     neuron->weights[k] = neuron1->weights[k];
                     neuron->back_weights[k] = neuron1->back_weights[k];

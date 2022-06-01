@@ -9,24 +9,16 @@
 #include "neuron_io.c"
 #include "mnist.c"
 
+#include "include/main.h"
+
 #define EPOCHS 10
 #define BATCHES 100
 
 #ifdef __CUDACC__
+#   warning compiling for CUDA compatible device only
 #   include "cuda_utils.cu"
 #   define MAX_CUDA_THREADS 1024 // from NVIDIA documentation
 #endif
-
-typedef struct TrainParameters {
-    Network* network;
-    int*** images;
-    int* labels;
-    int start;
-    int nb_images;
-    int height;
-    int width;
-    float accuracy;
-} TrainParameters;
 
 
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {
@@ -140,7 +132,8 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     float accuracy;
 
     #ifdef __CUDACC__
-    printf("Utilisation du GPU\n");
+    printf("Testing compatibility...\n");
+    check_cuda_compatibility();
     int nb_threads = MAX_CUDA_THREADS;
     #else
     printf("Pas d'utilisation du GPU\n");
