@@ -12,6 +12,10 @@
 #define EPOCHS 10
 #define BATCHES 100
 
+#ifdef __CUDACC__
+#   include "cuda_utils.cu"
+#   define MAX_CUDA_THREADS 1024 // from NVIDIA documentation
+#endif
 
 typedef struct TrainParameters {
     Network* network;
@@ -119,6 +123,8 @@ void* train_images(void* parameters) {
     }
     free(sortie);
     param->accuracy = accuracy;
+
+    return NULL;
 }
 
 
@@ -129,13 +135,18 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
 
     //int* repartition = malloc(sizeof(int)*layers);
     int nb_neurons_last_layer = 10;
-    int repartition[2] = {784, nb_neurons_last_layer};
+    int repartition[2] = {neurons, nb_neurons_last_layer};
 
     float accuracy;
 
+    #ifdef __CUDACC__
+    printf("Utilisation du GPU\n");
+    int nb_threads = MAX_CUDA_THREADS;
+    #else
+    printf("Pas d'utilisation du GPU\n");
     int nb_threads = get_nprocs();
     pthread_t *tid = (pthread_t *)malloc(nb_threads * sizeof(pthread_t));
-    //generer_repartition(layers, repartition);
+    #endif
 
     /*
     * On repart d'un réseau déjà créée stocké dans un fichier
@@ -174,6 +185,11 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     int*** images = read_mnist_images(image_file);
     unsigned int* labels = read_mnist_labels(label_file);
 
+    #ifdef __CUDACC__
+    int*** images_cuda = copy_images_cuda(images, nb_images_total, width, height);
+    unsigned int* labels_cuda = copy_labels_cuda(labels);
+    #endif
+
     if (nb_images_to_process != -1) {
         nb_images_total = nb_images_to_process;
     }
@@ -199,10 +215,20 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                 }
                 nb_remaining_images -= train_parameters[j]->nb_images;
 
+                #ifdef __CUDACC__
+                // Création des threads sur le GPU
+                #else
+                // Création des threads sur le CPU
                 pthread_create( &tid[j], NULL, train_images, (void*) train_parameters[j]);
+                #endif
             }
             for(int j=0; j < nb_threads; j++ ) {
+                #ifdef __CUDACC__
+                // On join les threads créés sur le GPU
+                #else
+                // On join les threads créés sur le CPU
                 pthread_join( tid[j], NULL );
+                #endif
                 accuracy += train_parameters[j]->accuracy / (float) nb_images_total;
                 if (delta != NULL)
                     patch_delta(delta_network, train_parameters[j]->network, train_parameters[j]->nb_images);
@@ -223,12 +249,17 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     }
     deletion_of_network(network);
     free(train_parameters);
+    #ifdef __CUDACC__
+    // On libère les espaces mémoires utilisés sur le GPU
+    #else
+    // On libère les espaces mémoire utilisés spécialement sur le CPU
     free(tid);
+    #endif
 }
 
 float** recognize(char* modele, char* entree) {
     Network* network = read_network(modele);
-    Layer* derniere_layer = network->layers[network->nb_layers-1];
+    Layer* last_layer = network->layers[network->nb_layers-1];
 
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
@@ -239,13 +270,13 @@ float** recognize(char* modele, char* entree) {
     float** results = (float**)malloc(sizeof(float*)*nb_images);
 
     for (int i=0; i < nb_images; i++) {
-        results[i] = (float*)malloc(sizeof(float)*derniere_layer->nb_neurons);
+        results[i] = (float*)malloc(sizeof(float)*last_layer->nb_neurons);
 
         write_image_in_network(images[i], network, height, width);
         forward_propagation(network);
 
-        for (int j=0; j < derniere_layer->nb_neurons; j++) {
-            results[i][j] = derniere_layer->neurons[j]->z;
+        for (int j=0; j < last_layer->nb_neurons; j++) {
+            results[i][j] = last_layer->neurons[j]->z;
         }
     }
     deletion_of_network(network);
@@ -262,7 +293,7 @@ void print_recognize(char* modele, char* entree, char* sortie) {
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
 
-    float** resultats = recognize(modele, entree);
+    float** results = recognize(modele, entree);
 
     if (! strcmp(sortie, "json")) {
         printf("{\n");
@@ -275,15 +306,15 @@ void print_recognize(char* modele, char* entree, char* sortie) {
 
         for (int j=0; j < nb_last_layer; j++) {
             if (! strcmp(sortie, "json")) {
-                printf("%f", resultats[i][j]);
+                printf("%f", results[i][j]);
 
                 if (j+1 < nb_last_layer) {
                     printf(", ");
                 }
             } else
-                printf("Probabilité %d: %f\n", j, resultats[i][j]);
+                printf("Probabilité %d: %f\n", j, results[i][j]);
         }
-        free(resultats[i]);
+        free(results[i]);
         if (! strcmp(sortie, "json")) {
             if (i+1 < nb_images) {
                 printf("],\n");
@@ -292,7 +323,7 @@ void print_recognize(char* modele, char* entree, char* sortie) {
             }
         }
     }
-    free(resultats);
+    free(results);
     free(parameters);
     if (! strcmp(sortie, "json")) {
         printf("}\n");
@@ -311,22 +342,22 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
     int height = parameters[2];
     int*** images = read_mnist_images(fichier_images);
 
-    float** resultats = recognize(modele, fichier_images);
+    float** results = recognize(modele, fichier_images);
     unsigned int* labels = read_mnist_labels(fichier_labels);
     float accuracy = 0.;
 
     for (int i=0; i < nb_images; i++) {
-        if (indice_max(resultats[i], nb_last_layer) == (int)labels[i]) {
+        if (indice_max(results[i], nb_last_layer) == (int)labels[i]) {
             accuracy += 1. / (float)nb_images;
         } else if (preview_fails) {
-            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(resultats[i], nb_last_layer));
-            print_image(width, height, images[i], resultats[i]);
+            printf("--- Image %d, %d --- Prévision: %d ---\n", i, labels[i], indice_max(results[i], nb_last_layer));
+            print_image(width, height, images[i], results[i]);
         }
-        free(resultats[i]);
+        free(results[i]);
     }
     printf("%d Images\tAccuracy: %0.1f%%\n", nb_images, accuracy*100);
     free(parameters);
-    free(resultats);
+    free(results);
 }
 
 
