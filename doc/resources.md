@@ -10,3 +10,11 @@
 - [Tobias Hill: Gradient Descent](https://towardsdatascience.com/part-2-gradient-descent-and-backpropagation-bf90932c066a)
 
 ## Convolutional Neural Network
+
+## Jeux de données
+- [MNIST](http://yann.lecun.com/exdb/mnist/)
+
+## CUDA
+- [Introduction à CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/) (Documentation Nvidia)
+- [Gestion des erreurs](https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/) (Documentation Nvidia)
+- [Unified Memory](https://on-demand.gputechconf.com/gtc/2017/presentation/s7285-nikolay-sakharnykh-unified-memory-on-pascal-and-volta.pdf) (Présentation Nvidia)
