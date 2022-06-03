@@ -11,7 +11,6 @@ uint32_t swap_endian(uint32_t val) {
 }
 
 
-// Renvoie une image sous forme d'un int**
 int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
     unsigned char buffer[width*height];
     int** image = (int**)malloc(sizeof(int*)*height);
@@ -30,7 +29,7 @@ int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
     return image;
 }
 
-// renvoie [nb_elem, width, height]
+
 int* read_mnist_images_parameters(char* filename) {
     int* tab = (int*)malloc(sizeof(int)*3);
     FILE *ptr;
@@ -62,6 +61,7 @@ int* read_mnist_images_parameters(char* filename) {
     return tab;
 }
 
+
 uint32_t read_mnist_labels_nb_images(char* filename) {
     FILE *ptr;
     
@@ -84,7 +84,7 @@ uint32_t read_mnist_labels_nb_images(char* filename) {
     return number_of_images;
 }
 
-// Lit un set de données images sous format de la base de données MNIST
+
 int*** read_mnist_images(char* filename) {
     FILE *ptr;
     
@@ -120,7 +120,7 @@ int*** read_mnist_images(char* filename) {
     return tab;
 }
 
-// Renvoie des labels formattés sous le format de la base MNIST
+// Renvoie des labels formatés sous le format de la base MNIST
 unsigned int* read_mnist_labels(char* filename) {
     FILE* ptr;
 
