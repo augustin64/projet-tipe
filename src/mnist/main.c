@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <sys/sysinfo.h>
 
-#include "neural_network.c"
-#include "neuron_io.c"
 #include "mnist.c"
+#include "neuron_io.c"
+#include "neural_network.c"
 
 #include "include/main.h"
 
