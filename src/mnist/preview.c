@@ -12,8 +12,8 @@
 void print_image(unsigned int width, unsigned int height, int** image) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
-    for (int i=0; i < (int)height; i++) {
-        for (int j=0; j < (int)width; j++) {
+    for (int i=0; i < (int)width; i++) {
+        for (int j=0; j < (int)height; j++) {
             printf("%c", tab[image[i][j]/52]);
         }
         printf("\n");
