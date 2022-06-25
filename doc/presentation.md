@@ -8,15 +8,21 @@ Augustin Lucas
 
 ## Objectif - Lien avec le sujet
 
-Geoguessr
-Google: map carrés
+![](https://augustin64.fr/tipe/geoguessr.png)
+
+----
+
+![](https://augustin64.fr/tipe/planet.png)
 
 ---
 
 ## Théorie
 
-NN simple, fonctionnement sans trop de détails
-Minimisation de l'écart etc
+![](https://augustin64.fr/tipe/neuralnetwork.png)
+
+----
+
+![](https://augustin64.fr/tipe/nn.png)
 
 ---
 
@@ -89,6 +95,11 @@ On pourra ensuite lire ce fichier à nouveau pour tester la cohérence des résu
 
 ### Plus de détails sur la Backpropagation
 
+![](https://augustin64.fr/tipe/nn.png)
+
+----
+
+![](https://augustin64.fr/tipe/gradient-descent.png)
 
 ---
 
@@ -111,18 +122,18 @@ Note: Pour un entraînement de 50s, le réseau obtient environ 90% de réussite 
 #### Problème de la puissance de calcul
 
 - Une idée de la puissance requise <!-- .element: class="fragment" data-fragment-index="1" -->
-- Implémentation à plusieurs coeurs <!-- .element: class="fragment" data-fragment-index="2" -->
+- Implémentation à plusieurs cœurs <!-- .element: class="fragment" data-fragment-index="2" -->
 - Répartir entre plusieurs ordinateurs <!-- .element: class="fragment" data-fragment-index="3" -->
 - Problème du réseau de neurones convolutif <!-- .element: class="fragment" data-fragment-index="4" -->
 - Utilisation de la carte graphique <!-- .element: class="fragment" data-fragment-index="5" -->
 
 Note:
 Malheureusement, le puissance de calcul nécessaire est une problématique qui risque de se faire ressentir dans la suite du projet  
-Car pour le même projet, Des ingénieurs de Google ont publié dans leur papier de recherche qu'il sont dû utiliser 200 coeurs de CPU qui ont tourné pendant 2 mois.  
-On peut récupérer un maximum de 20 coeurs  
+Car pour le même projet, Des ingénieurs de Google ont publié dans leur papier de recherche qu'il sont dû utiliser 200 cœurs de CPU qui ont tourné pendant 2 mois.  
+On peut récupérer un maximum de 20 cœurs  
 -> Le calcul est donc vite fait: nous sommes en retard... (Le TIPE c'est dans moins de 20 mois)
 
-Pour contrer au maximum ce problème, on a tout d'abord implémenté l'algorithme de manière à ce qu'il utilise les différents coeurs du processeur disponibles.  
+Pour contrer au maximum ce problème, on a tout d'abord implémenté l'algorithme de manière à ce qu'il utilise les différents cœurs du processeur disponibles.  
 -> fait
 
 Nous avons aussi implémenté une méthode permettant de réaliser les calculs en parallèle sur plusieurs ordinateurs à la fois mais qui s'avère être moins efficace que d'utiliser un ordinateur indépendant (question de bande-passante)  
@@ -155,6 +166,7 @@ Une autre méthode pour gagner en puissance brute de calcul serait d'utiliser la
 
 #### Jeux de données
 - [MNIST](http://yann.lecun.com/exdb/mnist/)
+- [image-net](https://image-net.org)
 
 ----
 
