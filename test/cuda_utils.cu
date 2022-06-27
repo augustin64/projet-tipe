@@ -1,15 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef __CUDACC__
-#   warning compiling for CUDA
-#   include "../src/mnist/cuda_utils.cu"
-#   define MAX_CUDA_THREADS 1024 // from NVIDIA documentation
-#else
-#   warning skipping CUDA checks
-#endif
+#include "../src/mnist/cuda_utils.cu"
+#define MAX_CUDA_THREADS 1024
 
-#ifdef __CUDACC__
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -46,9 +40,3 @@ int main() {
     
     return 0;
 }
-#else
-int main() {
-    printf("Pas de test CUDA à passer\n");
-    return 0;
-}
-#endif
