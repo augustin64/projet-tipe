@@ -32,6 +32,11 @@ build () {
 			$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
 			echo "Fait."
 		done
+		for i in "test/"*".cu"; do
+			echo "Compilation de $i"
+			nvcc "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')"
+			echo "Fait."
+		done
 		return 0
 	elif [[ $1 == "utils" ]]; then
 		echo "Compilation de src/mnist/utils.c"
