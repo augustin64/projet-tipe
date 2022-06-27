@@ -1,29 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "mnist.c"
+
 #include "include/cuda_utils.h"
 
-int*** copy_images_cuda(int*** images, int nb_images, int width, int height) {
-    int*** images_cuda;
-    cudaMalloc(&images_cuda, (size_t)sizeof(int**)*nb_images);
-    cudaMemcpy(images_cuda, &images, (size_t)sizeof(int**)*nb_images, cudaMemcpyHostToDevice);
-
-    for (int i=0; i < nb_images; i++) {
-        cudaMalloc(&images_cuda[i], sizeof(int**)*nb_images);
-        cudaMemcpy(images_cuda[i], &images[i], sizeof(int**)*nb_images, cudaMemcpyHostToDevice);
-            for (int j=0; j < height; j++) {
-                cudaMalloc((int**)&images_cuda[i][j], sizeof(int*)*width);
-                cudaMemcpy(images_cuda[i][j], &images[i][j], sizeof(int*)*width, cudaMemcpyHostToDevice);
-            }
-    }
-    return images_cuda;
-}
 
 
-unsigned int* copy_labels_cuda(unsigned int* labels) {
+unsigned int* cudaReadMnistLabels(char* filename) {
+    FILE* ptr;
+
+    ptr = fopen(filename, "rb");
+
+    uint32_t magic_number;
+    uint32_t number_of_items;
+    unsigned int* labels;
     unsigned int* labels_cuda;
+
+    fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    magic_number = swap_endian(magic_number);
+
+    if (magic_number != 2049) {
+        printf("Incorrect magic number !\n");
+        exit(1);
+    }
+
+    fread(&number_of_items, sizeof(uint32_t), 1, ptr);
+    number_of_items = swap_endian(number_of_items);
+
+    unsigned char buffer[number_of_items];
+    fread(buffer, sizeof(unsigned char), number_of_items, ptr);
+
+    labels = (unsigned int*)malloc(sizeof(unsigned int)*number_of_items);
+
+    for (int i=0; i < (int)number_of_items; i++) {
+        labels[i] = (unsigned int)buffer[i];
+    }
+
     cudaMalloc(&labels_cuda, (size_t)sizeof(labels));
     cudaMemcpy(labels_cuda, &labels, sizeof(labels), cudaMemcpyHostToDevice);
+    free(labels);
     return labels_cuda;
 }
 

@@ -3,9 +3,18 @@
 
 #ifndef DEF_CUDA_UTILS_H
 #define DEF_CUDA_UTILS_H
+/*
+* Il est entendu par "device" le GPU supportant CUDA utilisé
+*/
 
-int*** copy_images_cuda(int*** images, int nb_images, int width, int height);
-unsigned int* copy_labels_cuda(unsigned int* labels);
+/*
+* Lecture des labels et écriture dans la mémoire du device
+*/
+unsigned int* cudaReadMnistLabels(char* label_file);
+
+/*
+* Vérification de la disponibilité d'un device
+*/
 void check_cuda_compatibility();
 
 #endif
