@@ -7,8 +7,6 @@
 #include "include/preview.h"
 
 
-// Prévisualise un chiffre écrit à la main
-// de taille width x height
 void print_image(unsigned int width, unsigned int height, int** image) {
     char tab[] = {' ', '.', ':', '%', '#', '\0'};
 
