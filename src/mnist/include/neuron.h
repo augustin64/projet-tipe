@@ -4,7 +4,7 @@
 typedef struct Neuron {
     float* weights; // Liste de tous les poids des arêtes sortants du neurone
     float bias; // Caractérise le bias du neurone
-    float z; // Sauvegarde des calculs faits sur le neurone (programmation dynamique)
+    float z; // Sauvegarde des calculs faits sur le neurone
 
     float *back_weights; // Changement des poids sortants lors de la backpropagation
     float *last_back_weights; // Dernier changement de d_poid_sortants
