@@ -53,7 +53,6 @@ float leaky_ReLU_derivative(float x){
 }
 
 void network_creation(Network* network, int* neurons_per_layer, int nb_layers) {
-    /* Créé et alloue de la mémoire aux différentes variables dans le réseau neuronal*/
     Layer* layer;
 
     network->nb_layers = nb_layers;
@@ -62,14 +61,14 @@ void network_creation(Network* network, int* neurons_per_layer, int nb_layers) {
     for (int i=0; i < nb_layers; i++) {
         network->layers[i] = (Layer*)malloc(sizeof(Layer));
         layer = network->layers[i];
-        layer->nb_neurons = neurons_per_layer[i]; // Nombre de neurones pour la couche
-        layer->neurons = (Neuron**)malloc(sizeof(Neuron*)*network->layers[i]->nb_neurons); // Création des différents neurones dans la couche
+        layer->nb_neurons = neurons_per_layer[i];
+        layer->neurons = (Neuron**)malloc(sizeof(Neuron*)*network->layers[i]->nb_neurons);
 
         for (int j=0; j < layer->nb_neurons; j++) {
             layer->neurons[j] = (Neuron*)malloc(sizeof(Neuron));
 
             if (i != network->nb_layers-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
-                layer->neurons[j]->weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);// Création des poids sortants du neurone
+                layer->neurons[j]->weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
                 layer->neurons[j]->back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
                 layer->neurons[j]->last_back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
             }
@@ -81,8 +80,6 @@ void network_creation(Network* network, int* neurons_per_layer, int nb_layers) {
 
 
 void deletion_of_network(Network* network) {
-    /* Libère l'espace mémoire alloué aux différentes variables dans la fonction
-    'creation_du_network' */
     Layer* layer;
     Neuron* neuron;
 
@@ -97,20 +94,17 @@ void deletion_of_network(Network* network) {
                 free(neuron);
             }
         }
-        free(layer->neurons); // On libère enfin la liste des neurones de la couche
+        free(layer->neurons);
         free(network->layers[i]);
     }
     free(network->layers);
-    free(network); // Pour finir, on libère le réseau neuronal contenant la liste des couches
+    free(network);
 }
 
 
 
 
 void forward_propagation(Network* network) {
-    /* Effectue une propagation en avant du réseau neuronal lorsque les données 
-    on été insérées dans la première couche. Le résultat de la propagation se 
-    trouve dans la dernière couche */
     Layer* layer; // Couche actuelle
     Layer* pre_layer; // Couche précédente
     Neuron* neuron;
@@ -131,9 +125,9 @@ void forward_propagation(Network* network) {
                 neuron->z += pre_layer->neurons[k]->z * pre_layer->neurons[k]->weights[j];
             }
 
-            if (i < network->nb_layers-1) { // Pour toutes les couches sauf la dernière on utilise la fonction leaky_ReLU (a*z si z<0,  z sinon)
+            if (i < network->nb_layers-1) {
                 neuron->z = leaky_ReLU(neuron->z);  
-            } else { // Pour la dernière couche on utilise la fonction soft max
+            } else { // Softmax seulement pour la dernière couche
                 max_z = max(max_z, neuron->z);
             }
         }
@@ -156,16 +150,12 @@ void forward_propagation(Network* network) {
 
 
 int* desired_output_creation(Network* network, int wanted_number) {
-    /* Renvoie la liste des sorties voulues à partir du nombre
-    de couches, de la liste du nombre de neurones par couche et de la
-    position du résultat voulue, */
     int nb_neurons = network->layers[network->nb_layers-1]->nb_neurons;
 
     int* desired_output = (int*)malloc(sizeof(int)*nb_neurons);
 
     for (int i=0; i < nb_neurons; i++) // On initialise toutes les sorties à 0 par défaut
         desired_output[i] = 0;
-
     desired_output[wanted_number] = 1; // Seule la sortie voulue vaut 1
     return desired_output;
 }
@@ -173,7 +163,6 @@ int* desired_output_creation(Network* network, int wanted_number) {
 
 
 void backward_propagation(Network* network, int* desired_output) {
-    /* Effectue une propagation en arrière du réseau neuronal */
     Neuron* neuron;
     Neuron* neuron2;
     float changes;
@@ -181,8 +170,7 @@ void backward_propagation(Network* network, int* desired_output) {
 
     int i = network->nb_layers-2;
     int neurons_nb = network->layers[i+1]->nb_neurons;
-    // On commence par parcourir tous les neurones de la couche finale
-    for (int j=0; j < network->layers[i+1]->nb_neurons; j++) {
+    for (int j=0; j < network->layers[i+1]->nb_neurons; j++) { // Dernière couche en première
         neuron = network->layers[i+1]->neurons[j];
         tmp = (desired_output[j]==1) ? neuron->z - 1 : neuron->z;
         for (int k=0; k < network->layers[i]->nb_neurons; k++) {
@@ -193,7 +181,7 @@ void backward_propagation(Network* network, int* desired_output) {
         neuron->last_back_bias = tmp;
         neuron->back_bias += tmp;
     }
-    for (i--; i >= 0; i--) {
+    for (i--; i >= 0; i--) { // Autres couches ensuite
         neurons_nb =  network->layers[i+1]->nb_neurons;
         for (int j=0; j < neurons_nb; j++) {
             neuron = network->layers[i+1]->neurons[j];
@@ -217,8 +205,6 @@ void backward_propagation(Network* network, int* desired_output) {
 
 
 void network_modification(Network* network, uint32_t nb_modifs) {
-    /* Modifie les poids et le biais des neurones du réseau neuronal à partir
-    du nombre de couches et de la liste du nombre de neurone par couche */
     Neuron* neuron;
 
     for (int i=0; i < network->nb_layers; i++) { // on exclut la dernière couche
@@ -226,7 +212,7 @@ void network_modification(Network* network, uint32_t nb_modifs) {
             neuron = network->layers[i]->neurons[j];
             if (neuron->bias != 0 && PRINT_BIAIS)
                 printf("C %d\tN %d\tb: %f      \tDb: %f\n", i, j, neuron->bias,  (LEARNING_RATE/nb_modifs) * neuron->back_bias);
-            neuron->bias -= (LEARNING_RATE/nb_modifs) * neuron->back_bias; // On modifie le biais du neurone à partir des données de la propagation en arrière
+            neuron->bias -= (LEARNING_RATE/nb_modifs) * neuron->back_bias;
             neuron->back_bias = 0;
 
             if (neuron->bias > MAX_RESEAU)
@@ -238,7 +224,7 @@ void network_modification(Network* network, uint32_t nb_modifs) {
                 for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
                     if (neuron->weights[k] != 0 && PRINT_POIDS)
                         printf("C %d\tN %d -> %d\tp: %f  \tDp: %f\n", i, j, k, neuron->weights[k],  (LEARNING_RATE/nb_modifs) * neuron->back_weights[k]);
-                    neuron->weights[k] -= (LEARNING_RATE/nb_modifs) * neuron->back_weights[k]; // On modifie le poids du neurone à partir des données de la propagation en arrière
+                    neuron->weights[k] -= (LEARNING_RATE/nb_modifs) * neuron->back_weights[k];
                     neuron->back_weights[k] = 0;
 
                     if (neuron->weights[k] > MAX_RESEAU) {
@@ -259,8 +245,6 @@ void network_modification(Network* network, uint32_t nb_modifs) {
 
 
 void network_initialisation(Network* network) {
-    /* Initialise les variables du réseau neuronal (bias, poids, ...)
-    en suivant de la méthode de Xavier ...... à partir du nombre de couches et de la liste du nombre de neurone par couches */
     Neuron* neuron;
     double upper_bound;
     double lower_bound;
@@ -277,7 +261,6 @@ void network_initialisation(Network* network) {
         for (int j=0; j < network->layers[i]->nb_neurons; j++) {
 
             neuron = network->layers[i]->neurons[j];
-            // Initialisation des bornes supérieure et inférieure
 
             if (i!=nb_layers_loop) {
                 for (int k=0; k < network->layers[i+1]->nb_neurons; k++) {
@@ -286,7 +269,7 @@ void network_initialisation(Network* network) {
                     neuron->last_back_weights[k] = 0;
                 }
             }
-            if (i > 0) {// Pour tous les neurones n'étant pas dans la première couche
+            if (i > 0) { // On exclut la première couche
                 neuron->bias = lower_bound + RAND_DOUBLE()*bound_gap;
                 neuron->back_bias = 0;
                 neuron->last_back_bias = 0;
@@ -296,7 +279,6 @@ void network_initialisation(Network* network) {
 }
 
 void patch_network(Network* network, Network* delta, uint32_t nb_modifs) {
-    // Les deux réseaux donnés sont supposés de même dimensions
     Neuron* neuron;
     Neuron* dneuron;
 
@@ -318,7 +300,6 @@ void patch_network(Network* network, Network* delta, uint32_t nb_modifs) {
 }
 
 void patch_delta(Network* network, Network* delta, uint32_t nb_modifs) {
-    // Les deux réseaux donnés sont supposés de même dimensions
     Neuron* neuron;
     Neuron* dneuron;
 
@@ -338,7 +319,6 @@ void patch_delta(Network* network, Network* delta, uint32_t nb_modifs) {
 }
 
 Network* copy_network(Network* network) {
-    // Renvoie une copie modifiable d'un réseau de neurones
     Network* network2 = (Network*)malloc(sizeof(Network));
     Layer* layer;
     Neuron* neuron1;
@@ -377,29 +357,25 @@ Network* copy_network(Network* network) {
 }
 
 
-float loss_computing(Network* network, int numero_voulu){
-    /* Renvoie l'erreur du réseau neuronal pour une sortie */
+float loss_computing(Network* network, int wanted_number){
     float erreur = 0;
     float neuron_value;
-
     for (int i=0; i < network->nb_layers-1; i++) {
         neuron_value = network->layers[network->nb_layers-1]->neurons[i]->z;
 
-        if (i == numero_voulu) {
+        if (i == wanted_number) {
             erreur += (1-neuron_value)*(1-neuron_value);
         }
         else {
             erreur += neuron_value*neuron_value;
         }
     }
-    
     return erreur;
 }
 
 #ifdef __CUDACC__
 
 Network* copy_network_cuda(Network* network) {
-    // Renvoie une copie modifiable d'un réseau de neurones
     Network* network2 = NULL;
     Layer* layer;
     Neuron* neuron1;
