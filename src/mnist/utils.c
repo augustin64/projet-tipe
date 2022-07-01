@@ -25,6 +25,8 @@ void help(char* call) {
     printf("\tpatch-network:\n");
     printf("\t\t--network | -n [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--delta   | -d [FILENAME]\tFichier de patch à utiliser.\n");
+    printf("\tprint-images:\n");
+    printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
 }
 
 
@@ -132,6 +134,44 @@ void patch_stored_network(char* network_filename, char* delta_filename) {
 }
 
 
+void print_images(char* filename) {
+    int* parameters = read_mnist_images_parameters(filename);
+
+    int nb_elem = parameters[0];
+    int width = parameters[1];
+    int height = parameters[2];
+    free(parameters);
+
+    int*** images = read_mnist_images(filename);
+
+    printf("[\n");
+    for (int i=0; i < nb_elem; i++) {
+        printf("\t[\n");
+        for (int j=0; j < height; j++) {
+            printf("\t\t[");
+            for (int k=0; k < width; k++) {
+                if (k != width -1)
+                    printf("%d, ", images[i][j][k]);
+                else
+                    printf("%d", images[i][j][k]);
+            }
+            if (j != height -1)
+                printf("],\n");
+            else
+                printf("]\n");
+            free(images[i][j]);
+        }
+        if (i != nb_elem -1)
+            printf("\t],\n");
+        else
+            printf("\t]\n");
+        free(images[i]);
+    }
+    free(images);
+    printf("]\n");
+}
+
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Pas d'action spécifiée\n");
@@ -210,7 +250,7 @@ int main(int argc, char* argv[]) {
         }
         count_labels(labels);
         exit(0);
-    }  else if (! strcmp(argv[1], "patch-network")) {
+    } else if (! strcmp(argv[1], "patch-network")) {
         char* network = NULL;
         char* delta = NULL;
         int i = 2;
@@ -235,6 +275,24 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
         patch_stored_network(network, delta);
+        exit(0);
+    } else if (! strcmp(argv[1], "print-images")) {
+        char* images = NULL;
+        int i = 2;
+        while (i < argc) {
+            if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
+                images = argv[i+1];
+                i += 2;
+            } else {
+                printf("%s : Argument non reconnu\n", argv[i]);
+                i++;
+            }
+        }
+        if (!images) {
+            printf("--images: Argument obligatoire.\n");
+            exit(1);
+        }
+        print_images(images);
         exit(0);
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);
