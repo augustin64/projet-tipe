@@ -5,24 +5,23 @@
 #include "initialisation.h"
 
 Network* create_network(int max_size, int dropout, int initialisation, int input_dim, int input_depth) {
-    if (dropout<0 || dropout>100) {
+    if (dropout < 0 || dropout > 100) {
         printf("Erreur, la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
-    Network* network = malloc(sizeof(Network));
+    Network* network = (Network*)malloc(sizeof(Network));
     network->max_size = max_size;
     network->dropout = dropout;
     network->initialisation = initialisation;
     network->size = 1;
-    network->input = malloc(sizeof(float***)*max_size);
-    network->kernel = malloc(sizeof(Kernel)*(max_size-1));
-    create_a_cube_input_layer(network, 0, input_depth, input_dim);
-    int i, j;
-    network->dim = malloc(sizeof(int*)*max_size);
-    for (i=0; i<max_size; i++) {
-        network->dim[i] = malloc(sizeof(int)*2);
+    network->input = (float****)malloc(sizeof(float***)*max_size);
+    network->kernel = (Kernel*)malloc(sizeof(Kernel)*(max_size-1));
+    network->dim = (int**)malloc(sizeof(int*)*max_size);
+    for (int i=0; i < max_size; i++) {
+        network->dim[i] = (int*)malloc(sizeof(int)*2);
     }
     network->dim[0][0] = input_dim;
     network->dim[0][1] = input_depth;
+    create_a_cube_input_layer(network, 0, input_depth, input_dim);
     return network;
 }
 
@@ -40,12 +39,11 @@ Network* create_network_lenet5(int dropout, int activation, int initialisation) 
 }
 
 void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
-    int i, j;
-    network->input[pos] = malloc(sizeof(float**)*depth);
-    for (i=0; i<depth; i++) {
-        network->input[pos][i] = malloc(sizeof(float*)*dim);
-        for (j=0; j<dim; j++) {
-            network->input[pos][i][j] = malloc(sizeof(float)*dim);
+    network->input[pos] = (float***)malloc(sizeof(float**)*depth);
+    for (int i=0; i < depth; i++) {
+        network->input[pos][i] = (float**)malloc(sizeof(float*)*dim);
+        for (int j=0; j < dim; j++) {
+            network->input[pos][i][j] = (float*)malloc(sizeof(float)*dim);
         }
     }
     network->dim[pos][0] = dim;
@@ -53,10 +51,9 @@ void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
 }
 
 void create_a_line_input_layer(Network* network, int pos, int dim) {
-    int i;
-    network->input[pos] = malloc(sizeof(float**));
-    network->input[pos][0] = malloc(sizeof(float*));
-    network->input[pos][0][0] = malloc(sizeof(float)*dim);
+    network->input[pos] = (float***)malloc(sizeof(float**));
+    network->input[pos][0] = (float**)malloc(sizeof(float*));
+    network->input[pos][0][0] = (float*)malloc(sizeof(float)*dim);
 }
 
 void add_average_pooling(Network* network, int kernel_size, int activation) {
@@ -87,7 +84,7 @@ void add_average_pooling_flatten(Network* network, int kernel_size, int activati
 }
 
 void add_convolution(Network* network, int nb_filter, int kernel_size, int activation) {
-    int n = network->size, i, j, k;
+    int n = network->size;
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche de convolution, le réseau est déjà plein\n");
         return;
@@ -95,33 +92,33 @@ void add_convolution(Network* network, int nb_filter, int kernel_size, int activ
     int r = network->dim[n-1][1];
     int c = nb_filter;
     network->kernel[n].nn = NULL;
-    network->kernel[n].cnn = malloc(sizeof(Kernel_cnn));
+    network->kernel[n].cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
     network->kernel[n].activation = activation;
     network->kernel[n].cnn->k_size = kernel_size;
     network->kernel[n].cnn->rows = r;
     network->kernel[n].cnn->columns = c;
-    network->kernel[n].cnn->w = malloc(sizeof(float***)*r);
-    network->kernel[n].cnn->d_w = malloc(sizeof(float***)*r);
-    for (i=0; i<r; i++) {
-        network->kernel[n].cnn->w[i] = malloc(sizeof(float**)*c);
-        network->kernel[n].cnn->d_w[i] = malloc(sizeof(float**)*c);
-        for (j=0; j<c; j++) {
-            network->kernel[n].cnn->w[i][j] = malloc(sizeof(float*)*kernel_size);
-            network->kernel[n].cnn->d_w[i][j] = malloc(sizeof(float*)*kernel_size);
-            for (k=0; k<kernel_size; k++) {
-                network->kernel[n].cnn->w[i][j][k] = malloc(sizeof(float)*kernel_size);
-                network->kernel[n].cnn->d_w[i][j][k] = malloc(sizeof(float)*kernel_size);
+    network->kernel[n].cnn->w = (float****)malloc(sizeof(float***)*r);
+    network->kernel[n].cnn->d_w = (float****)malloc(sizeof(float***)*r);
+    for (int i=0; i < r; i++) {
+        network->kernel[n].cnn->w[i] = (float***)malloc(sizeof(float**)*c);
+        network->kernel[n].cnn->d_w[i] = (float***)malloc(sizeof(float**)*c);
+        for (int j=0; j < c; j++) {
+            network->kernel[n].cnn->w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
+            network->kernel[n].cnn->d_w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
+            for (int k=0; k < kernel_size; k++) {
+                network->kernel[n].cnn->w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
+                network->kernel[n].cnn->d_w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
             }
         }
     }
-    network->kernel[n].cnn->bias = malloc(sizeof(float**)*c);
-    network->kernel[n].cnn->d_bias = malloc(sizeof(float**)*c);
-    for (i=0; i<c; i++) {
-        network->kernel[n].cnn->bias[i] = malloc(sizeof(float*)*kernel_size);
-        network->kernel[n].cnn->d_bias[i] = malloc(sizeof(float*)*kernel_size);
-        for (j=0; j<kernel_size; j++) {
-            network->kernel[n].cnn->bias[i][j] = malloc(sizeof(float)*kernel_size);
-            network->kernel[n].cnn->d_bias[i][j] = malloc(sizeof(float)*kernel_size);
+    network->kernel[n].cnn->bias = (float***)malloc(sizeof(float**)*c);
+    network->kernel[n].cnn->d_bias = (float***)malloc(sizeof(float**)*c);
+    for (int i=0; i < c; i++) {
+        network->kernel[n].cnn->bias[i] = (float**)malloc(sizeof(float*)*kernel_size);
+        network->kernel[n].cnn->d_bias[i] = (float**)malloc(sizeof(float*)*kernel_size);
+        for (int j=0; j < kernel_size; j++) {
+            network->kernel[n].cnn->bias[i][j] = (float*)malloc(sizeof(float)*kernel_size);
+            network->kernel[n].cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*kernel_size);
         }
     }
     create_a_cube_input_layer(network, n, c, network->dim[n-1][0] - 2*(kernel_size/2));
@@ -141,17 +138,17 @@ void add_dense(Network* network, int input_units, int output_units, int activati
         return;
     }
     network->kernel[n].cnn = NULL;
-    network->kernel[n].nn = malloc(sizeof(Kernel_nn));
+    network->kernel[n].nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
     network->kernel[n].activation = activation;
     network->kernel[n].nn->input_units = input_units;
     network->kernel[n].nn->output_units = output_units;
-    network->kernel[n].nn->bias = malloc(sizeof(float)*output_units);
-    network->kernel[n].nn->d_bias = malloc(sizeof(float)*output_units);
-    network->kernel[n].nn->weights = malloc(sizeof(float*)*input_units);
-    network->kernel[n].nn->d_weights = malloc(sizeof(float*)*input_units);
-    for (int i=0; i<input_units; i++) {
-        network->kernel[n].nn->weights[i] = malloc(sizeof(float)*output_units);
-        network->kernel[n].nn->d_weights[i] = malloc(sizeof(float)*output_units);
+    network->kernel[n].nn->bias = (float*)malloc(sizeof(float)*output_units);
+    network->kernel[n].nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    network->kernel[n].nn->weights = (float**)malloc(sizeof(float*)*input_units);
+    network->kernel[n].nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
+    for (int i=0; i < input_units; i++) {
+        network->kernel[n].nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
+        network->kernel[n].nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
     }
     initialisation_1d_matrix(network->initialisation, network->kernel[n].nn->bias, output_units, output_units+input_units);
     initialisation_1d_matrix(ZERO, network->kernel[n].nn->d_bias, output_units, output_units+input_units);

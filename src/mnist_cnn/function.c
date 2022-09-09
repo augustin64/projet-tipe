@@ -4,7 +4,7 @@
 #include "function.h"
 
 float max(float a, float b) {
-    return a<b?b:a;
+    return a < b ? b:a;
 }
 
 float sigmoid(float x) {
@@ -36,27 +36,26 @@ float tanh_derivative(float x) {
 }
 
 void apply_softmax_input(float ***input, int depth, int rows, int columns) {
-    int i, j, k;
     float m = FLT_MIN;
     float sum=0;
-    for (i=0; i<depth; i++) {
-        for (j=0; j<rows; j++) {
-            for (k=0; k<columns; k++) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < rows; j++) {
+            for (int k=0; k < columns; k++) {
                 m = max(m, input[i][j][k]);
             }
         }
     }
-    for (i=0; i<depth; i++) {
-        for (j=0; j<rows; j++) {
-            for (k=0; k<columns; k++) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < rows; j++) {
+            for (int k=0; k < columns; k++) {
                 input[i][j][k] = exp(m-input[i][j][k]);
                 sum += input[i][j][k];
             }
         }
     }
-    for (i=0; i<depth; i++) {
-        for (j=0; j<rows; j++) {
-            for (k=0; k<columns; k++) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < rows; j++) {
+            for (int k=0; k < columns; k++) {
                 input[i][j][k] = input[i][j][k]/sum;
             }
         }
@@ -64,10 +63,9 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns) {
 }
 
 void apply_function_input(float (*f)(float), float*** input, int depth, int rows, int columns) {
-    int i, j ,k;
-    for (i=0; i<depth; i++) {
-        for (j=0; j<rows; j++) {
-            for (k=0; k<columns; k++) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < rows; j++) {
+            for (int k=0; k < columns; k++) {
                 input[i][j][k] = (*f)(input[i][j][k]);
             }
         }

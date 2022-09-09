@@ -10,9 +10,9 @@
 int will_be_drop(int dropout_prob);
 
 /*
-* Ecrit une image 28*28 au centre d'un tableau 32*32 et met à 0 le reste
+* Écrit une image 28*28 au centre d'un tableau 32*32 et met à 0 le reste
 */
-void write_image_in_newtork_32(int** image, int height, int width, float** input);
+void write_image_in_network_32(int** image, int height, int width, float** input);
 
 /*
 * Propage en avant le cnn
