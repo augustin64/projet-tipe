@@ -7,7 +7,7 @@ typedef struct Neuron {
     float z; // Sauvegarde des calculs faits sur le neurone
 
     float *back_weights; // Changement des poids sortants lors de la backpropagation
-    float *last_back_weights; // Dernier changement de d_poid_sortants
+    float *last_back_weights; // Dernier changement de d_poids_sortants
     float back_bias; // Changement du bias lors de la backpropagation
     float last_back_bias; // Dernier changement de back_bias
 } Neuron;

@@ -34,7 +34,7 @@ Layer* creer_layer(int nb_neurons, int nb_sortants) {
     layer->nb_neurons = nb_neurons;
     layer->neurons = tab;
 
-    for (int i=0; i<nb_neurons; i++) {
+    for (int i=0; i < nb_neurons; i++) {
         tab[i] = creer_neuron(nb_sortants);
     }
     return layer;
