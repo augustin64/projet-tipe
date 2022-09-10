@@ -37,7 +37,7 @@ typedef struct Network{
     int max_size; // Taille maximale du réseau après initialisation
     int size; // Taille actuelle du réseau
     int** dim; // Contient les dimensions de l'input (width*depth)
-    Kernel* kernel;
+    Kernel** kernel;
     float**** input;
 } Network;
 

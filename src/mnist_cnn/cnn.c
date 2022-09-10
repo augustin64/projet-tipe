@@ -33,32 +33,32 @@ void forward_propagation(Network* network) {
     int output_dim, output_depth;
     float*** output;
     for (int i=0; i < network->size-1; i++) {
-        if (network->kernel[i].nn==NULL && network->kernel[i].cnn!=NULL) { //CNN
+        if (network->kernel[i]->nn==NULL && network->kernel[i]->cnn!=NULL) { //CNN
             output = network->input[i+1];
             output_dim = network->dim[i+1][0];
             output_depth = network->dim[i+1][1];
-            make_convolution(network->input[i], network->kernel[i].cnn, output, output_dim);
-            choose_apply_function_input(network->kernel[i].activation, output, output_depth, output_dim, output_dim);
+            make_convolution(network->input[i], network->kernel[i]->cnn, output, output_dim);
+            choose_apply_function_input(network->kernel[i]->activation, output, output_depth, output_dim, output_dim);
         }
-        else if (network->kernel[i].nn!=NULL && network->kernel[i].cnn==NULL) { //NN
-            make_fully_connected(network->input[i][0][0], network->kernel[i].nn, network->input[i+1][0][0], network->dim[i][0], network->dim[i+1][0]);
-            choose_apply_function_input(network->kernel[i].activation, network->input[i+1], 1, 1, network->dim[i+1][0]);
+        else if (network->kernel[i]->nn!=NULL && network->kernel[i]->cnn==NULL) { //NN
+            make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], network->dim[i][0], network->dim[i+1][0]);
+            choose_apply_function_input(network->kernel[i]->activation, network->input[i+1], 1, 1, network->dim[i+1][0]);
         }
         else { //Pooling
             if (network->size-2==i) {
                 printf("Le réseau ne peut pas finir par une pooling layer");
                 return;
             }
-            if (network->kernel[i+1].nn!=NULL && network->kernel[i+1].cnn==NULL) {
-                make_average_pooling_flattened(network->input[i], network->input[i+1][0][0], network->kernel[i].activation/100, network->dim[i][1], network->dim[i][0]);
-                choose_apply_function_input(network->kernel[i].activation%100, network->input[i+1], 1, 1, network->dim[i+1][0]);
+            if (network->kernel[i+1]->nn!=NULL && network->kernel[i+1]->cnn==NULL) {
+                make_average_pooling_flattened(network->input[i], network->input[i+1][0][0], network->kernel[i]->activation/100, network->dim[i][1], network->dim[i][0]);
+                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], 1, 1, network->dim[i+1][0]);
             }
-            else if (network->kernel[i+1].nn==NULL && network->kernel[i+1].cnn!=NULL) {
-                make_average_pooling(network->input[i], network->input[i+1], network->kernel[i].activation/100, network->dim[i+1][1], network->dim[i+1][0]);
-                choose_apply_function_input(network->kernel[i].activation%100, network->input[i+1], network->dim[i+1][1], network->dim[i+1][0], network->dim[i+1][0]);
+            else if (network->kernel[i+1]->nn==NULL && network->kernel[i+1]->cnn!=NULL) {
+                make_average_pooling(network->input[i], network->input[i+1], network->kernel[i]->activation/100, network->dim[i+1][1], network->dim[i+1][0]);
+                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], network->dim[i+1][1], network->dim[i+1][0], network->dim[i+1][0]);
             }
             else {
-                printf("Le réseau ne peut pas contenir deux poolings layers collées");
+                printf("Le réseau ne peut pas contenir deux pooling layers collées");
                 return;
             }
         }
@@ -71,7 +71,7 @@ void backward_propagation(Network* network, float wanted_number) {
     float loss = compute_cross_entropy_loss(network->input[n][0][0], wanted_output, network->dim[n][0]);
     for (int i=n; i >= 0; i--) {
         if (i==n) {
-            if (network->kernel[i].activation == SOFTMAX) {
+            if (network->kernel[i]->activation == SOFTMAX) {
                 int l2 = network->dim[i][0]; // Taille de la dernière couche
                 int l1 = network->dim[i-1][0];
                 for (int j=0; j < l2; j++) {
@@ -79,18 +79,18 @@ void backward_propagation(Network* network, float wanted_number) {
                 }
             }
             else {
-                printf("Erreur, seule la fonction softmax est implémentée pour la dernière couche");
+                printf("Erreur, seule la fonction SOFTMAX est implémentée pour la dernière couche");
                 return;
             }
         }
         else {
-            if (network->kernel[i].activation == SIGMOID) {
+            if (network->kernel[i]->activation == SIGMOID) {
 
             }
-            else if (network->kernel[i].activation == TANH) {
+            else if (network->kernel[i]->activation == TANH) {
 
             }
-            else if (network->kernel[i].activation == RELU) {
+            else if (network->kernel[i]->activation == RELU) {
                 
             }
         }
@@ -127,8 +127,7 @@ float* generate_wanted_output(float wanted_number) {
 }
 
 int main() {
-    Network* network;
-    network = create_network_lenet5(0, TANH, GLOROT_NORMAL);
+    Network* network = create_network_lenet5(0, TANH, GLOROT_NORMAL);
     forward_propagation(network);
     return 0;
 }
