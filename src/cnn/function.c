@@ -86,6 +86,6 @@ void choose_apply_function_input(int activation, float*** input, int depth, int 
         apply_function_input(tanh_, input, depth, rows, columns);
     }
     else {
-        printf("Erreur, fonction d'activation inconnue");
+        printf("Erreur, fonction d'activation inconnue: %d\n", activation);
     }
 }

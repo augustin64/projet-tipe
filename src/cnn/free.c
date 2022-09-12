@@ -19,7 +19,7 @@ void free_a_line_input_layer(Network* network, int pos) {
 }
 
 void free_average_pooling(Network* network, int pos) {
-    free_a_cube_input_layer(network, pos, network->dim[pos-1][1], network->dim[pos-1][0]/2);
+    free_a_cube_input_layer(network, pos, network->depth[pos-1], network->width[pos-1]/2);
 }
 
 void free_average_pooling_flatten(Network* network, int pos) {
@@ -27,57 +27,57 @@ void free_average_pooling_flatten(Network* network, int pos) {
 }
 
 void free_convolution(Network* network, int pos) {
-    int c = network->kernel[pos].cnn->columns;
-    int k_size = network->kernel[pos].cnn->k_size;
-    int r = network->kernel[pos].cnn->rows;
-    free_a_cube_input_layer(network, pos, c, network->dim[pos-1][0] - 2*(k_size/2));
+    int c = network->kernel[pos]->cnn->columns;
+    int k_size = network->kernel[pos]->cnn->k_size;
+    int r = network->kernel[pos]->cnn->rows;
+    free_a_cube_input_layer(network, pos, c, network->width[pos-1] - 2*(k_size/2));
     for (int i=0; i < c; i++) {
         for (int j=0; j < k_size; j++) {
-            free(network->kernel[pos].cnn->bias[i][j]);
-            free(network->kernel[pos].cnn->d_bias[i][j]);
+            free(network->kernel[pos]->cnn->bias[i][j]);
+            free(network->kernel[pos]->cnn->d_bias[i][j]);
         }
-        free(network->kernel[pos].cnn->bias[i]);
-        free(network->kernel[pos].cnn->d_bias[i]);
+        free(network->kernel[pos]->cnn->bias[i]);
+        free(network->kernel[pos]->cnn->d_bias[i]);
     }
-    free(network->kernel[pos].cnn->bias);
-    free(network->kernel[pos].cnn->d_bias);
+    free(network->kernel[pos]->cnn->bias);
+    free(network->kernel[pos]->cnn->d_bias);
 
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
-                free(network->kernel[pos].cnn->w[i][j][k]);
-                free(network->kernel[pos].cnn->d_w[i][j][k]);
+                free(network->kernel[pos]->cnn->w[i][j][k]);
+                free(network->kernel[pos]->cnn->d_w[i][j][k]);
             }
-            free(network->kernel[pos].cnn->w[i][j]);
-            free(network->kernel[pos].cnn->d_w[i][j]);
+            free(network->kernel[pos]->cnn->w[i][j]);
+            free(network->kernel[pos]->cnn->d_w[i][j]);
         }
-        free(network->kernel[pos].cnn->w[i]);
-        free(network->kernel[pos].cnn->d_w[i]);
+        free(network->kernel[pos]->cnn->w[i]);
+        free(network->kernel[pos]->cnn->d_w[i]);
     }
-    free(network->kernel[pos].cnn->w);
-    free(network->kernel[pos].cnn->d_w);
+    free(network->kernel[pos]->cnn->w);
+    free(network->kernel[pos]->cnn->d_w);
 
-    free(network->kernel[pos].cnn);
+    free(network->kernel[pos]->cnn);
 }
 
 void free_dense(Network* network, int pos) {
     free_a_line_input_layer(network, pos);
-    int dim = network->kernel[pos].nn->output_units;
+    int dim = network->kernel[pos]->nn->output_units;
     for (int i=0; i < dim; i++) {
-        free(network->kernel[pos].nn->weights[i]);
-        free(network->kernel[pos].nn->d_weights[i]);
+        free(network->kernel[pos]->nn->weights[i]);
+        free(network->kernel[pos]->nn->d_weights[i]);
     }
-    free(network->kernel[pos].nn->weights);
-    free(network->kernel[pos].nn->d_weights);
+    free(network->kernel[pos]->nn->weights);
+    free(network->kernel[pos]->nn->d_weights);
 
-    free(network->kernel[pos].nn->bias);
-    free(network->kernel[pos].nn->d_bias);
+    free(network->kernel[pos]->nn->bias);
+    free(network->kernel[pos]->nn->d_bias);
 
-    free(network->kernel[pos].nn);
+    free(network->kernel[pos]->nn);
 }
 
 void free_network_creation(Network* network) {
-    free_a_cube_input_layer(network, 0, network->dim[0][1], network->dim[0][0]);
+    free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
 
     for (int i=0; i < network->max_size; i++) {
         free(network->dim[i]);

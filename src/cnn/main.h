@@ -1,7 +1,7 @@
 #include "struct.h"
 
-#ifndef DEF_CNN_H
-#define DEF_CNN_H
+#ifndef DEF_MAIN_H
+#define DEF_MAIN_H
 
 
 /*

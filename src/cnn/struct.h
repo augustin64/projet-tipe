@@ -13,7 +13,7 @@ typedef struct Kernel_cnn {
 } Kernel_cnn;
 
 typedef struct Kernel_nn {
-    int input_units;
+    int input_units; // Nombre d'éléments en entrée
     int output_units;
     float* bias; // De dimension output_units
     float* d_bias; // De dimension output_units
@@ -27,18 +27,16 @@ typedef struct Kernel {
     int activation; // Vaut l'activation sauf pour un pooling où il: vaut kernel_size*100 + activation
 } Kernel;
 
-typedef struct Layer {
-
-} Layer;
 
 typedef struct Network{
     int dropout; // Contient la probabilité d'abandon entre 0 et 100 (inclus)
     int initialisation; // Contient le type d'initialisation
     int max_size; // Taille maximale du réseau après initialisation
     int size; // Taille actuelle du réseau
-    int** dim; // Contient les dimensions de l'input (width*depth)
+    int* width; // Contient les dimensions de l'input (width*depth)
+    int* depth; // Contient les dimensions de l'input (width*depth)
     Kernel** kernel;
-    float**** input;
+    float**** input; // Équivalent du z
 } Network;
 
 #endif

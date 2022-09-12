@@ -7,7 +7,7 @@
 #include "creation.c"
 #include "make.c"
 
-#include "cnn.h"
+#include "main.h"
 
 // Augmente les dimensions de l'image d'entrée
 #define PADDING_INPUT 2
@@ -35,14 +35,14 @@ void forward_propagation(Network* network) {
     for (int i=0; i < network->size-1; i++) {
         if (network->kernel[i]->nn==NULL && network->kernel[i]->cnn!=NULL) { //CNN
             output = network->input[i+1];
-            output_dim = network->dim[i+1][0];
-            output_depth = network->dim[i+1][1];
+            output_dim = network->width[i+1];
+            output_depth = network->depth[i+1];
             make_convolution(network->input[i], network->kernel[i]->cnn, output, output_dim);
             choose_apply_function_input(network->kernel[i]->activation, output, output_depth, output_dim, output_dim);
         }
         else if (network->kernel[i]->nn!=NULL && network->kernel[i]->cnn==NULL) { //NN
-            make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], network->dim[i][0], network->dim[i+1][0]);
-            choose_apply_function_input(network->kernel[i]->activation, network->input[i+1], 1, 1, network->dim[i+1][0]);
+            make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], network->width[i], network->width[i+1]);
+            choose_apply_function_input(network->kernel[i]->activation, network->input[i+1], 1, 1, network->width[i+1]);
         }
         else { //Pooling
             if (network->size-2==i) {
@@ -50,12 +50,12 @@ void forward_propagation(Network* network) {
                 return;
             }
             if (network->kernel[i+1]->nn!=NULL && network->kernel[i+1]->cnn==NULL) {
-                make_average_pooling_flattened(network->input[i], network->input[i+1][0][0], network->kernel[i]->activation/100, network->dim[i][1], network->dim[i][0]);
-                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], 1, 1, network->dim[i+1][0]);
+                make_average_pooling_flattened(network->input[i], network->input[i+1][0][0], network->kernel[i]->activation/100, network->depth[i], network->width[i]);
+                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], 1, 1, network->width[i+1]);
             }
             else if (network->kernel[i+1]->nn==NULL && network->kernel[i+1]->cnn!=NULL) {
-                make_average_pooling(network->input[i], network->input[i+1], network->kernel[i]->activation/100, network->dim[i+1][1], network->dim[i+1][0]);
-                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], network->dim[i+1][1], network->dim[i+1][0], network->dim[i+1][0]);
+                make_average_pooling(network->input[i], network->input[i+1], network->kernel[i]->activation/100, network->depth[i+1], network->width[i+1]);
+                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], network->depth[i+1], network->width[i+1], network->width[i+1]);
             }
             else {
                 printf("Le réseau ne peut pas contenir deux pooling layers collées");
@@ -68,12 +68,12 @@ void forward_propagation(Network* network) {
 void backward_propagation(Network* network, float wanted_number) {
     float* wanted_output = generate_wanted_output(wanted_number);
     int n = network->size-1;
-    float loss = compute_cross_entropy_loss(network->input[n][0][0], wanted_output, network->dim[n][0]);
+    float loss = compute_cross_entropy_loss(network->input[n][0][0], wanted_output, network->width[n]);
     for (int i=n; i >= 0; i--) {
         if (i==n) {
             if (network->kernel[i]->activation == SOFTMAX) {
-                int l2 = network->dim[i][0]; // Taille de la dernière couche
-                int l1 = network->dim[i-1][0];
+                int l2 = network->width[i]; // Taille de la dernière couche
+                int l1 = network->width[i-1];
                 for (int j=0; j < l2; j++) {
 
                 }
