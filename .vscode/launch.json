@@ -1,0 +1,102 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "mnist/main",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/main",
+      "args": [
+        "train",
+        "--images",
+        "${workspaceFolder}/data/mnist/train-images-idx3-ubyte",
+        "--labels",
+        "${workspaceFolder}/data/mnist/train-labels-idx1-ubyte",
+        "--out",
+        "${workspaceFolder}/.test-cache/reseau.bin"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build"
+    },
+    {
+      "name": "mnist/preview",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/preview",
+      "args": [
+        "images",
+        "labels"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build"
+    },
+    {
+      "name": "cnn/main",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/cnn_main",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [
+        ""
+      ],
+      "stopAtEntry": false,
+      "cwd": "/home/augustin64/Documents/tipe/projet-tipe",
+      "environment": [],
+      "program": "/home/augustin64/Documents/tipe/projet-tipe/build/Debug/outDebug",
+      "internalConsoleOptions": "openOnSessionStart",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "externalConsole": false,
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
