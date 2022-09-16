@@ -3,40 +3,39 @@
 
 typedef struct Kernel_cnn {
     int k_size;
-    int rows;
-    int columns;
-    int b;
-    float*** bias; // De dimension columns*k_size*k_size
-    float*** d_bias; // De dimension columns*k_size*k_size
-    float**** w; // De dimension rows*columns*k_size*k_size
-    float**** d_w; // De dimension rows*columns*k_size*k_size
+    int rows; // Depth of the input
+    int columns; // Depth of the output
+    float*** bias; // bias[columns][k_size][k_size]
+    float*** d_bias; // d_bias[columns][k_size][k_size]
+    float**** w; // w[rows][columns][k_size][k_size]
+    float**** d_w; // dw[rows][columns][k_size][k_size]
 } Kernel_cnn;
 
 typedef struct Kernel_nn {
     int input_units; // Nombre d'éléments en entrée
-    int output_units;
-    float* bias; // De dimension output_units
-    float* d_bias; // De dimension output_units
-    float** weights; // De dimension input_units*output_units
-    float** d_weights; // De dimension input_units*output_units
+    int output_units; // Nombre d'éléments en sortie
+    float* bias; // bias[output_units]
+    float* d_bias; // d_bias[output_units]
+    float** weights; // weight[input_units][output_units]
+    float** d_weights; // d_weights[input_units][output_units]
 } Kernel_nn;
 
 typedef struct Kernel {
-    Kernel_cnn* cnn;
-    Kernel_nn* nn;
+    Kernel_cnn* cnn; // NULL si ce n'est pas un cnn
+    Kernel_nn* nn; // NULL si ce n'est pas un nn
     int activation; // Vaut l'activation sauf pour un pooling où il: vaut kernel_size*100 + activation
 } Kernel;
 
 
 typedef struct Network{
-    int dropout; // Contient la probabilité d'abandon entre 0 et 100 (inclus)
+    int dropout; // Contient la probabilité d'abandon d'un neurone dans [0, 100] (entiers)
     int initialisation; // Contient le type d'initialisation
-    int max_size; // Taille maximale du réseau après initialisation
-    int size; // Taille actuelle du réseau
-    int* width; // Contient les dimensions de l'input (width*depth)
-    int* depth; // Contient les dimensions de l'input (width*depth)
-    Kernel** kernel;
-    float**** input; // Équivalent du z
+    int max_size; // Taille du tableau contenant le réseau
+    int size; // Taille actuelle du réseau (size ≤ max_size)
+    int* width; // width[size]
+    int* depth; // depth[size]
+    Kernel** kernel; // Tableau de tous les kernels
+    float**** input; // Tableau de toutes les couches du réseau input[nb couches][?][?][?]
 } Network;
 
 #endif
