@@ -16,7 +16,7 @@ Network* create_network_lenet5(int dropout, int activation, int initialisation);
 /*
 * Créé et alloue de la mémoire à une couche de type input cube
 */
-void create_a_cube_input_layer(Network* network, int pos, int depth, int dim);
+void create_a_cube_input_layer(Network* network, int pos, int depth, int dim); // CHECKED
 
 /*
 * Créé et alloue de la mémoire à une couche de type ligne

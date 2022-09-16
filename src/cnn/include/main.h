@@ -7,12 +7,12 @@
 /*
 * Renvoie si oui ou non (1 ou 0) le neurone va être abandonné
 */
-int will_be_drop(int dropout_prob);
+int will_be_drop(int dropout_prob); //CHECKED
 
 /*
 * Écrit une image 28*28 au centre d'un tableau 32*32 et met à 0 le reste
 */
-void write_image_in_network_32(int** image, int height, int width, float** input);
+void write_image_in_network_32(int** image, int height, int width, float** input); //CHECKED
 
 /*
 * Propage en avant le cnn

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
-#include "initialisation.h"
+#include "include/initialisation.h"
 
 
 void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n) { //NOT FINISHED

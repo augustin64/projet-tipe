@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "make.h"
+#include "include/make.h"
 
 void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int output_dim) {
     //NOT FINISHED, MISS CONDITIONS ON THE CONVOLUTION

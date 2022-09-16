@@ -7,7 +7,7 @@
 #include "creation.c"
 #include "make.c"
 
-#include "main.h"
+#include "include/main.h"
 
 // Augmente les dimensions de l'image d'entrée
 #define PADDING_INPUT 2
@@ -18,8 +18,8 @@ int will_be_drop(int dropout_prob) {
 
 void write_image_in_network_32(int** image, int height, int width, float** input) {
     for (int i=0; i < height+2*PADDING_INPUT; i++) {
-        for (int j=PADDING_INPUT; j < width+2*PADDING_INPUT; j++) {
-            if (i < PADDING_INPUT || i > height+PADDING_INPUT || j < PADDING_INPUT || j > width+PADDING_INPUT) {
+        for (int j=0; j < width+2*PADDING_INPUT; j++) {
+            if (i < PADDING_INPUT || i >= height+PADDING_INPUT || j < PADDING_INPUT || j >= width+PADDING_INPUT) {
                 input[i][j] = 0.;
             }
             else {

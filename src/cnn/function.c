@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
-#include "function.h"
+#include "include/function.h"
 
 float max(float a, float b) {
     return a < b ? b:a;
