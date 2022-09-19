@@ -26,21 +26,26 @@ void create_a_line_input_layer(Network* network, int pos, int dim);
 /*
 * Ajoute au réseau une couche d'average pooling valide de dimension dim*dim
 */
-void add_average_pooling(Network* network, int kernel_size, int activation);
+void add_2d_average_pooling(Network* network, int kernel_size);
 
 /*
 * Ajoute au réseau une couche d'average pooling valide de dimension dim*dim qui aplatit
 */
-void add_average_pooling_flatten(Network* network, int kernel_size, int activation);
+void add_average_pooling_flatten(Network* network, int kernel_size);
 
 /*
-* Ajoute une couche de convolution dim*dim au réseau et initialise les kernels
+* Ajoute au réseau une couche de convolution dim*dim et initialise les kernels
 */
 void add_convolution(Network* network, int nb_filter, int kernel_size, int activation);
 
 /*
-* Ajoute une couche dense au réseau et initialise les poids et les biais
+* Ajoute au réseau une couche dense et initialise les poids et les biais
 */
 void add_dense(Network* network, int input_units, int output_units, int activation);
+
+/*
+* Ajoute au réseau une couche dense qui aplatit
+*/
+void add_dense_linearisation(Network* network, int input_units, int output_units, int activation);
 
 #endif

@@ -30,35 +30,48 @@ void write_image_in_network_32(int** image, int height, int width, float** input
 }
 
 void forward_propagation(Network* network) {
-    int output_dim, output_depth;
+    int activation, input_width, input_depth, output_width, output_depth;
+    int n = network->size;
+    float*** input;
     float*** output;
-    for (int i=0; i < network->size-1; i++) {
-        if (network->kernel[i]->nn==NULL && network->kernel[i]->cnn!=NULL) { //CNN
-            output = network->input[i+1];
-            output_dim = network->width[i+1];
-            output_depth = network->depth[i+1];
-            make_convolution(network->input[i], network->kernel[i]->cnn, output, output_dim);
-            choose_apply_function_input(network->kernel[i]->activation, output, output_depth, output_dim, output_dim);
+    Kernel* k_i_1;
+    Kernel* k_i;
+    for (int i=0; i < n-1; i++) {
+        k_i_1 = network->kernel[i+1];
+        k_i = network->kernel[i];
+        input_width = network->width[i];
+        input_depth = network->depth[i];
+        output_width = network->width[i+1];
+        output_depth = network->depth[i+1];
+        activation = network->kernel[i]->activation;
+        input = network->input[i];
+        output = network->input[i+1];
+
+        if (k_i_1->nn==NULL && k_i_1->cnn!=NULL) { //CNN
+            printf("Convolution of cnn: %dx%d -> %dx%d\n", input_depth, input_width, output_depth, output_width);
+            make_convolution(input, k_i_1->cnn, output, output_width);
+            choose_apply_function_input(activation, output, output_depth, output_width, output_width);
         }
-        else if (network->kernel[i]->nn!=NULL && network->kernel[i]->cnn==NULL) { //NN
-            make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], network->width[i], network->width[i+1]);
-            choose_apply_function_input(network->kernel[i]->activation, network->input[i+1], 1, 1, network->width[i+1]);
+        else if (k_i_1->nn!=NULL && k_i_1->cnn==NULL) { //NN
+            printf("Densification of nn\n");
+            // Checked if it is a nn which linearise
+            make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], input_width, output_width);
+            choose_apply_function_input(activation, output, 1, 1, output_width);
         }
-        else { //Pooling
-            if (network->size-2==i) {
+        else { //Pooling (Vérifier dedans) ??
+            if (n-2==i) {
                 printf("Le réseau ne peut pas finir par une pooling layer");
                 return;
             }
-            if (network->kernel[i+1]->nn!=NULL && network->kernel[i+1]->cnn==NULL) {
-                make_average_pooling_flattened(network->input[i], network->input[i+1][0][0], network->kernel[i]->activation/100, network->depth[i], network->width[i]);
-                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], 1, 1, network->width[i+1]);
+            if (1==1) { // Pooling sur une matrice
+                printf("Average pooling\n");
+                make_average_pooling(input, output, activation/100, output_depth, output_width);
             }
-            else if (network->kernel[i+1]->nn==NULL && network->kernel[i+1]->cnn!=NULL) {
-                make_average_pooling(network->input[i], network->input[i+1], network->kernel[i]->activation/100, network->depth[i+1], network->width[i+1]);
-                choose_apply_function_input(network->kernel[i]->activation%100, network->input[i+1], network->depth[i+1], network->width[i+1], network->width[i+1]);
+            else if (1==0) { // Pooling sur un vecteur
+                printf("Error: Not implemented: forward: %d\n", i);
             }
             else {
-                printf("Le réseau ne peut pas contenir deux pooling layers collées");
+                printf("Erreur: forward_propagation: %d -> %d %d\n", i, k_i_1->nn==NULL, k_i_1->cnn);
                 return;
             }
         }
@@ -128,6 +141,15 @@ float* generate_wanted_output(float wanted_number) {
 
 int main() {
     Network* network = create_network_lenet5(0, TANH, GLOROT_NORMAL);
+    for (int i=0; i<8; i++) {
+        printf("%d %d \n", network->depth[i], network->width[i]);
+    }
+    printf("Kernel:\n");
+    for (int i=0; i<7; i++) {
+        if (network->kernel[i]->cnn!=NULL) {
+            printf("%d -> %d %d\n", i, network->kernel[i]->cnn->rows, network->kernel[i]->cnn->k_size);
+        }
+    }
     forward_propagation(network);
     return 0;
 }

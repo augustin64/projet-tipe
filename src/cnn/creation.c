@@ -14,7 +14,7 @@ Network* create_network(int max_size, int dropout, int initialisation, int input
     network->initialisation = initialisation; 
     network->size = 1; 
     network->input = (float****)malloc(sizeof(float***)*max_size); 
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(max_size-1)); 
+    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*max_size); 
     network->width = (int*)malloc(sizeof(int*)*max_size); 
     network->depth = (int*)malloc(sizeof(int*)*max_size); 
     for (int i=0; i < max_size; i++) {
@@ -32,12 +32,12 @@ Network* create_network_lenet5(int dropout, int activation, int initialisation) 
     Network* network = create_network(8, dropout, initialisation, 32, 1); 
     network->kernel[0]->activation = activation;  
     add_convolution(network, 6, 5, activation);
-    add_average_pooling(network, 2, activation);
+    add_2d_average_pooling(network, 2);
     add_convolution(network, 16, 5, activation);
-    add_average_pooling_flatten(network, 2, activation);
+    add_2d_average_pooling(network, 2);
+    add_dense_linearisation(network, 160, 120, activation);
     add_dense(network, 120, 84, activation);
-    add_dense(network, 84, 10, activation);
-    add_dense(network, 10, 10, SOFTMAX);
+    add_dense(network, 84, 10, SOFTMAX);
     return network;
 }
 
@@ -57,9 +57,11 @@ void create_a_line_input_layer(Network* network, int pos, int dim) {
     network->input[pos] = (float***)malloc(sizeof(float**));
     network->input[pos][0] = (float**)malloc(sizeof(float*));
     network->input[pos][0][0] = (float*)malloc(sizeof(float)*dim);
+    network->width[pos] = dim;
+    network->depth[pos] = 1;
 }
 
-void add_average_pooling(Network* network, int kernel_size, int activation) {
+void add_2d_average_pooling(Network* network, int kernel_size) {
     int n = network->size;
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
@@ -67,12 +69,12 @@ void add_average_pooling(Network* network, int kernel_size, int activation) {
     }
     network->kernel[n]->cnn = NULL;
     network->kernel[n]->nn = NULL;
-    network->kernel[n]->activation = activation + 100*kernel_size;
+    network->kernel[n]->activation = 100*kernel_size; // Ne contient pas de fonction d'activation
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     network->size++;
 }
 
-void add_average_pooling_flatten(Network* network, int kernel_size, int activation) {
+void add_average_pooling_flatten(Network* network, int kernel_size) { // NEED TO BE VERIFIED
     int n = network->size;
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
@@ -80,7 +82,7 @@ void add_average_pooling_flatten(Network* network, int kernel_size, int activati
     }
     network->kernel[n]->cnn = NULL;
     network->kernel[n]->nn = NULL;
-    network->kernel[n]->activation = activation + 100*kernel_size;
+    network->kernel[n]->activation = 100*kernel_size; // Ne contient pas de fonction d'activation
     int dim = (network->width[n-1]*network->width[n-1]*network->depth[n-1])/(kernel_size*kernel_size);
     create_a_line_input_layer(network, n, dim);
     network->size++;
@@ -92,6 +94,7 @@ void add_convolution(Network* network, int depth_output, int kernel_size, int ac
         printf("Impossible de rajouter une couche de convolution, le réseau est déjà plein \n");
         return;
     }
+    int bias_size = network->width[n-1] - 2*(kernel_size/2);
     int depth_input = network->depth[n-1];
     network->kernel[n]->nn = NULL;
     network->kernel[n]->activation = activation;
@@ -118,14 +121,14 @@ void add_convolution(Network* network, int depth_output, int kernel_size, int ac
     cnn->bias = (float***)malloc(sizeof(float**)*depth_output);
     cnn->d_bias = (float***)malloc(sizeof(float**)*depth_output);
     for (int i=0; i < depth_output; i++) {
-        cnn->bias[i] = (float**)malloc(sizeof(float*)*kernel_size);
-        cnn->d_bias[i] = (float**)malloc(sizeof(float*)*kernel_size);
-        for (int j=0; j < kernel_size; j++) {
-            cnn->bias[i][j] = (float*)malloc(sizeof(float)*kernel_size);
-            cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*kernel_size);
+        cnn->bias[i] = (float**)malloc(sizeof(float*)*bias_size);
+        cnn->d_bias[i] = (float**)malloc(sizeof(float*)*bias_size);
+        for (int j=0; j < bias_size; j++) {
+            cnn->bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
+            cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
         }
     }
-    create_a_cube_input_layer(network, n, depth_output, network->width[n-1] - 2*(kernel_size/2));
+    create_a_cube_input_layer(network, n, depth_output, bias_size);
     int n_int = network->width[n-1]*network->width[n-1]*network->depth[n-1];
     int n_out = network->width[n]*network->width[n]*network->depth[n];
     initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, kernel_size, kernel_size, n_int+n_out);
@@ -160,5 +163,37 @@ void add_dense(Network* network, int input_units, int output_units, int activati
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
     initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units);
     create_a_line_input_layer(network, n, output_units);
+    network->size++;
+}
+
+void add_dense_linearisation(Network* network, int input_units, int output_units, int activation) {
+    // Can replace input_units by a research of this dim
+
+    int n = network->size;
+    if (network->max_size == n) {
+        printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
+        return;
+    }
+    network->kernel[n]->cnn = NULL;
+    network->kernel[n]->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
+    Kernel_nn* nn = network->kernel[n]->nn;
+    network->kernel[n]->activation = activation;
+    nn->input_units = input_units;
+    nn->output_units = output_units;
+    
+    nn->bias = (float*)malloc(sizeof(float)*output_units);
+    nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    nn->weights = (float**)malloc(sizeof(float*)*input_units);
+    nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
+    for (int i=0; i < input_units; i++) {
+        nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
+        nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
+    }
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, output_units+input_units);
+    initialisation_1d_matrix(ZERO, nn->d_bias, output_units, output_units+input_units);
+    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
+    initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units);
+    create_a_line_input_layer(network, n, output_units);
+
     network->size++;
 }

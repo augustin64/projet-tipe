@@ -5,6 +5,8 @@ void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int o
     //NOT FINISHED, MISS CONDITIONS ON THE CONVOLUTION
     float f;
     int n = kernel->k_size;
+    printf("Convolution output: %dx%dx%d, %dx%dx%d\n", kernel->columns, output_dim, output_dim, kernel->rows, n, n);
+    printf("BIS %d %d \n", kernel->columns, kernel->k_size);
     for (int i=0; i < kernel->columns; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
@@ -35,7 +37,7 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
                         average += input[i][2*j +a][2*k +b];
                     }
                 }
-                output[i][j][k] = average;
+                output[i][j][k] = average/n;
             }
         }
     }
