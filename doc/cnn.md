@@ -7,7 +7,7 @@ Les informations sont stockées de la manière suivante:
 ### Header
 type | nom de la variable | commentaire
 :---:|:---:|:---:
-uint32_t|magic_number|Variable servant à vérifier que le fichier n'est pas corrompu, vaut ...
+uint32_t|magic_number|Variable servant à vérifier que le fichier n'est pas corrompu, vaut 1012
 uint32_t|size|Nombre de couches du réseau
 uint32_t|initialisation|Fonction d'initialisation du réseau
 uint32_t|dropout|Probabilité d'abandon
@@ -15,11 +15,11 @@ uint32_t|input_width[0]|
 uint32_t|input_depth[0]|
 uint32_t|...|
 uint32_t|...|
-uint32_t|input_width[n]|
-uint32_t|input_depth[n]|
+uint32_t|input_width[size-1]|
+uint32_t|input_depth[size-1]|
 uint32_t|type_couche[0]|
 uint32_t|...|
-uint32_t|type_couche[n]|
+uint32_t|type_couche[size-1]|
 
 > type_couche:  
 > | 0 -> cnn  

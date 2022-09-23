@@ -6,7 +6,7 @@
 #include "include/neuron_io.h"
 #include "include/struct.h"
 
-#define MAGIC_NUMBER 9023
+#define MAGIC_NUMBER 1012
 
 void write_network(char* filename, Network* network) {
     FILE *ptr;
@@ -93,4 +93,80 @@ void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
         }
         fwrite(buffer, sizeof(buffer), 1, ptr);
     }
+}
+
+
+Network* read_network(char* filename) {
+    FILE *ptr;
+    Network* network = (Network*)malloc(sizeof(Network));
+    // TODO: malloc pour network -> input
+
+    ptr = fopen(filename, "rb");
+
+    uint32_t magic;
+    uint32_t size;
+    uint32_t initialisation;
+    uint32_t dropout;
+    uint32_t tmp;
+
+    fread(&magic, sizeof(uint32_t), 1, ptr);
+    if (magic != MAGIC_NUMBER) {
+        printf("Incorrect magic number !\n");
+        exit(1);
+    }
+
+    // Lecture des constantes du réseau
+    fread(&size, sizeof(uint32_t), 1, ptr);
+    network->size = size;
+    fread(&initialisation, sizeof(uint32_t), 1, ptr);
+    network->initialisation = initialisation;
+    fread(&dropout, sizeof(uint32_t), 1, ptr);
+    network->dropout = dropout;
+
+    // Lecture de la taille de l'entrée des différentes matrices
+    network->width = (int*)malloc(sizeof(int)*size);
+    network->depth = (int*)malloc(sizeof(int)*size);
+
+    for (int i=0; i < (int)size; i++) {
+        fread(&tmp, sizeof(tmp), 1, ptr);
+        network->width[i] = tmp;
+        fread(&tmp, sizeof(tmp), 1, ptr);
+        network->depth[i+1] = tmp;
+    }
+
+    // Lecture du type de chaque couche
+    uint32_t type_couche[size];
+
+    for (int i=0; i < (int)size; i++) {
+        fread(&tmp, sizeof(tmp), 1, ptr);
+        type_couche[i] = tmp;
+    }
+
+    // Lecture de chaque couche
+    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
+
+    for (int i=0; i < (int)size; i++) {
+        network->kernel[i] = read_kernel(type_couche[i], ptr);
+    }
+    
+    fclose(ptr);
+    return network;
+}
+
+Kernel* read_kernel(int type_couche, FILE* ptr) {
+    Kernel* kernel = (Kernel*)malloc(sizeof(Kernel));
+    if (type_couche == 0) {
+        // TODO: lecture d'un CNN
+    } else if (type_couche == 1) {
+        // TODO: lecture d'un NN
+    } else if (type_couche == 2) {
+        uint32_t pooling;
+        fread(&pooling, sizeof(pooling), 1, ptr);
+
+        kernel->cnn = NULL;
+        kernel->nn = NULL;
+        kernel->activation = pooling;
+        kernel->linearisation = pooling; // TODO: mettre à 0 la variable inutile
+    }
+    return kernel;
 }

@@ -21,4 +21,17 @@ void write_network(char* filename, Network* network);
 * Écrit une couche dans le fichier spécifié par le pointeur ptr
 */
 void write_couche(Kernel* kernel, int type_couche, FILE* ptr);
+
+
+// Lecture d'un réseau neuronal 
+
+/*
+* Lit un réseau neuronal dans un fichier donné
+*/
+Network* read_network(char* filename);
+
+/*
+* Lit une kernel dans le fichier spécifié par le pointeur ptr
+*/
+Kernel* read_kernel(int type_couche, FILE* ptr);
 #endif
