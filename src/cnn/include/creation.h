@@ -1,4 +1,5 @@
 #include "struct.h"
+#include "initialisation.h"
 
 #ifndef DEF_CREATION_H
 #define DEF_CREATION_H

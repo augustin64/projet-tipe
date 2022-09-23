@@ -27,12 +27,15 @@ build () {
 		echo "Fait."
 		return 0
 	elif [[ $1 == "test" ]]; then
+		[ -f "$OUT/test_"* ] && rm "$OUT/test_"*
 		for i in "test/"*".c"; do
 			echo "Compilation de $i"
 			$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
 			echo "Fait."
 		done
 		if ! command -v nvcc &> /dev/null; then
+			echo "Tests CUDA évités"
+		elif [[ $SKIP_CUDA == 1 ]]; then
 			echo "Tests CUDA évités"
 		else
 			for i in "test/"*".cu"; do
