@@ -17,12 +17,14 @@ int main() {
     write_network(".test-cache/cnn_neuron_io.bin", network);
     printf("OK\n");
 
-    /*
     printf("Vérification de l'accès en lecture\n");
-    Network* network2 = read_network(".test-cache/neuron_io.bin");
+    Network* network2 = read_network(".test-cache/cnn_neuron_io.bin");
     printf("OK\n");
-    deletion_of_network(network);
-    deletion_of_network(network2);
+
+    /*
+    printf("Réécriture du nouveau réseau\n");
+    write_network(".test-cache/cnn_neuron_io_2.bin", network2);
+    printf("OK\n");
     */
     return 0;
 }
