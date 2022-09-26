@@ -13,21 +13,21 @@
 /*
 * Initialise une matrice 1d rows de float en fonction du type d'initialisation
 */
-void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n); //NOT FINISHED (UNIFORM AND VARIATIONS)
+void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n); // TODO (UNIFORM AND VARIATIONS)
 
 /*
 * Initialise une matrice 2d rows*columns de float en fonction du type d'initialisation
 */
-void initialisation_2d_matrix(int initialisation, float** matrix, int rows, int columns, int n); //NOT FINISHED
+void initialisation_2d_matrix(int initialisation, float** matrix, int rows, int columns, int n); // TODO
 
 /*
 * Initialise une matrice 3d depth*dim*columns de float en fonction du type d'initialisation
 */
-void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, int rows, int columns, int n); //NOT FINISHED
+void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, int rows, int columns, int n); // TODO
 
 /*
 * Initialise une matrice 4d rows*columns*rows1*columns1 de float en fonction du type d'initialisation
 */
-void initialisation_4d_matrix(int initialisation, float**** matrix, int rows, int columns, int rows1, int columns1, int n); //NOT FINISHED
+void initialisation_4d_matrix(int initialisation, float**** matrix, int rows, int columns, int rows1, int columns1, int n); // TODO
 
 #endif

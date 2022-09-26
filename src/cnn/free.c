@@ -100,6 +100,6 @@ void free_network_lenet5(Network* network) {
     free_convolution(network, 0);
     free_network_creation(network);
     if (network->size != network->max_size) {
-        printf("Attention, le réseau LeNet5 n'est pas complet");
+        printf("033[33;1m[WARNING]\033[0m Le réseau LeNet5 est incomplet");
     }
 }

@@ -22,7 +22,7 @@ void forward_propagation(Network* network);
 /*
 * Propage en arrière le cnn
 */
-void backward_propagation(Network* network, float wanted_number); //NOT FINISHED
+void backward_propagation(Network* network, float wanted_number); // TODO
 
 /*
 * Renvoie l'erreur du réseau neuronal pour une sortie
