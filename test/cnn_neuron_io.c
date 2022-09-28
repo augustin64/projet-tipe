@@ -6,6 +6,7 @@
 #include "../src/colors.h"
 #include "../src/cnn/neuron_io.c"
 #include "../src/cnn/creation.c"
+#include "../src/cnn/utils.c"
 
 
 
@@ -22,14 +23,12 @@ int main() {
     Network* network2 = read_network(".test-cache/cnn_neuron_io.bin");
     printf("OK\n");
 
-    /*
     printf("Vérification de l'égalité des réseaux\n");
     if (! equals_networks(network, network2)) {
         printf_error("Les deux réseaux obtenus ne sont pas égaux.\n");
         exit(1);
     }
     printf("OK\n");
-    */
 
     return 0;
 }
