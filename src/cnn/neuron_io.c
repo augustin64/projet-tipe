@@ -119,7 +119,7 @@ Network* read_network(char* filename) {
     FILE *ptr;
     Network* network = (Network*)malloc(sizeof(Network));
     // TODO: malloc pour network -> input
-    printf("\033[33;1m[WARNING]\033[0m Chargement depuis un fichier, network->input ne sera pas alloué\n");
+    printf_warning("Chargement depuis un fichier, network->input ne sera pas alloué\n");
 
     ptr = fopen(filename, "rb");
 

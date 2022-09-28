@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+
+#include "../colors.h"
 #include "include/initialisation.h"
 #include "function.c"
 #include "creation.c"
@@ -79,7 +81,7 @@ void forward_propagation(Network* network) {
 }
 
 void backward_propagation(Network* network, float wanted_number) { // TODO
-    printf("\033[33;1m[WARNING]\033[0m Appel de backward_propagation, incomplet\n");
+    printf_warning("Appel de backward_propagation, incomplet\n");
     float* wanted_output = generate_wanted_output(wanted_number);
     int n = network->size-1;
     float loss = compute_cross_entropy_loss(network->input[n][0][0], wanted_output, network->width[n]);

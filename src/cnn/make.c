@@ -1,9 +1,11 @@
 #include <stdio.h>
+
+#include "../colors.h"
 #include "include/make.h"
 
 void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int output_dim) {
     // TODO, MISS CONDITIONS ON THE CONVOLUTION
-    printf("\033[33;1m[WARNING]\033[0m Appel de make_convolution, incomplet\n");
+    printf_warning("Appel de make_convolution, incomplet\n");
     float f;
     int n = kernel->k_size;
     printf("Convolution output: %dx%dx%d, %dx%dx%d\n", kernel->columns, output_dim, output_dim, kernel->rows, n, n);
@@ -27,7 +29,7 @@ void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int o
 
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim) {
     // TODO, MISS CONDITIONS ON THE POOLING
-    printf("\033[33;1m[WARNING]\033[0m Appel de make_average_pooling, incomplet\n");
+    printf_warning("Appel de make_average_pooling, incomplet\n");
     float average;
     int n = size*size;
     for (int i=0; i < output_depth; i++) {
@@ -47,7 +49,7 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
 
 void make_average_pooling_flattened(float*** input, float* output, int size, int input_depth, int input_dim) {
     if ((input_depth*input_dim*input_dim) % (size*size) != 0) {
-        printf("Erreur, deux layers non compatibles avec un average pooling flattened");
+        printf_error("Deux layers non compatibles avec un average pooling flattened");
         return;
     }
     float average;

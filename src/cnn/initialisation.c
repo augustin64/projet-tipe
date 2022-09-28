@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <math.h>
+
+#include "../colors.h"
 #include "include/initialisation.h"
 
 
 void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n) { // TODO
-    printf("\033[33;1m[WARNING]\033[0m Appel de initialisation_1d_matrix, incomplet\n");
+    printf_warning("Appel de initialisation_1d_matrix, incomplet\n");
     float lower_bound = -6/sqrt((double)n);
     float distance = -lower_bound-lower_bound;
     for (int i=0; i < rows; i++) {
@@ -13,7 +15,7 @@ void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n
 }
 
 void initialisation_2d_matrix(int initialisation, float** matrix, int rows, int columns, int n) { // TODO
-    printf("\033[33;1m[WARNING]\033[0m Appel de initialisation_2d_matrix, incomplet\n");
+    printf_warning("Appel de initialisation_2d_matrix, incomplet\n");
     float lower_bound = -6/sqrt((double)n);
     float distance = -lower_bound-lower_bound;
     for (int i=0; i < rows; i++) {
@@ -24,7 +26,7 @@ void initialisation_2d_matrix(int initialisation, float** matrix, int rows, int 
 }
 
 void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, int rows, int columns, int n) { // TODO
-    printf("\033[33;1m[WARNING]\033[0m Appel de initialisation_3d_matrix, incomplet\n");
+    printf_warning("Appel de initialisation_3d_matrix, incomplet\n");
     float lower_bound = -6/sqrt((double)n);
     float distance = -lower_bound-lower_bound;
     for (int i=0; i < depth; i++) {
@@ -37,7 +39,7 @@ void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, in
 }
 
 void initialisation_4d_matrix(int initialisation, float**** matrix, int rows, int columns, int rows1, int columns1, int n) { // TODO
-    printf("\033[33;1m[WARNING]\033[0m Appel de initialisation_4d_matrix, incomplet\n");
+    printf_warning("Appel de initialisation_4d_matrix, incomplet\n");
     float lower_bound = -6/sqrt((double)n);
     float distance = -lower_bound-lower_bound;
     for (int i=0; i < rows; i++) {
