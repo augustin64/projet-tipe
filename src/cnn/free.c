@@ -78,11 +78,8 @@ void free_dense(Network* network, int pos) {
 
 void free_network_creation(Network* network) {
     free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
-
-    for (int i=0; i < network->max_size; i++) {
-        free(network->dim[i]);
-    }
-    free(network->dim);
+    free(network->width);
+    free(network->depth);
 
     free(network->kernel);
     free(network->input);
