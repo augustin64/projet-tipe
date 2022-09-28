@@ -8,24 +8,27 @@
 
 #define MAGIC_NUMBER 1012
 
+#define bufferAdd(val) {buffer[indice_buffer] = val; indice_buffer++;}
+
 void write_network(char* filename, Network* network) {
     FILE *ptr;
     int size = network->size;
     int type_couche[size];
+    int indice_buffer = 0;
 
     ptr = fopen(filename, "wb");
 
     uint32_t buffer[(network->size)*3+4];
 
-    buffer[0] = MAGIC_NUMBER;
-    buffer[1] = size;
-    buffer[2] = network->initialisation;
-    buffer[3] = network->dropout;
+    bufferAdd(MAGIC_NUMBER);
+    bufferAdd(size);
+    bufferAdd(network->initialisation);
+    bufferAdd(network->dropout);
 
     // Écriture du header
     for (int i=0; i < size; i++) {
-        buffer[2*i+4] = network->width[i];
-        buffer[2*i+5] = network->depth[i];
+        bufferAdd(network->width[i]);
+        bufferAdd(network->depth[i]);
     }
 
     for (int i=0; i < size; i++) {
@@ -36,7 +39,7 @@ void write_network(char* filename, Network* network) {
         } else {
             type_couche[i] = 0;
         }
-        buffer[i+2*size+4] = type_couche[i];
+        bufferAdd(type_couche[i]);
     }
 
     fwrite(buffer, sizeof(buffer), 1, ptr);
@@ -51,7 +54,7 @@ void write_network(char* filename, Network* network) {
 
 
 void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
-    int indice;
+    int indice_buffer = 0;
     if (type_couche == 0) { // Cas du CNN
         Kernel_cnn* cnn = kernel->cnn;
 
@@ -64,22 +67,20 @@ void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
-        float buffer[2*cnn->k_size*cnn->k_size*cnn->columns*(cnn->rows+1)];
+        float buffer[cnn->k_size*cnn->k_size*cnn->columns*(cnn->rows+1)];
+
         for (int i=0; i < cnn->columns; i++) {
             for (int j=0; j < cnn->k_size; j++) {
                 for (int k=0; k < cnn->k_size; k++) {
-                    indice = cnn->k_size*(i*cnn->k_size+j)+k;
-                    buffer[indice] = cnn->bias[i][j][k];
+                    bufferAdd(cnn->bias[i][j][k]);
                 }
             }
         }
-        int av_bias = cnn->columns*cnn->k_size*cnn->k_size;
         for (int i=0; i < cnn->rows; i++) {
             for (int j=0; j < cnn->columns; j++) {
                 for (int k=0; k < cnn->k_size; k++) {
                     for (int l=0; l < cnn->k_size; l++) {
-                        indice = ((i*cnn->columns+j)*cnn->k_size+k)*cnn->k_size+l+av_bias;
-                        buffer[indice] = cnn->w[i][j][k][l];
+                        bufferAdd(cnn->w[i][j][k][l]);
                     }
                 }
             }
@@ -98,12 +99,11 @@ void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
         // Écriture du corps
         float buffer[(1+nn->input_units)*nn->output_units];
         for (int i=0; i < nn->output_units; i++) {
-            buffer[i] = nn->bias[i];
+            bufferAdd(nn->bias[i]);
         }
-        int av_bias = nn->output_units;
         for (int i=0; i < nn->input_units; i++) {
             for (int j=0; j < nn->output_units; j++) {
-                buffer[i*nn->output_units+j+av_bias] = nn->weights[i][j];
+                bufferAdd(nn->weights[i][j]);
             }
         }
         fwrite(buffer, sizeof(buffer), 1, ptr);
@@ -138,6 +138,7 @@ Network* read_network(char* filename) {
     // Lecture des constantes du réseau
     fread(&size, sizeof(uint32_t), 1, ptr);
     network->size = size;
+    network->max_size = size;
     fread(&initialisation, sizeof(uint32_t), 1, ptr);
     network->initialisation = initialisation;
     fread(&dropout, sizeof(uint32_t), 1, ptr);
@@ -148,10 +149,10 @@ Network* read_network(char* filename) {
     network->depth = (int*)malloc(sizeof(int)*size);
 
     for (int i=0; i < (int)size; i++) {
-        fread(&tmp, sizeof(tmp), 1, ptr);
+        fread(&tmp, sizeof(uint32_t), 1, ptr);
         network->width[i] = tmp;
-        fread(&tmp, sizeof(tmp), 1, ptr);
-        network->depth[i+1] = tmp;
+        fread(&tmp, sizeof(uint32_t), 1, ptr);
+        network->depth[i] = tmp;
     }
 
     // Lecture du type de chaque couche
@@ -183,6 +184,7 @@ Kernel* read_kernel(int type_couche, FILE* ptr) {
         fread(&buffer, sizeof(buffer), 1, ptr);
         
         kernel->activation = buffer[0];
+        kernel->linearisation = 0;
         kernel->cnn->k_size = buffer[1];
         kernel->cnn->rows = buffer[2];
         kernel->cnn->columns = buffer[3];
