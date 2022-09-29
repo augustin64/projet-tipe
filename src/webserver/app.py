@@ -38,7 +38,7 @@ def recognize_mnist(image):
 
     try:
         output = subprocess.check_output([
-            'out/main',
+            'out/mnist_main',
             'recognize',
             '--modele', '.cache/reseau.bin',
             '--in', '.cache/image-idx3-ubyte',

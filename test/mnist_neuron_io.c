@@ -71,7 +71,11 @@ int main() {
     printf("Vérification de l'accès en lecture\n");
     Network* network2 = read_network(".test-cache/neuron_io.bin");
     printf("OK\n");
+
+    printf("Suppression des réseaux\n");
     deletion_of_network(network);
     deletion_of_network(network2);
+    printf("OK\n");
+
     return 0;
 }

@@ -29,32 +29,13 @@
             "detail": "Tâche générée par le débogueur."
         },
         {
-            "type": "build",
-            "label": "C: gcc générer le fichier actif",
-            "command": "gcc",
+            "label": "build",
+            "command": "${workspaceFolder}/make.sh",
             "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${workspaceFolder}/out/${fileBasenameNoExtension}",
-                "-lm",
-                "-lpthread",
-                "-std=c99",
-                "-Wall",
-                "-Wextra"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "Tâche générée par le débogueur."
-        }
+                "build",
+                "all"
+            ]
+        },
     ],
     "version": "2.0.0"
 }

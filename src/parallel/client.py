@@ -118,13 +118,13 @@ def train_shared(dataset, start, nb_elem, epochs=1, out=DELTA):
         raise NotImplementedError
 
     # On compile out/main si il n'existe pas encore
-    if not os.path.isfile("out/main"):
-        subprocess.call(["./make.sh", "build", "main"])
+    if not os.path.isfile("out/mnist_main"):
+        subprocess.call(["./make.sh", "build", "mnist-main"])
 
     # Entraînement du réseau
     subprocess.call(
         [
-            "out/main", "train",
+            "out/mnist-main", "train",
             "--epochs", str(epochs),
             "--images", images,
             "--labels", labels,

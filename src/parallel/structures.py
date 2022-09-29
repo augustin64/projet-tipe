@@ -95,12 +95,12 @@ class Training:
             return
         
         self.lock_test = True
-        if not os.path.isfile("out/main"):
-            subprocess.call(["./make.sh", "build", "main"])
+        if not os.path.isfile("out/mnist_main"):
+            subprocess.call(["./make.sh", "build", "mnist-main"])
 
         subprocess.call(
         [
-            "out/main", "test",
+            "out/mnist_main", "test",
             "--images", self.test_images,
             "--labels", self.test_labels,
             "--modele", self.reseau
@@ -127,11 +127,11 @@ class Training:
         with open(self.reseau + ".lock", "w", encoding="utf8") as file:
             file.write("")
 
-        if not os.path.isfile("out/utils"):
-            subprocess.call(["./make.sh", "build", "utils"])
+        if not os.path.isfile("out/mnist_utils"):
+            subprocess.call(["./make.sh", "build", "mnist-utils"])
         subprocess.call(
         [
-            "out/utils", "patch-network",
+            "out/mnist_utils", "patch-network",
             "--network", self.reseau,
             "--delta", self.delta,
         ])

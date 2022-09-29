@@ -15,19 +15,19 @@ compile_cuda () {
 
 build () {
 	mkdir -p "$OUT"
-	[[ $1 ]] || set "main"
-	if [[ $1 == "main" ]]; then
+	[[ $1 ]] || set "mnist-main"
+	if [[ $1 == "mnist-main" ]]; then
 		echo "Compilation de src/mnist/main.c"
-		$CC src/mnist/main.c -o "$OUT/main" $FLAGS
+		$CC src/mnist/main.c -o "$OUT/mnist_main" $FLAGS
 		echo "Fait."
 		return 0
-	elif [[ $1 == "preview" ]]; then
+	elif [[ $1 == "mnist-preview" ]]; then
 		echo "Compilation de src/mnist/preview.c"
-		$CC src/mnist/preview.c -o "$OUT/preview_mnist" $FLAGS
+		$CC src/mnist/preview.c -o "$OUT/mnist_preview" $FLAGS
 		echo "Fait."
 		return 0
 	elif [[ $1 == "test" ]]; then
-		[[ -f "$OUT/test_"* ]] && rm "$OUT/test_"*
+		rm "$OUT/test_"* || true
 		for i in "test/"*".c"; do
 			echo "Compilation de $i"
 			$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
@@ -45,16 +45,30 @@ build () {
 			done
 		fi
 		return 0
-	elif [[ $1 == "utils" ]]; then
+	elif [[ $1 == "mnist-utils" ]]; then
 		echo "Compilation de src/mnist/utils.c"
-		$CC "src/mnist/utils.c" -o "$OUT/utils" $FLAGS
+		$CC "src/mnist/utils.c" -o "$OUT/mnist_utils" $FLAGS
 		echo "Fait."
 		return 0
+	elif [[ $1 == "mnist" ]]; then
+		build mnist-main
+		build mnist-preview
+		build mnist-utils
+	elif [[ $1 == "cnn-main" ]]; then
+		echo "Compilation de src/cnn/main.c"
+		$CC "src/cnn/main.c" -o "$OUT/cnn_main" $FLAGS
+		echo "Fait."
+	elif [[ $1 == "cnn" ]]; then
+		build cnn-main
 	else
-		build main
-		build preview
+		echo -e "\033[1m\033[34m###  Building mnist  ###\033[0m"
+		build mnist-main
+		build mnist-preview
+		build mnist-utils
+		echo -e "\033[1m\033[34m###   Building cnn   ###\033[0m"
+		build cnn
+		echo -e "\033[1m\033[34m###  Building tests  ###\033[0m"
 		build test
-		build utils
 		return 0
 	fi
 }
@@ -64,12 +78,12 @@ preview () {
 		build preview
 		return 0
 	elif [[ $1 == "train" ]]; then
-		[[ -f "$OUT/preview_mnist" ]] || $0 build preview
-		"$OUT/preview_mnist" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
+		[[ -f "$OUT/mnist_preview" ]] || $0 build preview
+		"$OUT/mnist_preview" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
 		return 0
 	elif [[ $1 == "t10k" ]]; then
-		[[ -f "$OUT/preview_mnist" ]] || $0 build preview
-		"$OUT/preview_mnist" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
+		[[ -f "$OUT/mnist_preview" ]] || $0 build preview
+		"$OUT/mnist_preview" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
 		return 0
 	fi
 }
@@ -95,11 +109,11 @@ test () {
 }
 
 train () {
-	[[ -f "$OUT/main" ]] || build main
+	[[ -f "$OUT/mnist_main" ]] || build mnist-main
 	[[ $1 ]] || set -- "train"
 	[[ $2 == "-r" || $2 == "--recover" ]] && RECOVER="-r .cache/reseau.bin"
 	mkdir -p .cache
-	"$OUT/main" train \
+	"$OUT/mnist_main" train \
 		--images "data/mnist/$1-images-idx3-ubyte" \
 		--labels "data/mnist/$1-labels-idx1-ubyte" \
 		--out ".cache/reseau.bin" \
@@ -108,10 +122,10 @@ train () {
 }
 
 test_reseau () {
-	[[ -f "$OUT/main" ]] || build main
+	[[ -f "$OUT/mnist_main" ]] || build mnist-main
 	[[ $1 ]] || set -- "train"
 	[[ -f ".cache/reseau.bin" ]] || train train
-	"$OUT/main" test \
+	"$OUT/mnist_main" test \
 		--images "data/mnist/$1-images-idx3-ubyte" \
 		--labels "data/mnist/$1-labels-idx1-ubyte" \
 		--modele ".cache/reseau.bin"
@@ -121,9 +135,9 @@ test_reseau () {
 recognize () {
 	if [[ $1 ]]; then
 		[[ $2 ]] || set -- "$2" "text"
-		[[ -f "$OUT/main" ]] || build main
+		[[ -f "$OUT/mnist_main" ]] || build mnist-main
 		[[ -f ".cache/reseau.bin" ]] || train train
-		"$OUT/main" recognize \
+		"$OUT/mnist_main" recognize \
 			--modele ".cache/reseau.bin" \
 			--in "$1" \
 			--out "$2"
@@ -135,13 +149,13 @@ recognize () {
 }
 
 utils () {
-	[[ -f "$OUT/utils" ]] || build utils
-	"$OUT/utils" ${*:1}
+	[[ -f "$OUT/mnist_utils" ]] || build mnist-utils
+	"$OUT/mnist_utils" ${*:1}
 	return 0
 }
 
 webserver () {
-	[[ -f "$OUT/main" ]] || build main
+	[[ -f "$OUT/mnist_main" ]] || build mnist-main
 	[[ -f ".cache/reseau.bin" ]] || train train
 	FLASK_APP="src/webserver/app.py" flask run
 	return 0
@@ -149,7 +163,13 @@ webserver () {
 
 usage () {
 	echo "Usage:"
-	echo -e "\t$0 build       ( main | preview | train | utils | all )\n"
+	echo -e "\t$0 build       ( test | all | ... )"
+	echo -e "\t\t\tmnist:  mnist"
+	echo -e "\t\t\t\tmnist-main"
+	echo -e "\t\t\t\tmnist-preview"
+	echo -e "\t\t\t\tmnist-utils"
+	echo -e "\t\t\tcnn:    cnn"
+	echo -e "\t\t\t\tcnn-main\n"
 	echo -e "\t$0 train       ( train | t10k ) ( -r | --recover )"
 	echo -e "\t$0 preview     ( train | t10k )"
 	echo -e "\t$0 test_reseau ( train | t10k )\n"

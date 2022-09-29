@@ -27,11 +27,11 @@ training = Training(BATCHS, DATASET, TEST_SET, CACHE)
 os.makedirs(CACHE, exist_ok=True)
 # On crée un réseau aléatoire si il n'existe pas encore
 if not os.path.isfile(RESEAU):
-    if not os.path.isfile("out/main"):
-        subprocess.call(["./make.sh", "build", "main"])
+    if not os.path.isfile("out/mnist_main"):
+        subprocess.call(["./make.sh", "build", "mnist-main"])
     subprocess.call(
     [
-        "out/main", "train",
+        "out/mnist_main", "train",
         "--epochs", "0",
         "--images", "data/mnist/train-images-idx3-ubyte",
         "--labels", "data/mnist/train-labels-idx1-ubyte",
