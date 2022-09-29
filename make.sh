@@ -16,96 +16,101 @@ compile_cuda () {
 build () {
 	mkdir -p "$OUT"
 	[[ $1 ]] || set "mnist-main"
-	if [[ $1 == "mnist-main" ]]; then
-		echo "Compilation de src/mnist/main.c"
-		$CC src/mnist/main.c -o "$OUT/mnist_main" $FLAGS
-		echo "Fait."
-		return 0
-	elif [[ $1 == "mnist-preview" ]]; then
-		echo "Compilation de src/mnist/preview.c"
-		$CC src/mnist/preview.c -o "$OUT/mnist_preview" $FLAGS
-		echo "Fait."
-		return 0
-	elif [[ $1 == "test" ]]; then
-		rm "$OUT/test_"* || true
-		for i in "test/"*".c"; do
-			echo "Compilation de $i"
-			$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS
-			echo "Fait."
-		done
-		if ! command -v nvcc &> /dev/null; then
-			echo "Tests CUDA évités"
-		elif [[ $SKIP_CUDA == 1 ]]; then
-			echo "Tests CUDA évités"
-		else
-			for i in "test/"*".cu"; do
-				echo "Compilation de $i"
-				nvcc "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')"
-				echo "Fait."
-			done
-		fi
-		return 0
-	elif [[ $1 == "mnist-utils" ]]; then
-		echo "Compilation de src/mnist/utils.c"
-		$CC "src/mnist/utils.c" -o "$OUT/mnist_utils" $FLAGS
-		echo "Fait."
-		return 0
-	elif [[ $1 == "mnist" ]]; then
-		build mnist-main
-		build mnist-preview
-		build mnist-utils
-	elif [[ $1 == "cnn-main" ]]; then
-		echo "Compilation de src/cnn/main.c"
-		$CC "src/cnn/main.c" -o "$OUT/cnn_main" $FLAGS
-		echo "Fait."
-	elif [[ $1 == "cnn" ]]; then
-		build cnn-main
-	else
-		echo -e "\033[1m\033[34m###  Building mnist  ###\033[0m"
-		build mnist-main
-		build mnist-preview
-		build mnist-utils
-		echo -e "\033[1m\033[34m###   Building cnn   ###\033[0m"
-		build cnn
-		echo -e "\033[1m\033[34m###  Building tests  ###\033[0m"
-		build test
-		return 0
-	fi
+	case $1 in
+		"mnist-main")
+			echo "Compilation de src/mnist/main.c";
+			$CC src/mnist/main.c -o "$OUT/mnist_main" $FLAGS;
+			echo "Fait.";
+			return 0;;
+		"mnist-preview")
+			echo "Compilation de src/mnist/preview.c";
+			$CC src/mnist/preview.c -o "$OUT/mnist_preview" $FLAGS;
+			echo "Fait.";
+			return 0;;
+		"mnist-utils")
+			echo "Compilation de src/mnist/utils.c";
+			$CC "src/mnist/utils.c" -o "$OUT/mnist_utils" $FLAGS;
+			echo "Fait.";
+			return 0;;
+		"mnist")
+			build mnist-main;
+			build mnist-preview;
+			build mnist-utils;;
+
+		"cnn-main")
+			echo "Compilation de src/cnn/main.c";
+			$CC "src/cnn/main.c" -o "$OUT/cnn_main" $FLAGS;
+			echo "Fait.";;
+		"cnn")
+			build cnn-main;;
+
+		"test")
+			rm "$OUT/test_"* || true;
+			for i in "test/"*".c"; do
+				echo "Compilation de $i";
+				$CC "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')" $FLAGS;
+				echo "Fait.";
+			done;
+			if ! command -v nvcc &> /dev/null; then
+				echo "Tests CUDA évités";
+			elif [[ $SKIP_CUDA == 1 ]]; then
+				echo "Tests CUDA évités";
+			else
+				for i in "test/"*".cu"; do
+					echo "Compilation de $i";
+					nvcc "$i" -o "$OUT/test_$(echo $i | awk -F. '{print $1}' | awk -F/ '{print $NF}')";
+					echo "Fait.";
+				done;
+			fi;
+			return 0;;
+		*)
+			echo -e "\033[1m\033[34m###  Building mnist  ###\033[0m";
+			build mnist-main;
+			build mnist-preview;
+			build mnist-utils;
+			echo -e "\033[1m\033[34m###   Building cnn   ###\033[0m";
+			build cnn;
+			echo -e "\033[1m\033[34m###  Building tests  ###\033[0m";
+			build test;
+			return 0;;
+	esac
 }
 
 preview () {
-	if [[ ! $1 ]]; then
-		build preview
-		return 0
-	elif [[ $1 == "train" ]]; then
-		[[ -f "$OUT/mnist_preview" ]] || $0 build preview
-		"$OUT/mnist_preview" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte
-		return 0
-	elif [[ $1 == "t10k" ]]; then
-		[[ -f "$OUT/mnist_preview" ]] || $0 build preview
-		"$OUT/mnist_preview" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte
-		return 0
-	fi
+	case $1 in
+		"train")
+			[[ -f "$OUT/mnist_preview" ]] || $0 build mnist-preview;
+			"$OUT/mnist_preview" data/mnist/train-images-idx3-ubyte data/mnist/train-labels-idx1-ubyte;
+			return 0;;
+		"t10k")
+			[[ -f "$OUT/mnist_preview" ]] || $0 build mnist-preview;
+			"$OUT/mnist_preview" data/mnist/t10k-images-idx3-ubyte data/mnist/t10k-labels-idx1-ubyte;
+			return 0;;
+		*)
+		build mnist-preview;
+		return 0;;
+	esac
 }
 
 test () {
-	if [[ ! $1 ]]; then
-		build test
-		return 0
-	elif [[ $1 == "run" ]]; then
-		build test
-		mkdir -p .test-cache
-		for i in "$OUT/test_"*; do
-			echo "--- $i ---"
-			$i
-		done
-		for i in "test/"*".sh"; do
-			echo "--- $i ---"
-			chmod +x "$i"
-			"$i" "$OUT" "$0"
-		done
-		return 0
-	fi
+	case $1 in
+		"run")
+			build test;
+			mkdir -p .test-cache;
+			for i in "$OUT/test_"*; do
+				echo "--- $i ---";
+				$i;
+			done
+			for i in "test/"*".sh"; do
+				echo "--- $i ---";
+				chmod +x "$i";
+				"$i" "$OUT" "$0";
+			done;
+			return 0;;
+		*)
+			build test;
+			return 0;;
+	esac
 }
 
 train () {
@@ -197,6 +202,5 @@ if [[ $1 && $(type "$1") = *"is a"*"function"* || $(type "$1") == *"est une fonc
 	$1 ${*:2} # Call the function
 else
 	usage
-	echo $(type "$1")
 	exit 1
 fi;
