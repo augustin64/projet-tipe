@@ -6,7 +6,7 @@ Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieu
 Chaque image renvoie les mêmes poids sur la dernière couche.  
 Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'activation associée sur la dernière couche :
 
-| Chiffre | Nombre d'occurences dans le set d'entraînement | Activation du neurone sortant | Rapport |
+| Chiffre | Nombre d’occurrences dans le set d'entraînement | Activation du neurone sortant | Rapport |
 | --- | --- | --- | --- |
 | 0 | 23692 | 0.483112 | 49040 |
 | 1 | 26968 | 0.508133 | 53072 |
@@ -25,7 +25,7 @@ Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'act
 
 ### **25 Avril 2022** Optimisation de la taille des époques. [698e72f](https://github.com/julienChemillier/TIPE/commit/698e72f56ed93aa6f5d9c81912ee98461f534410)
 Le réseau donne des probabilités dont la somme est de 1 (grâce à softmax).  
-Un problème d'overfitting (sur-ajustement) apparaît, résultant à de mauvais résultats sur des nouvelles données.  
+Un problème de sur-ajustement apparaît, résultant à de mauvais résultats sur des nouvelles données.  
 Plus le réseau contient de couches, plus sa convergence vers des probabilités convenables est longue.  
 Voici un tableau comparant les exactitudes des différentes époques et les dimensions du réseau sur les 60 000 images (train) :
 
@@ -37,7 +37,6 @@ Voici un tableau comparant les exactitudes des différentes époques et les dime
 | 784x16x16x10 | 9.1% | 9.5% | 10.8% | 12.9% | 14.4% | 15.4% | 16.1% | 16.6% | 17.1% | 17.6% | 18.1% | 18.6% | 19.1% | 19.6% | 20.0% | 20.4% | 20.8% | 21.2% | 21.6% | 21.9% | 22.2% | 23.0% |
 | 784x16x16x16x10 | 11.0% | 11.0% | 11.1% | 11.2% | 11.1% | 11.2% | 11.2% | 11.2% | 11.3% | 11.6% | 11.8% | 12.3% | 12.9% | 13.5% | 14.0% | 14.5% | 15.0% | 15.3% | 15.6% | 15.9% | 16.1% | 16.1% |
 
-
 <br/>
 <br/>
 <br/>
@@ -45,3 +44,13 @@ Voici un tableau comparant les exactitudes des différentes époques et les dime
 ### **14 Mai 2022** Implémentation du multithreading. [d40212d](https://github.com/julienChemillier/TIPE/commit/d40212d313b3e8260cb9f5527f261d5d86ad2d1b)
 Le problème qui se posera dans le futur est celui de la puissance de calcul nécessaire.  
 Pour l'optimiser, il faut donc utiliser au maximum les ressources disponibles.
+
+<br/>
+<br/>
+<br/>
+
+### **28 Septembre 2022** Enregistrement des fichiers du CNN [a478a45](https://github.com/julienChemillier/TIPE/commit/a478a454fd1698585b2de83c8abbdca36eb2111b)
+Le réseau neuronal simple donnant des résultats convaincants (approximativement 90% de réussite sur l'échantillon de test),
+Le réseau neuronal convolutif a commencé à être développé depuis [6532ad2](https://github.com/julienChemillier/TIPE/commit/6532ad2545f8882638209cc6918bf37a9f816840).  
+Ce commit introduit l'enregistrement du réseau de neurones convolutif,
+suivi de près par les tests unitaires correspondants [b12a03c](https://github.com/julienChemillier/TIPE/commit/b12a03c1baa8e8505066fa07ae2f20882a24854b).
