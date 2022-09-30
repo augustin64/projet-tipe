@@ -6,11 +6,9 @@
 #include <pthread.h>
 #include <sys/sysinfo.h>
 
-#include "mnist.c"
-#include "neuron_io.c"
-#include "neural_network.c"
-
-#include "include/main.h"
+#include "include/mnist.h"
+#include "include/neuron_io.h"
+#include "include/neural_network.h"
 
 #define EPOCHS 10
 #define BATCHES 100
@@ -20,6 +18,20 @@
 #   include "cuda_utils.cu"
 #   define MAX_CUDA_THREADS 1024 // from NVIDIA documentation
 #endif
+
+/*
+* Structure donnée en argument à la fonction 'train_images'
+*/
+typedef struct TrainParameters {
+    Network* network;
+    int*** images;
+    int* labels;
+    int start;
+    int nb_images;
+    int height;
+    int width;
+    float accuracy;
+} TrainParameters;
 
 
 void print_image(unsigned int width, unsigned int height, int** image, float* previsions) {

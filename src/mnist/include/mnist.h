@@ -6,6 +6,8 @@
 #ifndef DEF_MNIST_H
 #define DEF_MNIST_H
 
+#include "../mnist.c"
+
 uint32_t swap_endian(uint32_t val);
 
 /*

@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mnist.c"
-
-#include "include/cuda_utils.h"
+#include "include/mnist.h"
 
 
 

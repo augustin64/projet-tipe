@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/mnist/neuron_io.c"
-#include "../src/mnist/neural_network.c"
+#include "../src/mnist/include/neuron_io.h"
+#include "../src/mnist/include/neural_network.h"
 
 
 Neuron* creer_neuron(int nb_sortants) {

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../src/mnist/mnist.c"
+#include "../src/mnist/include/mnist.h"
 
 
 void read_test(int nb_images, int width, int height, int*** images, unsigned int* labels) {

@@ -3,9 +3,9 @@
 #include <string.h>
 #include <float.h>
 
-#include "neural_network.c"
-#include "neuron_io.c"
-#include "mnist.c"
+#include "include/neural_network.h"
+#include "include/neuron_io.h"
+#include "include/mnist.h"
 
 /*
 Contient un ensemble de fonctions utiles pour le débogage

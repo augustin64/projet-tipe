@@ -10,6 +10,8 @@
 #ifndef DEF_NEURAL_NETWORK_H
 #define DEF_NEURAL_NETWORK_H
 
+#include "../neural_network.c"
+
 /*
 * Fonction max pour les floats
 */

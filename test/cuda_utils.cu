@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../src/mnist/cuda_utils.cu"
+#include "../src/mnist/include/cuda_utils.h"
 #define MAX_CUDA_THREADS 1024
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }

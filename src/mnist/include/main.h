@@ -1,19 +1,7 @@
 #ifndef DEF_MAIN_H
 #define DEF_MAIN_H
 
-/*
-* Structure donnée en argument à la fonction 'train_images'
-*/
-typedef struct TrainParameters {
-    Network* network;
-    int*** images;
-    int* labels;
-    int start;
-    int nb_images;
-    int height;
-    int width;
-    float accuracy;
-} TrainParameters;
+#include "../main.c"
 
 /*
 * Affiche une image ainsi que les prévisions faites par le réseau de neurones sur sa valeur

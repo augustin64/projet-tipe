@@ -3,6 +3,8 @@
 
 #ifndef DEF_CUDA_UTILS_H
 #define DEF_CUDA_UTILS_H
+
+#include "../cuda_utils.cu"
 /*
 * Il est entendu par "device" le GPU supportant CUDA utilisé
 */

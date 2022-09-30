@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/mnist/neural_network.c"
-#include "../src/mnist/neuron_io.c"
+#include "../src/mnist/include/neural_network.h"
+#include "../src/mnist/include/neuron_io.h"
 
 int main() {
     printf("Création du réseau\n");

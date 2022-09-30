@@ -4,7 +4,6 @@
 #include <inttypes.h>
 
 #include "include/neuron.h"
-#include "include/neuron_io.h"
 
 #define MAGIC_NUMBER       2023
 #define DELTA_MAGIC_NUMBER 2024

@@ -7,7 +7,6 @@
 #include <time.h>
 
 #include "include/neuron.h"
-#include "include/neural_network.h"
 
 // Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
 // Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)

@@ -3,8 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "mnist.c"
-#include "include/preview.h"
+#include "include/mnist.h"
 
 
 void print_image(unsigned int width, unsigned int height, int** image) {
