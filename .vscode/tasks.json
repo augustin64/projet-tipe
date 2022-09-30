@@ -29,11 +29,27 @@
             "detail": "Tâche générée par le débogueur."
         },
         {
-            "label": "build",
+            "label": "build-all",
             "command": "${workspaceFolder}/make.sh",
             "args": [
                 "build",
                 "all"
+            ]
+        },
+        {
+            "label": "build-mnist",
+            "command": "${workspaceFolder}/make.sh",
+            "args": [
+                "build",
+                "mnist"
+            ]
+        },
+        {
+            "label": "build-cnn",
+            "command": "${workspaceFolder}/make.sh",
+            "args": [
+                "build",
+                "cnn"
             ]
         },
     ],
