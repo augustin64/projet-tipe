@@ -35,9 +35,14 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns);
 void apply_function_input(float (*f)(float), float*** input, int depth, int rows, int columns);
 
 /*
-* Redirige vers la fonction à appliquer sur ????
+* Redirige vers la fonction à appliquer sur une matrice
 */
-void choose_apply_function_input(int activation, float*** input, int depth, int rows, int columns);
+void choose_apply_function_matrix(int activation, float*** input, int depth, int dim);
+
+/*
+* Redirige vers la fonction à appliquer sur un vecteur
+*/
+void choose_apply_function_vector(int activation, float*** input, int dim);
 
 
 #endif

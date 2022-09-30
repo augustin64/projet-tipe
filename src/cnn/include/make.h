@@ -14,11 +14,6 @@ void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int o
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim);
 
 /*
-* Effectue un average pooling avec stride=size et aplatissement
-*/
-void make_average_pooling_flattened(float*** input, float* output, int size, int input_depth, int input_dim);
-
-/*
 * Effecute une full connection
 */
 void make_fully_connected(float* input, Kernel_nn* kernel, float* output, int size_input, int size_output);

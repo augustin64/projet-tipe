@@ -4,12 +4,9 @@
 #include "include/make.h"
 
 void make_convolution(float*** input, Kernel_cnn* kernel, float*** output, int output_dim) {
-    // TODO, MISS CONDITIONS ON THE CONVOLUTION
     printf_warning("Appel de make_convolution, incomplet\n");
     float f;
     int n = kernel->k_size;
-    printf("Convolution output: %dx%dx%d, %dx%dx%d\n", kernel->columns, output_dim, output_dim, kernel->rows, n, n);
-    printf("BIS %d %d \n", kernel->columns, kernel->k_size);
     for (int i=0; i < kernel->columns; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
@@ -42,31 +39,6 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
                     }
                 }
                 output[i][j][k] = average/n;
-            }
-        }
-    }
-}
-
-void make_average_pooling_flattened(float*** input, float* output, int size, int input_depth, int input_dim) {
-    if ((input_depth*input_dim*input_dim) % (size*size) != 0) {
-        printf_error("Deux layers non compatibles avec un average pooling flattened");
-        return;
-    }
-    float average;
-    int n = size*size;
-    int cpt = 0;
-    int output_dim = input_dim - 2*(size/2);
-    for (int i=0; i < input_depth; i++) {
-        for (int j=0; j < output_dim; j++) {
-            for (int k=0; k < output_dim; k++) {
-                average = 0.;
-                for (int a=0; a < size; a++) {
-                    for (int b=0; b < size; b++) {
-                        average += input[i][2*j +a][2*k +b];
-                    }
-                }
-                output[cpt] = average;
-                cpt++;
             }
         }
     }

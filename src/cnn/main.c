@@ -36,44 +36,40 @@ void forward_propagation(Network* network) {
     int n = network->size;
     float*** input;
     float*** output;
-    Kernel* k_i_1;
     Kernel* k_i;
     for (int i=0; i < n-1; i++) {
-        k_i_1 = network->kernel[i+1];
         k_i = network->kernel[i];
+        printf("\n i -> %d :: %d %d \n", i, k_i->cnn==NULL, k_i->nn==NULL);
         input_width = network->width[i];
         input_depth = network->depth[i];
         output_width = network->width[i+1];
         output_depth = network->depth[i+1];
-        activation = network->kernel[i]->activation;
+        activation = k_i->activation;
         input = network->input[i];
         output = network->input[i+1];
 
-        if (k_i_1->nn==NULL && k_i_1->cnn!=NULL) { //CNN
-            printf("Convolution of cnn: %dx%d -> %dx%d\n", input_depth, input_width, output_depth, output_width);
-            make_convolution(input, k_i_1->cnn, output, output_width);
-            choose_apply_function_input(activation, output, output_depth, output_width, output_width);
+        if (k_i->cnn!=NULL) { //CNN
+            printf("Convolution of cnn: %dx%dx%d -> %dx%dx%d\n", input_depth, input_width, input_width, output_depth, output_width, output_width);
+            make_convolution(input, k_i->cnn, output, output_width);
+            choose_apply_function_matrix(activation, output, output_depth, output_width);
         }
-        else if (k_i_1->nn!=NULL && k_i_1->cnn==NULL) { //NN
-            printf("Densification of nn\n");
+        else if (k_i->nn!=NULL) { //NN
+            printf("Densification of nn: %dx%dx%d -> %dx%dx%d\n", input_depth, input_width, input_width, output_depth, output_width, output_width);
             // Checked if it is a nn which linearise
             make_fully_connected(network->input[i][0][0], network->kernel[i]->nn, network->input[i+1][0][0], input_width, output_width);
-            choose_apply_function_input(activation, output, 1, 1, output_width);
+            choose_apply_function_vector(activation, output, output_width);
         }
-        else { //Pooling (Vérifier dedans) ??
+        else { //Pooling
             if (n-2==i) {
                 printf("Le réseau ne peut pas finir par une pooling layer");
                 return;
             }
             if (1==1) { // Pooling sur une matrice
-                printf("Average pooling\n");
+                printf("Average pooling: %dx%dx%d -> %dx%dx%d\n", input_depth, input_width, input_width, output_depth, output_width, output_width);
                 make_average_pooling(input, output, activation/100, output_depth, output_width);
             }
-            else if (1==0) { // Pooling sur un vecteur
-                printf("Error: Not implemented: forward: %d\n", i);
-            }
-            else {
-                printf("Erreur: forward_propagation: %d -> %d %d\n", i, k_i_1->nn==NULL, k_i_1->cnn);
+            else { // Pooling sur un vecteur
+                printf("Erreur: le pooling ne se fait que sur une matrice \n");
                 return;
             }
         }
@@ -89,7 +85,7 @@ void backward_propagation(Network* network, float wanted_number) { // TODO
         if (i==n) {
             if (network->kernel[i]->activation == SOFTMAX) {
                 int l2 = network->width[i]; // Taille de la dernière couche
-                int l1 = network->width[i-1];
+                //int l1 = network->width[i-1];
                 for (int j=0; j < l2; j++) {
 
                 }
