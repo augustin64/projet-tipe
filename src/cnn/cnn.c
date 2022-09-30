@@ -9,7 +9,7 @@
 #include "creation.c"
 #include "make.c"
 
-#include "include/main.h"
+#include "include/cnn.h"
 
 // Augmente les dimensions de l'image d'entrée
 #define PADDING_INPUT 2
