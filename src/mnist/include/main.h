@@ -34,7 +34,7 @@ void write_image_in_network(int** image, Network* network, int height, int width
 * Sous fonction de 'train' assignée à un thread
 * parameters: voir la structure 'TrainParameters'
 */
-void* train_images(void* parameters);
+void* train_thread(void* parameters);
 
 /*
 * Fonction d'entraînement du réseau

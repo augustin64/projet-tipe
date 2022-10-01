@@ -55,11 +55,41 @@
       "preLaunchTask": "build-mnist"
     },
     {
-      "name": "cnn/main",
+      "name": "cnn/main train",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/out/cnn_main",
-      "args": [],
+      "args": [
+        "train",
+        "--dataset", "mnist",
+        "--images","data/mnist/train-images-idx3-ubyte",
+        "--labels","data/mnist/train-labels-idx1-ubyte",
+        "--epochs", "10"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build-cnn"
+    },
+    {
+      "name": "cnn/main dev-conv",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/cnn_main",
+      "args": [
+        "dev",
+        "--conv"
+      ],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [],

@@ -12,7 +12,7 @@ Network* create_network(int max_size, int dropout, int initialisation, int input
 /*
 * Renvoie un réseau suivant l'architecture LeNet5
 */
-Network* create_network_lenet5(int dropout, int activation, int initialisation);
+Network* create_network_lenet5(int dropout, int activation, int initialisation, int input_dim, int input_depth);
 
 /*
 * Créé et alloue de la mémoire à une couche de type input cube

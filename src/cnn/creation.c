@@ -28,8 +28,8 @@ Network* create_network(int max_size, int dropout, int initialisation, int input
     return network;
 }
 
-Network* create_network_lenet5(int dropout, int activation, int initialisation) {
-    Network* network = create_network(8, dropout, initialisation, 32, 1); 
+Network* create_network_lenet5(int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+    Network* network = create_network(8, dropout, initialisation, input_dim, input_depth); 
     network->kernel[0]->activation = activation;  
     network->kernel[0]->linearisation = 0;
     add_convolution(network, 1, 32, 6, 28, activation);

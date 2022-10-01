@@ -20,7 +20,7 @@
 #endif
 
 /*
-* Structure donnée en argument à la fonction 'train_images'
+* Structure donnée en argument à la fonction 'train_thread'
 */
 typedef struct TrainParameters {
     Network* network;
@@ -95,7 +95,7 @@ void write_image_in_network(int** image, Network* network, int height, int width
     }
 }
 
-void* train_images(void* parameters) {
+void* train_thread(void* parameters) {
     TrainParameters* param = (TrainParameters*)parameters;
     Network* network = param->network;
     Layer* last_layer = network->layers[network->nb_layers-1];
@@ -187,6 +187,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     int nb_remaining_images = 0; // Nombre d'images restantes dans un batch
     int height = parameters[1];
     int width = parameters[2];
+    free(parameters);
 
     int*** images = read_mnist_images(image_file);
     unsigned int* labels = read_mnist_labels(label_file);
@@ -201,20 +202,22 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     }
 
     TrainParameters** train_parameters = (TrainParameters**)malloc(sizeof(TrainParameters*)*nb_threads);
+    for (int j=0; j < nb_threads; j++) {
+        train_parameters[j] = (TrainParameters*)malloc(sizeof(TrainParameters));
+        train_parameters[j]->images = (int***)images;
+        train_parameters[j]->labels = (int*)labels;
+        train_parameters[j]->height = height;
+        train_parameters[j]->width = width;
+        train_parameters[j]->nb_images = BATCHES / nb_threads;
+    }
+
     for (int i=0; i < epochs; i++) {
         accuracy = 0.;
         for (int k=0; k < nb_images_total / BATCHES; k++) {
             nb_remaining_images = BATCHES;
-
             for (int j=0; j < nb_threads; j++) {
-                train_parameters[j] = (TrainParameters*)malloc(sizeof(TrainParameters));
                 train_parameters[j]->network = copy_network(network);
-                train_parameters[j]->images = (int***)images;
-                train_parameters[j]->labels = (int*)labels;
-                train_parameters[j]->nb_images = BATCHES / nb_threads;
                 train_parameters[j]->start = nb_images_total - BATCHES*(nb_images_total / BATCHES - k -1) - nb_remaining_images + start;
-                train_parameters[j]->height = height;
-                train_parameters[j]->width = width;
 
                 if (j == nb_threads-1) {
                     train_parameters[j]->nb_images = nb_remaining_images;
@@ -225,7 +228,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                 // Création des threads sur le GPU
                 #else
                 // Création des threads sur le CPU
-                pthread_create( &tid[j], NULL, train_images, (void*) train_parameters[j]);
+                pthread_create( &tid[j], NULL, train_thread, (void*) train_parameters[j]);
                 #endif
             }
             for(int j=0; j < nb_threads; j++ ) {
@@ -240,11 +243,10 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                     patch_delta(delta_network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 deletion_of_network(train_parameters[j]->network);
-                free(train_parameters[j]);
             }
-            printf("\rThread [%d/%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, nb_threads, i, epochs, BATCHES*(k+1), nb_images_total, accuracy*100);
+            printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, i, epochs, BATCHES*(k+1), nb_images_total, accuracy*100);
         }
-        printf("\rThread [%d/%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
         write_network(out, network);
         if (delta != NULL)
             write_delta_network(delta, delta_network);
@@ -254,6 +256,9 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
         deletion_of_network(delta_network);
     }
     deletion_of_network(network);
+    for (int j=0; j < nb_threads; j++) {
+        free(train_parameters[j]);
+    }
     free(train_parameters);
     #ifdef __CUDACC__
     // On libère les espaces mémoires utilisés sur le GPU
@@ -271,6 +276,7 @@ float** recognize(char* modele, char* entree) {
     int nb_images = parameters[0];
     int height = parameters[1];
     int width = parameters[2];
+    free(parameters);
 
     int*** images = read_mnist_images(entree);
     float** results = (float**)malloc(sizeof(float*)*nb_images);
@@ -286,7 +292,6 @@ float** recognize(char* modele, char* entree) {
         }
     }
     deletion_of_network(network);
-    free(parameters);
     return results;
 }
 
@@ -371,7 +376,7 @@ int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Pas d'action spécifiée\n");
         help(argv[0]);
-        exit(1);
+        return 1;
     }
     if (! strcmp(argv[1], "train")) {
         int epochs = EPOCHS;
@@ -425,11 +430,11 @@ int main(int argc, char* argv[]) {
         }
         if (! images) {
             printf("Pas de fichier d'images spécifié\n");
-            exit(1);
+            return 1;
         }
         if (! labels) {
             printf("Pas de fichier de labels spécifié\n");
-            exit(1);
+            return 1;
         }
         if (! out) {
             printf("Pas de fichier de sortie spécifié, default: out.bin\n");
@@ -437,7 +442,7 @@ int main(int argc, char* argv[]) {
         }
         // Entraînement en sourçant neural_network.c
         train(epochs, layers, neurons, recovery, images, labels, out, delta, nb_images, start);
-        exit(0);
+        return 0;
     }
     if (! strcmp(argv[1], "recognize")) {
         char* in = NULL;
@@ -461,18 +466,18 @@ int main(int argc, char* argv[]) {
         }
         if (! in) {
             printf("Pas d'entrée spécifiée\n");
-            exit(1);
+            return 1;
         }
         if (! modele) {
             printf("Pas de modèle spécifié\n");
-            exit(1);
+            return 1;
         }
         if (! out) {
             out = "text";
         }
         print_recognize(modele, in, out);
         // Reconnaissance puis affichage des données sous le format spécifié
-        exit(0);
+        return 0;
     }
     if (! strcmp(argv[1], "test")) {
         char* modele = NULL;
@@ -496,7 +501,7 @@ int main(int argc, char* argv[]) {
             }
         }
         test(modele, images, labels, preview_fails);
-        exit(0);
+        return 0;
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);
     help(argv[0]);

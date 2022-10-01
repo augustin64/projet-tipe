@@ -12,7 +12,7 @@
 
 int main() {
     printf("Création du réseau\n");
-    Network* network = create_network_lenet5(0, 3, 2);
+    Network* network = create_network_lenet5(0, 3, 2, 32, 1);
     printf("OK\n");
 
     printf("Écriture du réseau\n");

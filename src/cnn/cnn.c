@@ -137,18 +137,3 @@ float* generate_wanted_output(float wanted_number) {
     }
     return wanted_output;
 }
-
-int main() {
-    Network* network = create_network_lenet5(0, TANH, GLOROT_NORMAL);
-    for (int i=0; i<8; i++) {
-        printf("%d %d \n", network->depth[i], network->width[i]);
-    }
-    printf("Kernel:\n");
-    for (int i=0; i<7; i++) {
-        if (network->kernel[i]->cnn!=NULL) {
-            printf("%d -> %d %d\n", i, network->kernel[i]->cnn->rows, network->kernel[i]->cnn->k_size);
-        }
-    }
-    forward_propagation(network);
-    return 0;
-}

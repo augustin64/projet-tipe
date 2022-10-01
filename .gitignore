@@ -7,3 +7,4 @@
 .vscode
 *.bin
 app-secret
+data/50States10K
