@@ -160,7 +160,8 @@ void add_dense(Network* network, int input_units, int output_units, int activati
     initialisation_1d_matrix(ZERO, nn->d_bias, output_units, output_units+input_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
     initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units);
-    create_a_line_input_layer(network, n, output_units); */
+    */
+    create_a_line_input_layer(network, n, output_units);
     network->size++;
 }
 
