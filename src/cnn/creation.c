@@ -36,7 +36,7 @@ Network* create_network_lenet5(int dropout, int activation, int initialisation, 
     add_2d_average_pooling(network, 28, 14);
     add_convolution(network, 6, 14, 16, 10, activation);
     add_2d_average_pooling(network, 10, 5);
-    add_dense_linearisation(network, 160, 120, activation);
+    add_dense_linearisation(network, 400, 120, activation);
     add_dense(network, 120, 84, activation);
     add_dense(network, 84, 10, SOFTMAX);
     return network;
@@ -155,13 +155,13 @@ void add_dense(Network* network, int input_units, int output_units, int activati
         nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
         nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
     }
+    create_a_line_input_layer(network, n, output_units);
     /* Not currently used
     initialisation_1d_matrix(network->initialisation, nn->bias, output_units, output_units+input_units);
     initialisation_1d_matrix(ZERO, nn->d_bias, output_units, output_units+input_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
     initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units);
     */
-    create_a_line_input_layer(network, n, output_units);
     network->size++;
 }
 
