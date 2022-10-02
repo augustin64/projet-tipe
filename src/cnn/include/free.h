@@ -5,41 +5,43 @@
 
 /*
 * Libère la mémoire allouée à une couche de type input cube
+* Donc free networkt->input[pos][i][j]
 */
 void free_a_cube_input_layer(Network* network, int pos, int depth, int dim);
 
 /*
 * Libère la mémoire allouée à une couche de type input line
+* Donc free networkt->input[pos][0][0]
 */
 void free_a_line_input_layer(Network* network, int pos);
 
 /*
-* Libère l'espace mémoie et supprime une couche d'average pooling classique
+* Libère l'espace mémoire alloué dans 'add_2d_average_pooling' (creation.c)
 */
-void free_average_pooling(Network* network, int pos);
+void free_2d_average_pooling(Network* network, int pos);
 
 /*
-* Libère l'espace mémoie et supprime une couche d'average pooling flatten
-*/
-void free_average_pooling_flatten(Network* network, int pos);
-
-/*
-* Libère l'espace mémoire et supprime une couche de convolution
+* Libère l'espace mémoire dans 'add_convolution' (creation.c)
 */
 void free_convolution(Network* network, int pos);
 
 /*
-* Libère l'espace mémoire et supprime une couche dense
+* Libère l'espace mémoire alloué dans 'add_dense' (creation.c)
 */
 void free_dense(Network* network, int pos);
 
 /*
-* Libère l'espace alloué dans la fonction 'create_network'
+* Libère l'espace mémoire alloué dans 'add_dense_linearisation' (creation.c)
+*/
+void free_dense_linearisation(Network* network, int pos);
+
+/*
+* Libère l'espace mémoire alloué dans 'create_network' (creation.c)
 */
 void free_network_creation(Network* network);
 
 /*
-* Libère l'espace alloué dans la fonction 'create_network_lenet5'
+* Libère l'espace mémoire alloué dans 'create_network_lenet5' (creation.c)
 */
 void free_network_lenet5(Network* network);
 
