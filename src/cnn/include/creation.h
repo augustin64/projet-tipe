@@ -7,12 +7,12 @@
 /*
 * Créé un réseau qui peut contenir max_size couche (dont celle d'input et d'output)
 */
-Network* create_network(int max_size, int dropout, int initialisation, int input_dim, int input_depth);
+Network* create_network(int max_size, int learning_rate, int dropout, int initialisation, int input_dim, int input_depth);
 
 /*
 * Renvoie un réseau suivant l'architecture LeNet5
 */
-Network* create_network_lenet5(int dropout, int activation, int initialisation, int input_dim, int input_depth);
+Network* create_network_lenet5(int learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
 
 /*
 * Créé et alloue de la mémoire à une couche de type input cube

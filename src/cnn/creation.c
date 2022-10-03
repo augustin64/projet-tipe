@@ -4,11 +4,12 @@
 #include "include/function.h"
 #include "initialisation.c"
 
-Network* create_network(int max_size, int dropout, int initialisation, int input_dim, int input_depth) {
+Network* create_network(int max_size, int learning_rate, int dropout, int initialisation, int input_dim, int input_depth) {
     if (dropout < 0 || dropout > 100) {
         printf("Erreur, la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
     Network* network = (Network*)malloc(sizeof(Network)); 
+    network->learning_rate = learning_rate;
     network->max_size = max_size; 
     network->dropout = dropout; 
     network->initialisation = initialisation; 
@@ -28,8 +29,8 @@ Network* create_network(int max_size, int dropout, int initialisation, int input
     return network;
 }
 
-Network* create_network_lenet5(int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(8, dropout, initialisation, input_dim, input_depth); 
+Network* create_network_lenet5(int learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+    Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth); 
     network->kernel[0]->activation = activation;  
     network->kernel[0]->linearisation = 0;
     add_convolution(network, 1, 32, 6, 28, activation);

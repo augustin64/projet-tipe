@@ -30,6 +30,7 @@ typedef struct Kernel {
 
 typedef struct Network{
     int dropout; // Contient la probabilité d'abandon d'un neurone dans [0, 100] (entiers)
+    int learning_rate;
     int initialisation; // Contient le type d'initialisation
     int max_size; // Taille du tableau contenant le réseau
     int size; // Taille actuelle du réseau (size ≤ max_size)

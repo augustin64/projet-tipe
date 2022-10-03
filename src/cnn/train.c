@@ -77,7 +77,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     }
 
     // Initialisation du réseau
-    Network* network = create_network_lenet5(0, TANH, GLOROT_NORMAL, input_dim, input_depth);
+    Network* network = create_network_lenet5(0, 0, TANH, GLOROT_NORMAL, input_dim, input_depth);
 
     #ifdef USE_MULTITHREADING
     // Récupération du nombre de threads disponibles

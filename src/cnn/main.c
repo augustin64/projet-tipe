@@ -27,7 +27,7 @@ void help(char* call) {
 
 
 void dev_conv() {
-    Network* network = create_network_lenet5(0, TANH, GLOROT_NORMAL, 32, 1);
+    Network* network = create_network_lenet5(0, 0, TANH, GLOROT_NORMAL, 32, 1);
     forward_propagation(network);
 }
 
