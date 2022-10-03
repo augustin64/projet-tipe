@@ -33,7 +33,7 @@ Network* create_network_lenet5(int learning_rate, int dropout, int activation, i
     Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth); 
     network->kernel[0]->activation = activation;  
     network->kernel[0]->linearisation = 0;
-    add_convolution(network, 1, 32, 6, 28, activation);
+    add_convolution(network, input_depth, input_dim, 6, 28, activation);
     add_2d_average_pooling(network, 28, 14);
     add_convolution(network, 6, 14, 16, 10, activation);
     add_2d_average_pooling(network, 10, 5);
