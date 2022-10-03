@@ -37,7 +37,7 @@ typedef struct Network{
     int* width; // width[size]
     int* depth; // depth[size]
     Kernel** kernel; // Tableau de tous les kernels
-    float**** input; // Tableau de toutes les couches du réseau input[nb couches][?][?][?]
+    float**** input; // Tableau de toutes les couches du réseau input[nb couches][couche->depth][couche->dim][couche->dim]
 } Network;
 
 #endif

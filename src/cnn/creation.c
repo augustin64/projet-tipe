@@ -33,13 +33,13 @@ Network* create_network_lenet5(int learning_rate, int dropout, int activation, i
     Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth); 
     network->kernel[0]->activation = activation;  
     network->kernel[0]->linearisation = 0;
-    add_convolution(network, input_depth, input_dim, 6, 28, activation);
-    add_2d_average_pooling(network, 28, 14);
-    add_convolution(network, 6, 14, 16, 10, activation);
-    add_2d_average_pooling(network, 10, 5);
-    add_dense_linearisation(network, 400, 120, activation);
-    add_dense(network, 120, 84, activation);
-    add_dense(network, 84, 10, SOFTMAX);
+    add_convolution(network, 6, 28, activation);
+    add_2d_average_pooling(network, 14);
+    add_convolution(network, 16, 10, activation);
+    add_2d_average_pooling(network, 5);
+    add_dense_linearisation(network, 120, activation);
+    add_dense(network, 84, activation);
+    add_dense(network, 10, SOFTMAX);
     return network;
 }
 
@@ -63,9 +63,10 @@ void create_a_line_input_layer(Network* network, int pos, int dim) {
     network->depth[pos] = 1;
 }
 
-void add_2d_average_pooling(Network* network, int dim_input, int dim_ouput) {
+void add_2d_average_pooling(Network* network, int dim_ouput) {
     int n = network->size;
     int k_pos = n-1;
+    int dim_input = network->width[k_pos];
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
         return;
@@ -82,13 +83,16 @@ void add_2d_average_pooling(Network* network, int dim_input, int dim_ouput) {
     network->size++;
 }
 
-void add_convolution(Network* network, int depth_input, int dim_input, int depth_output, int dim_output, int activation) {
+void add_convolution(Network* network, int depth_output, int dim_output, int activation) {
     int n = network->size;
     int k_pos = n-1;
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche de convolution, le réseau est déjà plein \n");
         return;
     }
+    int depth_input = network->depth[k_pos];
+    int dim_input = network->width[k_pos];
+
     int bias_size = dim_output;
     int kernel_size = dim_input - dim_output +1;
     network->kernel[k_pos]->nn = NULL;
@@ -135,9 +139,10 @@ void add_convolution(Network* network, int depth_input, int dim_input, int depth
     network->size++;
 }
 
-void add_dense(Network* network, int input_units, int output_units, int activation) {
+void add_dense(Network* network, int output_units, int activation) {
     int n = network->size;
     int k_pos = n-1;
+    int input_units = network->width[k_pos];
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
@@ -166,11 +171,12 @@ void add_dense(Network* network, int input_units, int output_units, int activati
     network->size++;
 }
 
-void add_dense_linearisation(Network* network, int input_units, int output_units, int activation) {
+void add_dense_linearisation(Network* network, int output_units, int activation) {
     // Can replace input_units by a research of this dim
 
     int n = network->size;
     int k_pos = n-1;
+    int input_units = network->depth[k_pos]*network->width[k_pos]*network->width[k_pos];
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
