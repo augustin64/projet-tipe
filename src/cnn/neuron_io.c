@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "../colors.h"
 #include "include/neuron_io.h"
 #include "include/struct.h"
 
@@ -254,8 +255,8 @@ Kernel* read_kernel(int type_couche, FILE* ptr) {
         nn->weights = (float**)malloc(sizeof(float*)*nn->input_units);
         nn->d_weights = (float**)malloc(sizeof(float*)*nn->input_units);
         for (int i=0; i < nn->input_units; i++) {
-            nn->weights[i] = malloc(sizeof(float)*nn->output_units);
-            nn->d_weights[i] = malloc(sizeof(float)*nn->output_units);
+            nn->weights[i] = (float*)malloc(sizeof(float)*nn->output_units);
+            nn->d_weights[i] = (float*)malloc(sizeof(float)*nn->output_units);
             for (int j=0; j < nn->output_units; j++) {
                 fread(&tmp, sizeof(tmp), 1, ptr);
                 nn->weights[i][j] = tmp;
