@@ -119,8 +119,6 @@ void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
 Network* read_network(char* filename) {
     FILE *ptr;
     Network* network = (Network*)malloc(sizeof(Network));
-    // TODO: malloc pour network -> input
-    printf_warning("Chargement depuis un fichier, network->input ne sera pas alloué\n");
 
     ptr = fopen(filename, "rb");
 
@@ -169,6 +167,20 @@ Network* read_network(char* filename) {
 
     for (int i=0; i < (int)size; i++) {
         network->kernel[i] = read_kernel(type_couche[i], ptr);
+    }
+
+    network->input = (float****)malloc(sizeof(float***)*size);
+    for (int i=0; i < size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
+        network->input[i] = (float***)malloc(sizeof(float**)*network->depth[i]);
+        for (int j=0; j < network->depth[i]; j++) {
+            network->input[i][j] = (float**)malloc(sizeof(float*)*network->width[i]);
+            for (int k=0; k < network->width[i]; k++) {
+                network->input[i][j][k] = (float*)malloc(sizeof(float)*network->width[i]);
+                for (int l=0; l < network->width[i]; l++) {
+                    network->input[i][j][k][l] = 0.;
+                }
+            }
+        }
     }
     
     fclose(ptr);
