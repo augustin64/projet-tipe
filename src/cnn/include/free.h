@@ -41,8 +41,8 @@ void free_dense_linearisation(Network* network, int pos);
 void free_network_creation(Network* network);
 
 /*
-* Libère l'espace mémoire alloué dans 'create_network_lenet5' (creation.c)
+* Libère l'espace mémoire alloué à un réseau quelconque
 */
-void free_network_lenet5(Network* network);
+void free_network(Network* network);
 
 #endif

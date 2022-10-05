@@ -19,7 +19,7 @@ void free_a_line_input_layer(Network* network, int pos) {
 }
 
 void free_2d_average_pooling(Network* network, int pos) {
-    free_a_cube_input_layer(network, pos+1, network->depth[pos-1], network->width[pos-1]/2);
+    free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
 }
 
 void free_convolution(Network* network, int pos) {
@@ -27,8 +27,8 @@ void free_convolution(Network* network, int pos) {
     int c = k_pos->columns;
     int k_size = k_pos->k_size;
     int r = k_pos->rows;
-    int bias_size = network->width[pos-1]-k_size+1; // Not sure of the value
-    free_a_cube_input_layer(network, pos+1, c, bias_size);
+    int bias_size = network->width[pos+1]; // Not sure of the value
+    free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
     for (int i=0; i < c; i++) {
         for (int j=0; j < bias_size; j++) {
             free(k_pos->bias[i][j]);
@@ -104,16 +104,20 @@ void free_network_creation(Network* network) {
     free(network);
 }
 
-void free_network_lenet5(Network* network) {
-    free_dense(network, 6);
-    free_dense(network, 5);
-    free_dense_linearisation(network, 4);
-    free_average_pooling(network, 3);
-    free_convolution(network, 2);
-    free_average_pooling(network, 1);
-    free_convolution(network, 0);
-    free_network_creation(network);
-    if (network->size != network->max_size) {
-        printf("033[33;1m[WARNING]\033[0m Le réseau LeNet5 est incomplet");
+void free_network(Network* network) {
+    for (int i=network->size-2; i>=0; i--) {
+        if (network->kernel[i]->cnn != NULL) { // Convolution
+            free_convolution(network, i);
+        } else if (network->kernel[i]->nn != NULL) {
+            if (network->depth[i]==1) { // Dense non linearised
+                free_dense(network, i);
+            } else { // Dense lineariation
+                free_dense_linearisation(network, i);
+            }
+        } else { // Pooling
+            free_2d_average_pooling(network, i);
+        }
     }
+    printf("Network freed successfully !\n");
+    free_network_creation(network);
 }
