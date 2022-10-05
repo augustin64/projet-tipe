@@ -30,14 +30,14 @@ typedef struct Kernel {
 
 typedef struct Network{
     int dropout; // Contient la probabilité d'abandon d'un neurone dans [0, 100] (entiers)
-    int learning_rate;
+    int learning_rate; // Taux d'apprentissage du réseau
     int initialisation; // Contient le type d'initialisation
     int max_size; // Taille du tableau contenant le réseau
     int size; // Taille actuelle du réseau (size ≤ max_size)
     int* width; // width[size]
     int* depth; // depth[size]
-    Kernel** kernel; // Tableau de tous les kernels
-    float**** input; // Tableau de toutes les couches du réseau input[nb couches][couche->depth][couche->dim][couche->dim]
+    Kernel** kernel; // kernel[size], contient tous les kernels
+    float**** input; // Tableau de toutes les couches du réseau input[size][couche->depth][couche->width][couche->width]
 } Network;
 
 #endif

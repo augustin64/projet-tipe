@@ -14,4 +14,9 @@
 */
 bool equals_networks(Network* network1, Network* network2);
 
+/*
+ * Duplique un réseau
+*/
+Network* copy_network(Network* network);
+
 #endif

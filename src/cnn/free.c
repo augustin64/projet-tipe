@@ -118,6 +118,5 @@ void free_network(Network* network) {
             free_2d_average_pooling(network, i);
         }
     }
-    printf("Network freed successfully !\n");
     free_network_creation(network);
 }
