@@ -1,3 +1,5 @@
+#include "struct.h"
+
 #ifndef DEF_TRAIN_H
 #define DEF_TRAIN_H
 
