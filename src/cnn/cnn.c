@@ -19,14 +19,19 @@ int will_be_drop(int dropout_prob) {
 }
 
 void write_image_in_network_32(int** image, int height, int width, float** input) {
-    for (int i=0; i < height+2*PADDING_INPUT; i++) {
-        for (int j=0; j < width+2*PADDING_INPUT; j++) {
-            if (i < PADDING_INPUT || i >= height+PADDING_INPUT || j < PADDING_INPUT || j >= width+PADDING_INPUT) {
-                input[i][j] = 0.;
-            }
-            else {
-                input[i][j] = (float)image[i][j] / 255.0f;
-            }
+    int padding = (32 - height)/2;
+    for (int i=0; i < padding; i++) {
+        for (int j=0; j < 32; j++) {
+            input[i][j] = 0.;
+            input[31-i][j] = 0.;
+            input[j][i] = 0.;
+            input[j][31-i] = 0.;
+        }
+    }
+
+    for (int i=0; i < width; i++) {
+        for (int j=0; j < height; j++) {
+            input[i+2][j+2] = (float)image[i][j] / 255.0f;
         }
     }
 }
@@ -49,16 +54,13 @@ void forward_propagation(Network* network) {
         activation = k_i->activation;
 
         if (k_i->cnn!=NULL) { // Convolution
-            printf("\n(%d)-Convolution of cnn: %dx%dx%d -> %dx%dx%d\n", i, input_depth, input_width, input_width, output_depth, output_width, output_width);
             make_convolution(k_i->cnn, input, output, output_width);
             choose_apply_function_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn!=NULL) { // Full connection
             if (input_depth==1) { // Vecteur -> Vecteur
-                printf("\n(%d)-Densification of nn: %dx%dx%d -> %dx%dx%d\n", i, 1, 1, input_width, 1, 1, output_width);
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
             } else { // Matrice -> vecteur
-                printf("\n(%d)-Densification linearised of nn: %dx%dx%d -> %dx%dx%d\n", i, input_depth, input_width, input_width, 1, 1, output_width);
                 make_dense_linearised(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
             choose_apply_function_vector(activation, output, output_width);
@@ -68,7 +70,6 @@ void forward_propagation(Network* network) {
                 printf("Le réseau ne peut pas finir par une pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
-                printf("\n(%d)-Average pooling: %dx%dx%d -> %dx%dx%d\n", i, input_depth, input_width, input_width, output_depth, output_width, output_width);
                 make_average_pooling(input, output, activation/100, output_depth, output_width);
             }
         }

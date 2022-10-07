@@ -7,6 +7,8 @@
 #include "../mnist/mnist.c"
 #include "../colors.h"
 #include "neuron_io.c"
+#include "utils.c"
+#include "free.c"
 #include "cnn.c"
 
 #include "include/train.h"
@@ -28,8 +30,8 @@ void* train_thread(void* parameters) {
 
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
-            // TODO write_image_in_network_32(images[i], height, width, network_input);
-            //forward_propagation(network);
+            write_image_in_network_32(images[i], height, width, network->input[0][0]);
+            forward_propagation(network);
             //backward_propagation(network, labels[i]);
 
             // TODO get_indice_max(network last layer)
@@ -118,10 +120,14 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     if (dataset_type == 0) {
         train_params->images = images;
         train_params->labels = labels;
+        train_params->width = 28;
+        train_params->height = 28;
         train_params->data_dir = NULL;
     } else {
         train_params->data_dir = data_dir;
         train_params->images = NULL;
+        train_params->width = 0;
+        train_params->height = 0;
         train_params->labels = NULL;
     }
     train_params->nb_images = BATCHES;
@@ -145,17 +151,16 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 } else {
                     nb_remaining_images -= BATCHES / nb_threads;
                 }
-                // TODO train_parameters[k]->network = copy_network(network);
+                train_parameters[k]->network = copy_network(network);
                 train_parameters[k]->start = BATCHES*j + (nb_images_total/BATCHES)*k;
                 pthread_create( &tid[j], NULL, train_thread, (void*) train_parameters[k]);
             }
             for (int k=0; k < nb_threads; k++) {
-                // TODO joindre les threads et afficher la progression
                 // On attend la terminaison de chaque thread un à un
                 pthread_join( tid[j], NULL );
                 accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
                 // TODO patch_network(network, train_parameters[k]->network, train_parameters[k]->nb_images);
-                // TODO free_network(train_parameters[k]->network);
+                free_network(train_parameters[k]->network);
             }
             printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, accuracy*100);
             #else
@@ -172,7 +177,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         #endif
         write_network(out, network);
     }
-    // TODO free_network(network)
+    free_network(network);
     #ifdef USE_MULTITHREADING
     free(tid);
     #else
