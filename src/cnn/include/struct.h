@@ -7,8 +7,10 @@ typedef struct Kernel_cnn {
     int columns; // Depth of the output
     float*** bias; // bias[columns][k_size][k_size]
     float*** d_bias; // d_bias[columns][k_size][k_size]
+    float*** last_d_bias; // last_d_bias[columns][k_size][k_size]
     float**** w; // w[rows][columns][k_size][k_size]
-    float**** d_w; // dw[rows][columns][k_size][k_size]
+    float**** d_w; // d_w[rows][columns][k_size][k_size]
+    float**** last_d_w; // last_d_w[rows][columns][k_size][k_size]
 } Kernel_cnn;
 
 typedef struct Kernel_nn {
@@ -16,8 +18,10 @@ typedef struct Kernel_nn {
     int output_units; // Nombre d'éléments en sortie
     float* bias; // bias[output_units]
     float* d_bias; // d_bias[output_units]
+    float* last_d_bias; // last_d_bias[output_units]
     float** weights; // weight[input_units][output_units]
     float** d_weights; // d_weights[input_units][output_units]
+    float** last_d_weights; // last_d_weights[input_units][output_units]
 } Kernel_nn;
 
 typedef struct Kernel {

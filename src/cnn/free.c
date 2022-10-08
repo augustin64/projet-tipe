@@ -33,27 +33,34 @@ void free_convolution(Network* network, int pos) {
         for (int j=0; j < bias_size; j++) {
             free(k_pos->bias[i][j]);
             free(k_pos->d_bias[i][j]);
+            free(k_pos->last_d_bias[i][j]);
         }
         free(k_pos->bias[i]);
         free(k_pos->d_bias[i]);
+        free(k_pos->last_d_bias[i]);
     }
     free(k_pos->bias);
     free(k_pos->d_bias);
+    free(k_pos->last_d_bias);
 
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
                 free(k_pos->w[i][j][k]);
                 free(k_pos->d_w[i][j][k]);
+                free(k_pos->last_d_w[i][j][k]);
             }
             free(k_pos->w[i][j]);
             free(k_pos->d_w[i][j]);
+            free(k_pos->last_d_w[i][j]);
         }
         free(k_pos->w[i]);
         free(k_pos->d_w[i]);
+        free(k_pos->last_d_w[i]);
     }
     free(k_pos->w);
     free(k_pos->d_w);
+    free(k_pos->last_d_w);
 
     free(k_pos);
 }
@@ -65,12 +72,15 @@ void free_dense(Network* network, int pos) {
     for (int i=0; i < dim; i++) {
         free(k_pos->weights[i]);
         free(k_pos->d_weights[i]);
+        free(k_pos->last_d_weights[i]);
     }
     free(k_pos->weights);
     free(k_pos->d_weights);
+    free(k_pos->last_d_weights);
 
     free(k_pos->bias);
     free(k_pos->d_bias);
+    free(k_pos->last_d_bias);
 
     free(k_pos);
 }
@@ -82,12 +92,15 @@ void free_dense_linearisation(Network* network, int pos) {
     for (int i=0; i < dim; i++) {
         free(k_pos->weights[i]);
         free(k_pos->d_weights[i]);
+        free(k_pos->last_d_weights[i]);
     }
     free(k_pos->weights);
     free(k_pos->d_weights);
+    free(k_pos->last_d_weights);
 
     free(k_pos->bias);
     free(k_pos->d_bias);
+    free(k_pos->last_d_bias);
 
     free(k_pos);
 }
