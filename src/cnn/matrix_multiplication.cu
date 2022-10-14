@@ -102,10 +102,14 @@ void matrix_multiplication(float** m1, float** m2, float** result, int n, int p,
     float* result_dev;
     
     gpuErrchk( cudaMallocPitch((void**)&m1_dev, &pitch_m1_dev, p * sizeof(float), n));
-    gpuErrchk( cudaMemcpy2D(m1_dev, pitch_m1_dev, &m1, p*sizeof(float), p* sizeof(float), n, cudaMemcpyHostToDevice));
+    for (int i=0; i < n; i++) {
+        gpuErrchk( cudaMemcpy2D((void*)((char*)m1_dev + i*pitch_m1_dev), pitch_m1_dev, (const void*)&(m1[i][0]), p*sizeof(float), p*sizeof(float), 1, cudaMemcpyHostToDevice));
+    }
     
     gpuErrchk( cudaMallocPitch((void**)&m2_dev, &pitch_m2_dev, q * sizeof(float), p));
-    gpuErrchk( cudaMemcpy2D(m2_dev, pitch_m2_dev, &m2, q*sizeof(float), q* sizeof(float), p, cudaMemcpyHostToDevice));
+    for (int i=0; i < p; i++) {
+        gpuErrchk( cudaMemcpy2D((void*)((char*)m2_dev + i*pitch_m2_dev), pitch_m2_dev, (const void*)&(m2[i][0]), q*sizeof(float), q*sizeof(float), 1, cudaMemcpyHostToDevice));
+    }
 
     gpuErrchk( cudaMallocPitch((void**)&result_dev, &pitch_result_dev, q * sizeof(float), n));
 
@@ -118,7 +122,7 @@ void matrix_multiplication(float** m1, float** m2, float** result, int n, int p,
     gpuErrchk( cudaDeviceSynchronize() );
 
     // Post-traitement
-    for (int i=0; i < q; i++) {
+    for (int i=0; i < n; i++) {
         gpuErrchk( cudaMemcpy2D((void*)&(result[i][0]), q*sizeof(float), (const void*)((char*)result_dev + i*pitch_result_dev), pitch_result_dev, sizeof(float)*q, 1, cudaMemcpyDeviceToHost));
     }
 
