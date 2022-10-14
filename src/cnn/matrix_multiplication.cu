@@ -18,15 +18,15 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 
 
 #ifdef __CUDACC__
-int i_div_up(int hostPtr, int b){
-    return ((hostPtr % b) != 0) ? (hostPtr / b + 1) : (hostPtr / b);
+int i_div_up(int a, int b) { // Partie entière supérieure de a/b
+    return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
 
-__global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p, int q, size_t pitch_m, size_t pitch_n, size_t pitch_p) {
+__global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int p, size_t pitch_m, size_t pitch_n, size_t pitch_p) {
     // 2D Thread ID
-    int tx = blockIdx.x*blockDim.x + threadIdx.x;
-    int ty = blockIdx.y*blockDim.y + threadIdx.y;
+    int tx = blockIdx.x*blockDim.x + threadIdx.x; // Indice de colonne
+    int ty = blockIdx.y*blockDim.y + threadIdx.y; // Indice de ligne
     // Pvalue stores the Pd element that is computed by the thread
     float Pvalue = 0.;
     float* M_offset;
@@ -38,7 +38,7 @@ __global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p,
     
         Pvalue += M_offset[k] * N_offset[tx];
     }
-    // Write the matrix to device memory each thread writes one element
+    // Écrire les résultats des calculs dans la matrice stockée sur le device
     float* P_offset = (float*)((char*)Pd + ty * pitch_p);
     P_offset[tx] = Pvalue;
 }
@@ -67,9 +67,9 @@ void matrix_multiplication_device(float** m1, float** m2, float** result, int n,
 
     // Traitement
     dim3 gridSize(i_div_up(n, BLOCKSIZE_x), i_div_up(q, BLOCKSIZE_y));
-    dim3 blockSize(BLOCKSIZE_y, BLOCKSIZE_x);
+    dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y);
 
-    matrix_mul_kernel<<<gridSize, blockSize>>>(m1_dev, m2_dev, result_dev, n, p, q, pitch_m1_dev, pitch_m2_dev, pitch_result_dev);
+    matrix_mul_kernel<<<gridSize, blockSize>>>(m1_dev, m2_dev, result_dev, p, pitch_m1_dev, pitch_m2_dev, pitch_result_dev);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 
