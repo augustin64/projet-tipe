@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
 
 #define BLOCKSIZE_x 16
 #define BLOCKSIZE_y 16
@@ -16,54 +15,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 #endif
-
-float random_float(float low, float high) {
-  float t = (float)rand() / (float)RAND_MAX;
-  return (1.0f - t) * low + t * high;
-}
-
-
-void fill_matrix_random(float **matrix, int n, int p) {
-  for (int i=0; i < n; i++) {
-    for (int j=0; j < p; j++) {
-        matrix[i][j] = random_float(0.0f, 15.0f);
-    }
-  }
-}
-
-
-void print_matrix(float** mat, int n, int p) {
-    for (int i=0; i < n; i++) {
-        printf("[\t");
-        for (int j=0; j < p; j++) {
-            printf("%0.1f\t", mat[i][j]);
-        }
-        printf("]\n");
-    }
-}
-
-
-float** create_matrix(int n, int p) {
-    float** matrix = (float**)malloc(n*sizeof(float*));
-    for (int i=0; i < n; i++) {
-        matrix[i] = (float*)malloc(sizeof(float)*p);
-    }
-
-    fill_matrix_random(matrix, n, p);
-    return matrix;
-}
-
-
-float** create_empty_matrix(int n, int p) {
-    float** matrix = (float**)malloc(n*sizeof(float*));
-    for (int i=0; i < n; i++) {
-        matrix[i] = (float*)malloc(p*sizeof(float));
-        for (int j=0; j < p; j++) {
-            matrix[i][j] = 0.;
-        }
-    }
-    return matrix;
-}
 
 
 #ifdef __CUDACC__
@@ -169,7 +120,7 @@ void matrix_multiplication_host(float** m1, float** m2, float** result, int n, i
         for (int j=0; j < q; j++) {
             result[i][j] = 0.;
             for (int k=0; k < p; k++) {
-                result[i][j] += m1[i][k] + m2[k][j];
+                result[i][j] += m1[i][k] * m2[k][j];
             }
         }
     }
@@ -186,33 +137,4 @@ void matrix_multiplication(float** m1, float** m2, float** result, int n, int p,
     #else
     matrix_multiplication_host(m1, m2, result, n, p, q);
     #endif
-}
-
-
-int main() {
-    srand(time(NULL));
-    int n = 3;
-    int p = 3;
-    int q = 3;
-    float** matrix1 = create_matrix(n, p);
-    float** matrix2 = create_matrix(p, q);
-    float** result = create_empty_matrix(n, q);
-
-    clock_t start, end;
-    double cpu_time_used;
-
-    start = clock();
-    matrix_multiplication(matrix1, matrix2, result, n, p, q, check_cuda_compatibility());
-    end = clock();
-
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("Time used: %lf seconds\n", cpu_time_used);
-
-    print_matrix(matrix1, n, p);
-    printf("\n");
-    print_matrix(matrix2, p, q);
-    printf("\n");
-    print_matrix(result, n, q);
-
-    return 0;
 }
