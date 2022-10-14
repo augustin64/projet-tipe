@@ -7,12 +7,12 @@
 /*
 * Renvoie si oui ou non (1 ou 0) le neurone va être abandonné
 */
-int will_be_drop(int dropout_prob); //CHECKED
+int will_be_drop(int dropout_prob);
 
 /*
 * Écrit une image 28*28 au centre d'un tableau 32*32 et met à 0 le reste
 */
-void write_image_in_network_32(int** image, int height, int width, float** input); //CHECKED
+void write_image_in_network_32(int** image, int height, int width, float** input);
 
 /*
 * Propage en avant le cnn
@@ -22,10 +22,15 @@ void forward_propagation(Network* network);
 /*
 * Propage en arrière le cnn
 */
-void backward_propagation(Network* network, float wanted_number); // TODO
+void backward_propagation(Network* network, float wanted_number);
 
 /*
-* Renvoie l'erreur du réseau neuronal pour une sortie
+* Renvoie l'erreur du réseau neuronal pour une sortie (RMS)
+*/
+float compute_mean_squared_error(float* output, float* wanted_output, int len);
+
+/*
+* Renvoie l'erreur du réseau neuronal pour une sortie (CEL)
 */
 float compute_cross_entropy_loss(float* output, float* wanted_output, int len);
 

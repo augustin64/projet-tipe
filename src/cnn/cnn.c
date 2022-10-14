@@ -53,11 +53,11 @@ void forward_propagation(Network* network) {
         output_width = network->width[i+1];
         activation = k_i->activation;
 
-        if (k_i->cnn!=NULL) { // Convolution
+        if (k_i->cnn) { // Convolution
             make_convolution(k_i->cnn, input, output, output_width);
             choose_apply_function_matrix(activation, output, output_depth, output_width);
         }
-        else if (k_i->nn!=NULL) { // Full connection
+        else if (k_i->nn) { // Full connection
             if (input_depth==1) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
             } else { // Matrice -> vecteur
@@ -80,7 +80,7 @@ void backward_propagation(Network* network, float wanted_number) {
     printf_warning("Appel de backward_propagation, incomplet\n");
     float* wanted_output = generate_wanted_output(wanted_number);
     int n = network->size;
-    float loss = compute_cross_entropy_loss(network->input[n][0][0], wanted_output, network->width[n]);
+    float loss = compute_mean_squared_error(network->input[n][0][0], wanted_output, network->width[n]);
     int activation, input_depth, input_width, output_depth, output_width;
     float*** input;
     float*** output;
@@ -104,6 +104,18 @@ void backward_propagation(Network* network, float wanted_number) {
         // else pooling
     }
     free(wanted_output);
+}
+
+float compute_mean_squared_error(float* output, float* wanted_output, int len) {
+    if (len==0) {
+        printf("Erreur MSE: la longueur de la sortie est de 0 -> division par 0 impossible\n");
+        return 0.;
+    }
+    float loss=0.;
+    for (int i=0; i < len ; i++) {
+        loss += (output[i]-wanted_output[i])*(output[i]-wanted_output[i]);
+    }
+    return loss/len;
 }
 
 float compute_cross_entropy_loss(float* output, float* wanted_output, int len) {
