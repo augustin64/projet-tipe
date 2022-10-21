@@ -55,34 +55,76 @@ float** create_empty_matrix(int n, int p) {
     return matrix;
 }
 
-float max_float(float a, float b) {
-    return a > b ? a : b;
-}
 
-
-bool check_matrices_equality(float** m1, float** m2, int n, int p) {
-    float err_max = 0.;
-    float err_moy = 0.;
+bool check_matrices_equality(float** m1, float** m2, int n, int p, int acceptation) {
     for (int i=0; i < n; i++) {
         for (int j=0; j < p; j++) {
-            if (fabs(m1[i][j] - m2[i][j]) > 0.8) {
-                //printf("%d %d\n", i, j);
-                //return false;
+            if (fabs(m1[i][j] - m2[i][j]) > 0.01*acceptation) {
+                return false;
             }
-            err_max = max_float(err_max, fabs(m1[i][j] - m2[i][j]));
-            err_moy += fabs(m1[i][j] - m2[i][j]);
         }
     }
-    printf("err_max: %f\n", err_max);
-    printf("err_moy: %f\n", err_moy/(n*p));
     return true;
+}
+
+void run_matrices_test(int n, int p, int q) {
+    clock_t start, end;
+    double cpu_time_used;
+
+    float** matrix1 = create_matrix(n, p);
+    float** matrix2 = create_matrix(p, q);
+    float** result_gpu = create_empty_matrix(n, q);
+    float** result_cpu = create_empty_matrix(n, q);
+
+    printf("(%d,%d)x(%d,%d) Computing on GPU.\n", n, p, p, q);
+    start = clock();
+    matrix_multiplication_device(matrix1, matrix2, result_gpu, n, p, q);
+    end = clock();
+
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("(%d,%d)x(%d,%d) Time used for GPU: %lf seconds\n", n, p, p, q, cpu_time_used);
+    printf("OK\n");
+    
+    printf("(%d,%d)x(%d,%d) Computing on CPU.\n", n, p, p, q);
+    start = clock();
+    matrix_multiplication_host(matrix1, matrix2, result_cpu, n, p, q);
+    end = clock();
+
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("(%d,%d)x(%d,%d) Time used for CPU: %lf seconds\n", n, p, p, q, cpu_time_used);
+    printf("OK\n");
+
+    // Vérification de l'égalité des matrices
+    printf("(%d,%d)x(%d,%d) Checking equality.\n", n, p, p, q);
+    if (!check_matrices_equality(result_gpu, result_cpu, n, q, p)) {
+        exit(1);
+    }
+    printf("OK\n");
+
+    // On libère l'espace mémoire alloué
+    for (int i=0; i < n; i++) {
+        free(matrix1[i]);
+    }
+    free(matrix1);
+
+    for (int i=0; i < p; i++) {
+        free(matrix2[i]);
+    }
+    free(matrix2);
+
+    for (int i=0; i < n; i++) {
+        free(result_cpu[i]);
+    }
+    free(result_cpu);
+
+    for (int i=0; i < n; i++) {
+        free(result_gpu[i]);
+    }
+    free(result_gpu);
 }
 
 
 int main() {
-    clock_t start, end;
-    double cpu_time_used;
-
     printf("Checking CUDA compatibility.\n");
     bool cuda_compatible = check_cuda_compatibility();
     if (!cuda_compatible) {
@@ -91,42 +133,10 @@ int main() {
     }
     printf("OK\n");
 
-
-    printf("Generating matrices.\n");
     srand(time(NULL));
-    int n = 200;
-    int p = 1000;
-    int q = 200;
-    float** matrix1 = create_matrix(n, p);
-    float** matrix2 = create_matrix(p, q);
-    float** result_gpu = create_empty_matrix(n, q);
-    float** result_cpu = create_empty_matrix(n, q);
-    printf("OK\n");
-
-    printf("Computing on GPU.\n");
-    start = clock();
-    matrix_multiplication_device(matrix1, matrix2, result_gpu, n, p, q);
-    end = clock();
-
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("Time used for GPU: %lf seconds\n", cpu_time_used);
-    printf("OK\n");
-    
-    printf("Computing on CPU.\n");
-    start = clock();
-    matrix_multiplication_host(matrix1, matrix2, result_cpu, n, p, q);
-    end = clock();
-
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("Time used for CPU: %lf seconds\n", cpu_time_used);
-    printf("OK\n");
-
-
-    printf("Checking equality.\n");
-    if (!check_matrices_equality(result_gpu, result_cpu, n, q)) {
-        return 1;
-    }
-    printf("OK\n");
+    run_matrices_test(200, 1000, 200);
+    run_matrices_test(200, 1000, 20);
+    run_matrices_test(20, 1000, 200);
     
     return 0;
 }
@@ -135,4 +145,4 @@ int main() {
 // Cette différence est linéaire en p. (err_moy = p*1.639e-6)
 // Elle ne varie pas en fonction de n et q.
 // Cette erreur est sûrement dûe à différences mineurs dans la précision du stockage des flottants
-// Dans la mémoire RAM et VRAM (du GPU)
+// dans la mémoire RAM et VRAM (du GPU)
