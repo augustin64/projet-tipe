@@ -86,10 +86,4 @@ Network* copy_network(Network* network);
 */
 float loss_computing(Network* network, int wanted_number);
 
-#ifdef __CUDACC__
-/*
-* Renvoie une copie modifiable du réseau de neurones
-*/
-Network* copy_network_cuda(Network* network);
-#endif
 #endif

@@ -13,12 +13,6 @@
 #define EPOCHS 10
 #define BATCHES 100
 
-#ifdef __CUDACC__
-#   warning compiling for CUDA compatible device only
-#   include "cuda_utils.cu"
-#   define MAX_CUDA_THREADS 1024 // from NVIDIA documentation
-#endif
-
 /*
 * Structure donnée en argument à la fonction 'train_thread'
 */
@@ -144,15 +138,8 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
 
     float accuracy;
 
-    #ifdef __CUDACC__
-    printf("Testing compatibility...\n");
-    check_cuda_compatibility();
-    int nb_threads = MAX_CUDA_THREADS;
-    #else
-    printf("Pas d'utilisation du GPU\n");
     int nb_threads = get_nprocs();
     pthread_t *tid = (pthread_t *)malloc(nb_threads * sizeof(pthread_t));
-    #endif
 
     /*
     * On repart d'un réseau déjà créée stocké dans un fichier
@@ -192,11 +179,6 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     int*** images = read_mnist_images(image_file);
     unsigned int* labels = read_mnist_labels(label_file);
 
-    #ifdef __CUDACC__
-    int*** images_cuda = copy_images_cuda(images, nb_images_total, width, height);
-    unsigned int* labels_cuda = copy_labels_cuda(labels);
-    #endif
-
     if (nb_images_to_process != -1) {
         nb_images_total = nb_images_to_process;
     }
@@ -224,20 +206,13 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                 }
                 nb_remaining_images -= train_parameters[j]->nb_images;
 
-                #ifdef __CUDACC__
-                // Création des threads sur le GPU
-                #else
                 // Création des threads sur le CPU
                 pthread_create( &tid[j], NULL, train_thread, (void*) train_parameters[j]);
-                #endif
             }
             for(int j=0; j < nb_threads; j++ ) {
-                #ifdef __CUDACC__
-                // On join les threads créés sur le GPU
-                #else
                 // On join les threads créés sur le CPU
                 pthread_join( tid[j], NULL );
-                #endif
+                
                 accuracy += train_parameters[j]->accuracy / (float) nb_images_total;
                 if (delta != NULL)
                     patch_delta(delta_network, train_parameters[j]->network, train_parameters[j]->nb_images);
@@ -260,12 +235,8 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
         free(train_parameters[j]);
     }
     free(train_parameters);
-    #ifdef __CUDACC__
-    // On libère les espaces mémoires utilisés sur le GPU
-    #else
     // On libère les espaces mémoire utilisés spécialement sur le CPU
     free(tid);
-    #endif
 }
 
 float** recognize(char* modele, char* entree) {
