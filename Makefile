@@ -4,6 +4,7 @@ CACHE_DIR    := ./cache
 NVCC         := nvcc
 CC           := gcc
 
+NVCC_INSTALLED := $(shell command -v nvcc 2> /dev/null)
 
 MNIST_SRCDIR := $(SRCDIR)/mnist
 CNN_SRCDIR   := $(SRCDIR)/cnn
@@ -72,7 +73,11 @@ $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  $(CFLAGS)  -c $< -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
-	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	ifndef NVCC_INSTALLED
+		@echo "nvcc not found, skipping"
+	else
+		$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	endif
 #
 # Build general files
 #
@@ -101,8 +106,11 @@ build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $(CFLAGS)  $^ -o $@
 
 $(BUILDDIR)/test-cnn_matrix_multiplication: test/cnn_matrix_multiplication.cu $(BUILDDIR)/cnn_matrix_multiplication.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
-	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
-
+	ifndef NVCC_INSTALLED
+		@echo "nvcc not found, skipping"
+	else
+		$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+	endif
 
 #
 # Utils
