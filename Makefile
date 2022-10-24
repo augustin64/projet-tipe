@@ -73,11 +73,11 @@ $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  $(CFLAGS)  -c $< -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
-	ifndef NVCC_INSTALLED
-		@echo "nvcc not found, skipping"
-	else
-		$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
-	endif
+ifndef NVCC_INSTALLED
+	@echo "nvcc not found, skipping"
+else
+	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+endif
 #
 # Build general files
 #
@@ -106,11 +106,11 @@ build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $(CFLAGS)  $^ -o $@
 
 $(BUILDDIR)/test-cnn_matrix_multiplication: test/cnn_matrix_multiplication.cu $(BUILDDIR)/cnn_matrix_multiplication.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
-	ifndef NVCC_INSTALLED
-		@echo "nvcc not found, skipping"
-	else
-		$(NVCC)  $(NVCCFLAGS)  $^ -o $@
-	endif
+ifndef NVCC_INSTALLED
+	@echo "nvcc not found, skipping"
+else
+	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+endif
 
 #
 # Utils
