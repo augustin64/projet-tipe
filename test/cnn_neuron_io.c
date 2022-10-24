@@ -3,11 +3,10 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/colors.h"
-#include "../src/cnn/neuron_io.c"
-#include "../src/cnn/creation.c"
-#include "../src/cnn/utils.c"
-
+#include "../src/include/colors.h"
+#include "../src/cnn/include/neuron_io.h"
+#include "../src/cnn/include/creation.h"
+#include "../src/cnn/include/utils.h"
 
 
 int main() {

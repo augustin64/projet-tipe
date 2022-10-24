@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../colors.h"
+#include "../include/colors.h"
 #include "include/neuron_io.h"
 #include "include/struct.h"
 
@@ -170,7 +170,7 @@ Network* read_network(char* filename) {
     }
 
     network->input = (float****)malloc(sizeof(float***)*size);
-    for (int i=0; i < size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
+    for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
         network->input[i] = (float***)malloc(sizeof(float**)*network->depth[i]);
         for (int j=0; j < network->depth[i]; j++) {
             network->input[i][j] = (float**)malloc(sizeof(float*)*network->width[i]);

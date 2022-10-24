@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "include/creation.h"
+
+#include "include/initialisation.h"
 #include "include/function.h"
-#include "initialisation.c"
+
+#include "include/creation.h"
 
 Network* create_network(int max_size, int learning_rate, int dropout, int initialisation, int input_dim, int input_depth) {
     if (dropout < 0 || dropout > 100) {

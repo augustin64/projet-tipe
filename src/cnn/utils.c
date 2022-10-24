@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "../colors.h"
+#include "../include/colors.h"
 #include "include/struct.h"
 
 #define copyVar(var) network_cp->var = network->var

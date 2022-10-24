@@ -1,10 +1,10 @@
-**/out
 **/a.out
 **/__pycache__
 
 .cache
 .test-cache
 .vscode
+build/*
 *.bin
-app-secret
+
 data/50States10K

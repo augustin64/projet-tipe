@@ -8,7 +8,6 @@
 #ifndef DEF_NEURON_IO_H
 #define DEF_NEURON_IO_H
 
-#include "../neuron_io.c"
 
 // Lecture d'un réseau neuronal 
 

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <time.h>
 
-#include "../src/cnn/matrix_multiplication.cu"
+#include "../src/cnn/include/matrix_multiplication.h"
 
 
 float random_float(float low, float high) {

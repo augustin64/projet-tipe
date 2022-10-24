@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../src/colors.h"
-#include "../src/cnn/creation.c"
-#include "../src/cnn/utils.c"
+#include "../src/include/colors.h"
+#include "../src/cnn/include/creation.h"
+#include "../src/cnn/include/utils.h"
 
 int main() {
     printf("Création du réseau\n");

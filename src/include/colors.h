@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #ifndef DEF_COLORS_H
 #define DEF_COLORS_H
 
@@ -19,16 +21,8 @@
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
-void printf_error(char* string) {
-    printf(BOLDRED "[ ERROR ]" RESET " %s", string);
-}
-
-void printf_warning(char* string) {
-    printf(BOLDYELLOW "[WARNING]" RESET " %s", string);
-}
-
-void printf_info(char* string) {
-    printf(BOLDBLUE "[ INFO  ]" RESET " %s", string);
-}
+void printf_error(char* string);
+void printf_warning(char* string);
+void printf_info(char* string);
 
 #endif

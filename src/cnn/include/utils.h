@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "../../colors.h"
 #include "struct.h"
 
 #ifndef DEF_UTILS_H

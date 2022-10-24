@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "include/free.h"
 
 void free_a_cube_input_layer(Network* network, int pos, int depth, int dim) {

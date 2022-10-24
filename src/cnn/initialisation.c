@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../colors.h"
+#include "../include/colors.h"
 #include "include/initialisation.h"
 
 

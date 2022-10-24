@@ -1,8 +1,6 @@
 #ifndef DEF_MAIN_H
 #define DEF_MAIN_H
 
-#include "../main.c"
-
 /*
 * Affiche une image ainsi que les prévisions faites par le réseau de neurones sur sa valeur
 * width, height: dimensions de l'image

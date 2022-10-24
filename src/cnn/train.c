@@ -4,12 +4,15 @@
 #include <pthread.h>
 #include <sys/sysinfo.h>
 
-#include "../mnist/mnist.c"
-#include "../colors.h"
-#include "neuron_io.c"
-#include "utils.c"
-#include "free.c"
-#include "cnn.c"
+#include "../mnist/include/mnist.h"
+#include "include/initialisation.h"
+#include "include/neuron_io.h"
+#include "../include/colors.h"
+#include "include/function.h"
+#include "include/creation.h"
+#include "include/utils.h"
+#include "include/free.h"
+#include "include/cnn.h"
 
 #include "include/train.h"
 
@@ -19,7 +22,7 @@ void* train_thread(void* parameters) {
     Network* network = param->network;
 
     int*** images = param->images;
-    int* labels = param->labels;
+    int* labels = (int*)param->labels;
 
     int width = param->width;
     int height = param->height;
@@ -32,7 +35,7 @@ void* train_thread(void* parameters) {
         if (dataset_type == 0) {
             write_image_in_network_32(images[i], height, width, network->input[0][0]);
             forward_propagation(network);
-            //backward_propagation(network, labels[i]);
+            backward_propagation(network, labels[i]);
 
             // TODO get_indice_max(network last layer)
             // TODO if indice_max == labels[i] then accuracy += 1.

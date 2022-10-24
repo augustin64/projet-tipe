@@ -6,7 +6,6 @@
 #ifndef DEF_PREVIEW_H
 #define DEF_PREVIEW_H
 
-#include "../preview.c"
 
 /*
 * Affiche un chiffre de taille width x height

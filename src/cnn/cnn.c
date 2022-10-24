@@ -3,12 +3,12 @@
 #include <math.h>
 #include <float.h> // Is it used ?
 
-#include "../colors.h"
 #include "include/initialisation.h"
-#include "function.c"
-#include "creation.c"
-#include "make.c"
+#include "include/function.h"
+#include "include/creation.h"
+#include "include/make.h"
 
+#include "../include/colors.h"
 #include "include/cnn.h"
 
 // Augmente les dimensions de l'image d'entrée

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "../colors.h"
+#include "../include/colors.h"
 #include "include/make.h"
 
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {

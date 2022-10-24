@@ -4,9 +4,12 @@
 #include <math.h>
 #include <float.h>
 
-#include "train.c"
+#include "include/initialisation.h"
+#include "../include/colors.h"
+#include "include/function.h"
+#include "include/creation.h"
+#include "include/train.h"
 #include "include/cnn.h"
-#include "../colors.h"
 
 #include "include/main.h"
 
