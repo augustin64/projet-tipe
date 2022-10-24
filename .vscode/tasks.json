@@ -30,25 +30,22 @@
         },
         {
             "label": "build-all",
-            "command": "${workspaceFolder}/make.sh",
+            "command": "make",
             "args": [
-                "build",
                 "all"
             ]
         },
         {
             "label": "build-mnist",
-            "command": "${workspaceFolder}/make.sh",
+            "command": "make",
             "args": [
-                "build",
                 "mnist"
             ]
         },
         {
             "label": "build-cnn",
-            "command": "${workspaceFolder}/make.sh",
+            "command": "make",
             "args": [
-                "build",
                 "cnn"
             ]
         },
