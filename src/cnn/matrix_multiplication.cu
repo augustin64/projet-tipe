@@ -24,28 +24,25 @@ int i_div_up(int a, int b) { // Partie entière supérieure de a/b
 
 
 __global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p, int q, size_t pitch_m, size_t pitch_n, size_t pitch_p) {
-    // 2D Thread ID
-    int tx = blockIdx.x*blockDim.x + threadIdx.x; // Indice de colonne
-    int ty = blockIdx.y*blockDim.y + threadIdx.y; // Indice de ligne
+    // Chaque thread calcule toutes les multiplications utilisant l'élément Nd[tx][ty]
+    int tx = (blockIdx.x*blockDim.x) + threadIdx.x; // Indice de colonne
+    int ty = (blockIdx.y*blockDim.y) + threadIdx.y; // Indice de ligne
 
-    if (tx >= n || ty >= q) {
+    if (tx >= p || ty >= q) {
         return;
     }
 
     // Pvalue stores the Pd element that is computed by the thread
-    float Pvalue = 0.;
     float* M_offset;
-    float* N_offset;
+    float* P_offset;
+    float* N_offset = (float *)((char*)Nd + tx * pitch_n);
+    float Nxy = N_offset[ty]; // N[tx][ty]
 
-    for (int k = 0; k < p; k++) {
-        M_offset = (float *)((char*)Md + ty * pitch_m);
-        N_offset = (float *)((char*)Nd + k * pitch_n);
-    
-        Pvalue += M_offset[k] * N_offset[tx];
+    for (int i = 0; i < n; i++) {
+        M_offset = (float *)((char*)Md + i * pitch_m);
+        P_offset = (float*)((char*)Pd + i * pitch_p); // P[i], pitch_p est un décalage en bytes
+         atomicAdd(&P_offset[ty], M_offset[tx] * Nxy); // P[i][ty] += P[i][tx] * N[tx][ty]
     }
-    // Écrire les résultats des calculs dans la matrice stockée sur le device
-    float* P_offset = (float*)((char*)Pd + ty * pitch_p);
-    P_offset[tx] = Pvalue;
 }
 
 
@@ -60,18 +57,19 @@ void matrix_multiplication_device(float** m1, float** m2, float** result, int n,
     
     gpuErrchk( cudaMallocPitch((void**)&m1_dev, &pitch_m1_dev, p * sizeof(float), n));
     for (int i=0; i < n; i++) {
-        gpuErrchk( cudaMemcpy2D((void*)((char*)m1_dev + i*pitch_m1_dev), pitch_m1_dev, (const void*)&(m1[i][0]), p*sizeof(float), p*sizeof(float), 1, cudaMemcpyHostToDevice));
+        gpuErrchk( cudaMemcpy((void*)((char*)m1_dev + i*pitch_m1_dev), (const void*)&(m1[i][0]), p*sizeof(float), cudaMemcpyHostToDevice));
     }
     
     gpuErrchk( cudaMallocPitch((void**)&m2_dev, &pitch_m2_dev, q * sizeof(float), p));
     for (int i=0; i < p; i++) {
-        gpuErrchk( cudaMemcpy2D((void*)((char*)m2_dev + i*pitch_m2_dev), pitch_m2_dev, (const void*)&(m2[i][0]), q*sizeof(float), q*sizeof(float), 1, cudaMemcpyHostToDevice));
+        gpuErrchk( cudaMemcpy((void*)((char*)m2_dev + i*pitch_m2_dev), (const void*)&(m2[i][0]), q*sizeof(float), cudaMemcpyHostToDevice));
     }
 
     gpuErrchk( cudaMallocPitch((void**)&result_dev, &pitch_result_dev, q * sizeof(float), n));
+    gpuErrchk( cudaMemset(result_dev, 0, pitch_result_dev*n));
 
     // Traitement
-    dim3 gridSize(i_div_up(n, BLOCKSIZE_x), i_div_up(q, BLOCKSIZE_y));
+    dim3 gridSize(i_div_up(p, BLOCKSIZE_x), i_div_up(q, BLOCKSIZE_y));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y);
 
     matrix_mul_kernel<<<gridSize, blockSize>>>(m1_dev, m2_dev, result_dev, n, p, q, pitch_m1_dev, pitch_m2_dev, pitch_result_dev);
@@ -80,7 +78,7 @@ void matrix_multiplication_device(float** m1, float** m2, float** result, int n,
 
     // Post-traitement
     for (int i=0; i < n; i++) {
-        gpuErrchk( cudaMemcpy2D((void*)&(result[i][0]), q*sizeof(float), (const void*)((char*)result_dev + i*pitch_result_dev), pitch_result_dev, sizeof(float)*q, 1, cudaMemcpyDeviceToHost));
+        gpuErrchk( cudaMemcpy((void*)&(result[i][0]), (const void*)((char*)result_dev + i*pitch_result_dev), sizeof(float)*q, cudaMemcpyDeviceToHost));
     }
 
     gpuErrchk( cudaFree(result_dev) );
@@ -111,7 +109,7 @@ bool check_cuda_compatibility() {
     }
 
     cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: %s\n\n", prop.name);
+    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
     return true;
     #else
     printf("Pas d'utilisation du GPU\n\n");
