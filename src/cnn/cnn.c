@@ -45,6 +45,7 @@ void forward_propagation(Network* network) {
     for (int i=0; i < n-1; i++) {
         // Transférer les informations de 'input' à 'output'
         k_i = network->kernel[i];
+        output_a = network->input_a[i+1];
         input = network->input[i];
         input_depth = network->depth[i];
         input_width = network->width[i];
@@ -55,12 +56,13 @@ void forward_propagation(Network* network) {
 
         if (k_i->cnn) { // Convolution
             make_convolution(k_i->cnn, input, output, output_width);
+            copy_input_to_input_a(outtput, output_a, outpu_width, output_width, ouput_depth);
             choose_apply_function_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
             if (input_depth==1) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
-            } else { // Matrice -> vecteur
+            } else { // Matrice -> Vecteur
                 make_dense_linearised(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
             choose_apply_function_vector(activation, output, output_width);
@@ -80,12 +82,15 @@ void backward_propagation(Network* network, float wanted_number) {
     printf_warning("Appel de backward_propagation, incomplet\n");
     float* wanted_output = generate_wanted_output(wanted_number);
     int n = network->size;
-    float loss = compute_mean_squared_error(network->input[n][0][0], wanted_output, network->width[n]);
+    //float loss = compute_mean_squared_error(network->input[n][0][0], wanted_output, network->width[n]);
+    // -> will it really be used ?
     int activation, input_depth, input_width, output_depth, output_width;
     float*** input;
     float*** output;
     Kernel* k_i;
     Kernel* k_i_1;
+
+    rms_backward(network->input[n-1][0][0], wanted_output); // Backward sur la dernière colonne
 
     for (int i=n-3; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
@@ -99,11 +104,93 @@ void backward_propagation(Network* network, float wanted_number) {
         output_width = network->width[i+1];
         activation = k_i->activation;
 
-        //if convolution
-        // else if dense (linearised or not)
-        // else pooling
+        
+        if (k_i->cnn) { // Convolution
+
+        } else if (k_i->nn) { // Full connection
+            if (input_depth==1) { // Vecteur -> Vecteur
+
+            } else { // Matrice -> vecteur
+
+            }
+        } else { // Pooling
+            backward_2d_pooling(input, output, input_width, output_width, input_depth) // Depth pour input et output a la même valeur
+        }
     }
     free(wanted_output);
+}
+
+void update_weights(Network* network) {
+    int n = network->size;
+    int input_depth, input_width, output_width;
+    for (int i=0; i<(n-1); i++) {
+        k_i = network->kernel[i];
+        k_i_1 = network->kernel[i+1];
+        input_depth = network->depth[i];
+        input_width = network->width[i];
+        output_width = network->width[i+1];
+
+        if (k_i->cnn) { // Convolution
+            Kernel_cnn* cnn = k_i_1->cnn;
+            int k_size = cnn->k_size;
+            for (int a=0; a<input_depth; a++) {
+                for (int b=0; b<ouput_depth; b++) {
+                    for (int c=0; c<k_size; c++) {
+                        for (int d=0; d<k_size; d++) {
+                            cnn->w[a][b][c][d] += cnn->d_w[a][b][c][d];
+                        }
+                    }
+                }
+            }
+        } else if (k_i->nn) { // Full connection
+            if (input_depth==1) { // Vecteur -> Vecteur
+                Kernel_nn* nn = k_i_1->nn;
+                for (int a=0; a<input_width; a++) {
+                    for (int b=0; b<output_width; b++) {
+                        nn->weights[a][b] += nn->d_weights[a][b];
+                    }
+                }
+            } else { // Matrice -> vecteur
+                Kernel_nn* nn = k_i_1->nn;
+                int input_size = input_width*input_width*input_depth;
+                for (int a=0; a<input_size; a++) {
+                    for (int b=0; b<output_width; b++) {
+                        nn->weights[a][b] += nn->d_weights[a][b];
+                    }
+                }
+            }
+        } else { // Pooling
+            (void)0; // Ne rien faire pour la couche pooling
+        }
+    }
+}
+
+void update_bias(Network* network) {
+    int n = network->size;
+    int output_width;
+    for (int i=0; i<(n-1); i++) {
+        k_i = network->kernel[i];
+        k_i_1 = network->kernel[i+1];
+        output_width = network->width[i+1];
+
+        if (k_i->cnn) { // Convolution
+            Kernel_cnn* cnn = k_i_1->cnn;
+            for (int a=0; a<ouput_depth; a++) {
+                for (int b=0; b<output_width; b++) {
+                    for (int c=0; c<output_width; c++) {
+                        cnn->bias[a][b][c] += cnn->d_bias[a][b][c];
+                    }
+                }
+            }
+        } else if (k_i->nn) { // Full connection
+            Kernel_nn* nn = k_i_1->nn;
+            for (int a=0; a<output_width; a++) {
+                nn->bias[a] += nn->d_bias[a];
+            }
+        } else { // Pooling
+            (void)0; // Ne rien faire pour la couche pooling
+        }
+    }
 }
 
 float compute_mean_squared_error(float* output, float* wanted_output, int len) {
