@@ -1,6 +1,8 @@
 #ifndef DEF_FUNCTION_H
 #define DEF_FUNCTION_H
 
+
+typedef float (*returnFunctionType)(float, float);
 // Les dérivées sont l'opposé
 #define TANH 1
 #define SIGMOID 2
@@ -43,10 +45,5 @@ void choose_apply_function_matrix(int activation, float*** input, int depth, int
 * Redirige vers la fonction à appliquer sur un vecteur
 */
 void choose_apply_function_vector(int activation, float*** input, int dim);
-
-/*
-* Renvoie un pointeur vers la fonction d'activation correspondante
-*/
-void* get_function_activation(int activation)
 
 #endif

@@ -17,7 +17,12 @@ Network* create_network_lenet5(int learning_rate, int dropout, int activation, i
 /*
 * Créé et alloue de la mémoire à une couche de type input cube
 */
-void create_a_cube_input_layer(Network* network, int pos, int depth, int dim); // CHECKED
+void create_a_cube_input_layer(Network* network, int pos, int depth, int dim);
+
+/*
+* Créé et alloue de la mémoire à une couche de type input_z cube
+*/
+void create_a_cube_input_z_layer(Network* network, int pos, int depth, int dim);
 
 /*
 * Créé et alloue de la mémoire à une couche de type ligne
@@ -27,7 +32,7 @@ void create_a_line_input_layer(Network* network, int pos, int dim);
 /*
 * Ajoute au réseau une couche d'average pooling valide de dimension dim*dim
 */
-void add_2d_average_pooling(Network* network, int dim_ouput);
+void add_2d_average_pooling(Network* network, int dim_output);
 
 /*
 * Ajoute au réseau une couche de convolution dim*dim et initialise les kernels

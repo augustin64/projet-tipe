@@ -25,6 +25,11 @@ void forward_propagation(Network* network);
 void backward_propagation(Network* network, float wanted_number);
 
 /*
+* Copie les données de output dans output_a (Sachant que les deux matrices ont les mêmes dimensions)
+*/
+void copy_input_to_input_z(float*** output, float*** output_a, int output_depth, int output_rows, int output_columns);
+
+/*
 * Bascule les données de d_weights dans weights
 */
 void update_weights(Network* network);
@@ -33,7 +38,6 @@ void update_weights(Network* network);
 * Bascule les données de d_bias dans bias
 */
 void update_bias(Network* network);
-
 /*
 * Renvoie l'erreur du réseau neuronal pour une sortie (RMS)
 */

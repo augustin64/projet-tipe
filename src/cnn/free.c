@@ -7,16 +7,22 @@ void free_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
     for (int i=0; i < depth; i++) {
         for (int j=0; j < dim; j++) {
             free(network->input[pos][i][j]);
+            free(network->input_z[pos][i][j]);
         }
         free(network->input[pos][i]);
+        free(network->input_z[pos][i]);
     }
     free(network->input[pos]);
+    free(network->input_z[pos]);
 }
 
 void free_a_line_input_layer(Network* network, int pos) {
     free(network->input[pos][0][0]);
+    free(network->input_z[pos][0][0]);
     free(network->input[pos][0]);
+    free(network->input_z[pos][0]);
     free(network->input[pos]);
+    free(network->input_z[pos]);
 }
 
 void free_2d_average_pooling(Network* network, int pos) {
@@ -114,6 +120,7 @@ void free_network_creation(Network* network) {
     free(network->depth);
     free(network->kernel);
     free(network->input);
+    free(network->input_z);
 
     free(network);
 }
