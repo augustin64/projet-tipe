@@ -4,6 +4,9 @@
 #include "include/make.h"
 
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
+    // c'est le kernel de input
+    // input[kernel->rows][kernel_k_size + output_dim-1][kernel_k_size + output_dim-1]
+    // output[kernel->columns][output_dim][output_dim]
     float f;
     int n = kernel->k_size;
     for (int i=0; i < kernel->columns; i++) {
@@ -24,6 +27,8 @@ void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int o
 }
 
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim) {
+    // input[output_depth][output_dim+size-1][output_dim+size-1]
+    // output[output_depth][output_dim][output_dim]
     float average;
     int n = size*size;
     for (int i=0; i < output_depth; i++) {
@@ -42,6 +47,8 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
 }
 
 void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, int size_output) {
+    // input[size_input]
+    // output[size_output]
     float f;
     for (int i=0; i < size_output; i++) {
         f = kernel->bias[i];
@@ -53,6 +60,8 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 }
 
 void make_dense_linearised(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+    // input[depth_input][dim_input][dim_input]
+    // output[size_output]
     int n = depth_input*dim_input*dim_input;
     float f;
     for (int l=0; l<size_output; l++) {

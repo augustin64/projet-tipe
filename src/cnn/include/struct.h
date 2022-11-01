@@ -2,12 +2,12 @@
 #define DEF_STRUCT_H
 
 typedef struct Kernel_cnn {
-    int k_size;
+    int k_size; // k_size = dim_input - dim_output + 1
     int rows; // Depth of the input
     int columns; // Depth of the output
-    float*** bias; // bias[columns][k_size][k_size]
-    float*** d_bias; // d_bias[columns][k_size][k_size]
-    float*** last_d_bias; // last_d_bias[columns][k_size][k_size]
+    float*** bias; // bias[columns][dim_output][dim_output]
+    float*** d_bias; // d_bias[columns][dim_output][dim_output]
+    float*** last_d_bias; // last_d_bias[columns][dim_output][dim_output]
     float**** w; // w[rows][columns][k_size][k_size]
     float**** d_w; // d_w[rows][columns][k_size][k_size]
     float**** last_d_w; // last_d_w[rows][columns][k_size][k_size]
