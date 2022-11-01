@@ -41,7 +41,7 @@ __global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p,
     for (int i = 0; i < n; i++) {
         M_offset = (float *)((char*)Md + i * pitch_m);
         P_offset = (float*)((char*)Pd + i * pitch_p); // P[i], pitch_p est un décalage en bytes
-         atomicAdd(&P_offset[ty], M_offset[tx] * Nxy); // P[i][ty] += P[i][tx] * N[tx][ty]
+        atomicAdd(&P_offset[ty], M_offset[tx] * Nxy); // P[i][ty] += P[i][tx] * N[tx][ty]
     }
 }
 

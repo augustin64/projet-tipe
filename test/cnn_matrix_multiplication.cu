@@ -69,7 +69,7 @@ bool check_matrices_equality(float** m1, float** m2, int n, int p, int acceptati
 
 void run_matrices_test(int n, int p, int q) {
     clock_t start, end;
-    double cpu_time_used;
+    double cpu_time_used, gpu_time_used;
 
     float** matrix1 = create_matrix(n, p);
     float** matrix2 = create_matrix(p, q);
@@ -90,8 +90,8 @@ void run_matrices_test(int n, int p, int q) {
     matrix_multiplication_host(matrix1, matrix2, result_cpu, n, p, q);
     end = clock();
 
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("(%d,%d)x(%d,%d) Time used for CPU: %lf seconds\n", n, p, p, q, cpu_time_used);
+    gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("(%d,%d)x(%d,%d) Time used for CPU: %lf seconds\n", n, p, p, q, gpu_time_used);
     printf("OK\n");
 
     // Vérification de l'égalité des matrices

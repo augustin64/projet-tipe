@@ -65,13 +65,16 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 #
 cnn: $(BUILDDIR)/cnn-main;
 
-$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)  $(CFLAGS)  $^ -o $@
+
+$(BUILDDIR)/cnn-main-cuda: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  $(CFLAGS)  -c $< -o $@
 
-$(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
+$(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 ifndef NVCC_INSTALLED
 	@echo "nvcc not found, skipping"
 else
@@ -90,7 +93,7 @@ run-tests: build-tests
 	$(foreach file, $(wildcard $(BUILDDIR)/test-*), $(file);)
 	$(foreach file, $(wildcard $(TEST_SRCDIR)/*.sh), $(file);)
 
-build-tests: prepare-tests $(TESTS_OBJ)
+build-tests: prepare-tests $(TESTS_OBJ) $(BUILDDIR)/test-cnn_matrix_multiplication $(BUILDDIR)/test-cnn_convolution
 
 
 prepare-tests:
@@ -104,7 +107,7 @@ build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $(CFLAGS)  $^ -o $@
 
-$(BUILDDIR)/test-cnn_matrix_multiplication: test/cnn_matrix_multiplication.cu $(BUILDDIR)/cnn_matrix_multiplication.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(CNN_OBJ)
 ifndef NVCC_INSTALLED
 	@echo "nvcc not found, skipping"
 else
