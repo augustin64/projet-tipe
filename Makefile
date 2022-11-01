@@ -2,7 +2,6 @@ BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./cache
 NVCC         := nvcc
-CC           := gcc
 
 NVCC_INSTALLED := $(shell command -v nvcc 2> /dev/null)
 
@@ -27,7 +26,7 @@ TESTS_OBJ     = $(TESTS_SRC:test/%.c=$(BUILDDIR)/test-%) $(TESTS_SRC_CU:test/%.c
 
 # Compile flags
 CFLAGS   = -std=c99 -lm -lpthread
-NVCCFLAGS = 
+NVCCFLAGS =
 
 # Additional warning rules
 CFLAGS   += -Wall -Wextra
