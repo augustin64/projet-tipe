@@ -1,30 +1,9 @@
 #include <stdio.h>
 
 #include "../include/colors.h"
+#include "include/convolution.h"
 #include "include/make.h"
 
-void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
-    // c'est le kernel de input
-    // input[kernel->rows][kernel_k_size + output_dim-1][kernel_k_size + output_dim-1]
-    // output[kernel->columns][output_dim][output_dim]
-    float f;
-    int n = kernel->k_size;
-    for (int i=0; i < kernel->columns; i++) {
-        for (int j=0; j < output_dim; j++) {
-            for (int k=0; k < output_dim; k++) {
-                f = kernel->bias[i][j][k];
-                for (int a=0; a < kernel->rows; a++) {
-                    for (int b=0; b < n; b++) {
-                        for (int c=0; c < n; c++) {
-                            f += kernel->w[a][i][b][c]*input[a][j+b][k+c];
-                        }
-                    }
-                }
-                output[i][j][k] = f/n; // Average
-            }
-        }
-    }
-}
 
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim) {
     // input[output_depth][output_dim+size-1][output_dim+size-1]
