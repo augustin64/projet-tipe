@@ -4,6 +4,7 @@
 
 #include "include/function.h"
 
+
 float max(float a, float b) {
     return a < b ? b:a;
 }
@@ -100,3 +101,32 @@ void choose_apply_function_vector(int activation, float*** input, int dim) {
         printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
     }
 }
+
+ptr get_function_activation(int activation) {
+    if (activation == RELU) {
+        return &relu;
+    } else if (activation == -RELU) {
+        return &relu_derivative;
+    } else if (activation == SIGMOID) {
+        return &sigmoid;
+    } else if (activation == -SIGMOID) {
+        return &sigmoid_derivative;
+    } else if (activation == SOFTMAX) {
+        printf("Erreur, impossible de renvoyer la fonction softmax");
+        return NULL;
+    } else if (activation == -SOFTMAX) {
+        printf("Erreur, impossible de renvoyer la dérivée de la fonction softmax");
+        return NULL;
+    } else if (activation == TANH) {
+        return &tanh_;
+    } else if (activation == -TANH) {
+        return &tanh_derivative;
+    } else {
+        printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
+        return NULL;
+    }
+}
+// to use: 
+// float a = 5; int activation;
+// pm u = get_function_activation;
+// printf("%f", (*u(activation))(a));

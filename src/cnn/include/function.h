@@ -2,12 +2,14 @@
 #define DEF_FUNCTION_H
 
 
-typedef float (*returnFunctionType)(float, float);
 // Les dérivées sont l'opposé
 #define TANH 1
 #define SIGMOID 2
 #define RELU 3
 #define SOFTMAX 4
+
+typedef float (*ptr)(float);
+typedef ptr (*pm)();
 
 /*
 * Fonction max pour les floats
@@ -45,5 +47,7 @@ void choose_apply_function_matrix(int activation, float*** input, int depth, int
 * Redirige vers la fonction à appliquer sur un vecteur
 */
 void choose_apply_function_vector(int activation, float*** input, int dim);
+
+ptr get_function_activation(int activation);
 
 #endif
