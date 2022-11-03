@@ -88,34 +88,38 @@ void backward_propagation(Network* network, float wanted_number) {
     int n = network->size;
     int activation, input_depth, input_width, output_depth, output_width;
     float*** input;
+    float*** input_z;
     float*** output;
     Kernel* k_i;
     Kernel* k_i_1;
-    // rms_backward(network->input[n-1][0][0], wanted_output); // Backward sur la dernière colonne
+    rms_backward(network->input[n-1][0][0], network->input_z[n-1][0][0], wanted_output, network->width[n-1]); // Backward sur la dernière colonne
 
-    for (int i=n-3; i >= 0; i--) {
+    for (int i=n-2; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
         k_i = network->kernel[i];
         k_i_1 = network->kernel[i+1];
         input = network->input[i];
+        input_z = network->input_z[i];
         input_depth = network->depth[i];
         input_width = network->width[i];
         output = network->input[i+1];
         output_depth = network->depth[i+1];
         output_width = network->width[i+1];
-        activation = k_i->activation;
+        activation = i==0?SIGMOID:k_i->activation;
 
         
         if (k_i->cnn) { // Convolution
-
+            ptr d_f = get_function_activation(activation);
+            backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
         } else if (k_i->nn) { // Full connection
+            ptr d_f = get_function_activation(activation);
             if (input_depth==1) { // Vecteur -> Vecteur
-
+                backward_fully_connected(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
-
+                backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, d_f);
             }
         } else { // Pooling
-            // backward_2d_pooling(input, output, input_width, output_width, input_depth) // Depth pour input et output a la même valeur
+            backward_2d_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
         }
     }
     free(wanted_output);

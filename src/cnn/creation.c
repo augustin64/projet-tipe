@@ -31,7 +31,7 @@ Network* create_network(int max_size, int learning_rate, int dropout, int initia
     create_a_cube_input_layer(network, 0, input_depth, input_dim); 
     // create_a_cube_input_z_layer(network, 0, input_depth, input_dim); 
     // This shouldn't be used (if I'm not mistaken) so to save space, we can do:
-    ntework->input_z[0] = NULL; // As we don't backpropagate the input
+    network->input_z[0] = NULL; // As we don't backpropagate the input
     return network;
 }
 
