@@ -52,6 +52,6 @@ void make_dense_linearised(Kernel_nn* kernel, float*** input, float* output, int
                 }
             }
         }
-        output[l] = f/size_output;
+        output[l] = f;
     }
 }
