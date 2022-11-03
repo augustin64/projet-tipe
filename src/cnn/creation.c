@@ -156,8 +156,8 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     }
     create_a_cube_input_layer(network, n, depth_output, bias_size);
     create_a_cube_input_z_layer(network, n, depth_output, bias_size);
-    int n_int = network->width[n-1]*network->width[n-1]*network->depth[n-1];
-    int n_out = network->width[n]*network->width[n]*network->depth[n];
+    // int n_int = network->width[n-1]*network->width[n-1]*network->depth[n-1];
+    // int n_out = network->width[n]*network->width[n]*network->depth[n];
     /* Not currently used 
     initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, kernel_size, kernel_size, n_int+n_out);
     initialisation_3d_matrix(ZERO, cnn->d_bias, depth_output, kernel_size, kernel_size, n_int+n_out);

@@ -3,6 +3,7 @@
 #include <math.h>
 #include <float.h> // Is it used ?
 
+#include "include/backpropagation.h"
 #include "include/initialisation.h"
 #include "include/function.h"
 #include "include/creation.h"
@@ -91,13 +92,12 @@ void backward_propagation(Network* network, float wanted_number) {
     float*** input_z;
     float*** output;
     Kernel* k_i;
-    Kernel* k_i_1;
+    
     rms_backward(network->input[n-1][0][0], network->input_z[n-1][0][0], wanted_output, network->width[n-1]); // Backward sur la dernière colonne
 
     for (int i=n-2; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
         k_i = network->kernel[i];
-        k_i_1 = network->kernel[i+1];
         input = network->input[i];
         input_z = network->input_z[i];
         input_depth = network->depth[i];

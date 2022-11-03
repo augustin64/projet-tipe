@@ -74,7 +74,7 @@ void backward_fully_connected(Kernel_nn* ker, float* input, float* input_z, floa
         for (int j=0; j < size_output; j++) {
             tmp += output[j]*ker->weights[i][j];
         }
-        input[i] = tmp*derivative_function(input_z[i]);
+        input[i] = tmp*d_function(input_z[i]);
     }
 }
 
@@ -106,7 +106,7 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
                 for (int j=0; j < size_output; j++) {
                     tmp += output[j]*ker->weights[cpt][j];
                 }
-                input[i][k][l] = tmp*derivative_function(input_z[i][k][l]);
+                input[i][k][l] = tmp*d_function(input_z[i][k][l]);
                 cpt++;
             }
         }
@@ -125,7 +125,7 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
 
     // Weights
     int k_size = dim_input - dim_output +1;
-    int var = dim_input - k_size +1;
+
     for (int h=0; h < depth_input; h++) {
         for (int i=0; i < depth_output; i++) {
             for (int j=0; j < k_size; j++) {
@@ -161,7 +161,7 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
                         }
                     }
                 }
-                input[i][j][k] = tmp*derivative_function(input_z[i][j][k]);
+                input[i][j][k] = tmp*d_function(input_z[i][j][k]);
             }
         }
     }
