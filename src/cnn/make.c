@@ -10,6 +10,7 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
     // output[output_depth][output_dim][output_dim]
     float average;
     int n = size*size;
+
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
@@ -29,6 +30,7 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
     // input[size_input]
     // output[size_output]
     float f;
+
     for (int i=0; i < size_output; i++) {
         f = kernel->bias[i];
         for (int j=0; j < size_input; j++) {
@@ -41,13 +43,13 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 void make_dense_linearised(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     // input[depth_input][dim_input][dim_input]
     // output[size_output]
-    int n = depth_input*dim_input*dim_input;
     float f;
-    for (int l=0; l<size_output; l++) {
+
+    for (int l=0; l < size_output; l++) {
         f = 0;
-        for (int i=0; i<depth_input; i++) {
-            for (int j=0; j<dim_input; j++) {
-                for (int k=0; k<dim_input; k++) {
+        for (int i=0; i < depth_input; i++) {
+            for (int j=0; j < dim_input; j++) {
+                for (int k=0; k < dim_input; k++) {
                     f += input[i][j][k]*kernel->weights[k + j*dim_input + i*depth_input][l];
                 }
             }

@@ -17,9 +17,24 @@
 #include "include/train.h"
 
 
+int indice_max(float* tab, int n) {
+    int indice = -1;
+    float maxi = FLT_MIN;
+    
+    for (int i=0; i < n; i++) {
+        if (tab[i] > maxi) {
+            maxi = tab[i];
+            indice = i;
+        }
+    }
+    return indice;
+}
+
+
 void* train_thread(void* parameters) {
     TrainParameters* param = (TrainParameters*)parameters;
     Network* network = param->network;
+    int maxi;
 
     int*** images = param->images;
     int* labels = (int*)param->labels;
@@ -37,8 +52,10 @@ void* train_thread(void* parameters) {
             forward_propagation(network);
             backward_propagation(network, labels[i]);
 
-            // TODO get_indice_max(network last layer)
-            // TODO if indice_max == labels[i] then accuracy += 1.
+            maxi = indice_max(network->input[network->size-1][0][0], network->width[network->size-1]);
+            if (maxi == labels[i]) {
+                accuracy += 1.;
+            }
         } else {
             printf_error("Dataset de type JPG non implémenté\n");
             exit(1);

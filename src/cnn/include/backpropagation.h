@@ -1,4 +1,6 @@
 #include "function.h"
+#include "struct.h"
+
 #ifndef DEF_BACKPROPAGATION_H
 #define DEF_BACKPROPAGATION_H
 

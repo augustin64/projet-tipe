@@ -1,5 +1,6 @@
 
-#include "update.h"
+#include "include/update.h"
+#include "include/struct.h"
 
 void update_weights(Network* network) {
     int n = network->size;

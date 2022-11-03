@@ -14,7 +14,7 @@ typedef ptr (*pm)();
 /*
 * Fonction max pour les floats
 */
-float max(float a, float b);
+float max_float(float a, float b);
 
 float sigmoid(float x);
 

@@ -5,7 +5,7 @@
 #include "include/function.h"
 
 
-float max(float a, float b) {
+float max_float(float a, float b) {
     return a < b ? b:a;
 }
 
@@ -19,7 +19,7 @@ float sigmoid_derivative(float x) {
 }
 
 float relu(float x) {
-    return max(0, x);
+    return max_float(0, x);
 }
 
 float relu_derivative(float x) {
@@ -43,7 +43,7 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns) {
     for (int i=0; i < depth; i++) {
         for (int j=0; j < rows; j++) {
             for (int k=0; k < columns; k++) {
-                m = max(m, input[i][j][k]);
+                m = max_float(m, input[i][j][k]);
             }
         }
     }
