@@ -38,7 +38,7 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
                         }
                     }
                 }
-                output[i][j][k] = f/kernel->k_size; // Average
+                output[i][j][k] = f;
             }
         }
     }
@@ -80,7 +80,7 @@ __global__ void make_convolution_kernel(int k_size, int columns, int rows, float
     }
 
     output_offset = (float*)((char*)output + (idx*output_dim+idy)*pitch_output);
-    output_offset[idz] = f/(k_size);
+    output_offset[idz] = f;
 }
 
 void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
