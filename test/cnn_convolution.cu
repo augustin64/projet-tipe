@@ -104,16 +104,13 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     // bias[kernel->columns][dim_output][dim_output]
     kernel->bias = create_matrix(kernel->columns, output_dim, output_dim, 15.0f);
     kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
-    kernel->last_d_bias = create_matrix(kernel->columns, output_dim, output_dim, 0.1f);
 
     // w[rows][columns][k_size][k_size]
     kernel->w = (float****)malloc(sizeof(float***)*kernel->rows);
     kernel->d_w = (float****)malloc(sizeof(float***)*kernel->rows);
-    kernel->last_d_w = (float****)malloc(sizeof(float***)*kernel->rows);
     for (int i=0; i < kernel->rows; i++) {
         kernel->w[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 15.0f);
         kernel->d_w[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
-        kernel->last_d_w[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 0.1f);
     }
 
     float*** input = create_matrix(kernel->rows, input_dim, input_dim, 5.0f);
@@ -151,16 +148,13 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
 
     free_matrix(kernel->bias, kernel->columns, output_dim);
     free_matrix(kernel->d_bias, kernel->columns, output_dim);
-    free_matrix(kernel->last_d_bias, kernel->columns, output_dim);
 
     for (int i=0; i < kernel->rows; i++) {
         free_matrix(kernel->w[i], kernel->columns, kernel->k_size);
         free_matrix(kernel->d_w[i], kernel->columns, kernel->k_size);
-        free_matrix(kernel->last_d_w[i], kernel->columns, kernel->k_size);
     }
     free(kernel->w);
     free(kernel->d_w);
-    free(kernel->last_d_w);
 
     free_matrix(input, kernel->rows, input_dim);
     free_matrix(output_cpu, kernel->columns, output_dim);

@@ -48,6 +48,9 @@ void choose_apply_function_matrix(int activation, float*** input, int depth, int
 */
 void choose_apply_function_vector(int activation, float*** input, int dim);
 
+/*
+* Renvoie la fonction d'activation correspondant à son identifiant (activation)
+*/
 ptr get_function_activation(int activation);
 
 #endif
