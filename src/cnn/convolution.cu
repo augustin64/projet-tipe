@@ -147,6 +147,7 @@ void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output
 }
 #endif
 
+extern "C" {
 
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
     #ifndef __CUDACC__
@@ -154,4 +155,6 @@ void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int o
     #else
     make_convolution_device(kernel, input, output, output_dim);
     #endif
+}
+
 }

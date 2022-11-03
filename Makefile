@@ -68,7 +68,7 @@ cnn: $(BUILDDIR)/cnn-main;
 $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)  $(CFLAGS)  $^ -o $@
 
-$(BUILDDIR)/cnn-main-cuda: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
@@ -107,7 +107,7 @@ build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $(CFLAGS)  $^ -o $@
 
-$(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(CNN_OBJ)
+$(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 ifndef NVCC_INSTALLED
 	@echo "nvcc not found, skipping"
 else
