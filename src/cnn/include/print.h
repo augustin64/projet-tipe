@@ -1,7 +1,7 @@
 #ifndef DEF_PRINT_H
 #define DEF_PRINT_H
 
-#include "include/struct.h"
+#include "struct.h"
 
 /*
 * Affiche le kernel d'une couche de convolution
