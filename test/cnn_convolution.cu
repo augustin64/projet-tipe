@@ -5,7 +5,6 @@
 #include <math.h>
 #include <time.h>
 
-#include "../src/cnn/include/make.h"
 #include "../src/cnn/include/convolution.h"
 #include "../src/cnn/include/struct.h"
 
