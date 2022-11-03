@@ -13,13 +13,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - run:   |
+         sudo apt update
+         sudo apt install gcc-10
+      shell: bash
     - name: print versions
       run: make --version; gcc --version
     - name: run-tests
       run: make run-tests
+      env:
+        CC: gcc-10
     - name: mnist main train
       run: build/mnist-main train
             --epochs 1
             --images data/mnist/t10k-images-idx3-ubyte
             --labels data/mnist/t10k-labels-idx1-ubyte
             --out mnist-reseau.bin
+      env:
+        CC: gcc-10
