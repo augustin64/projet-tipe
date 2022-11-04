@@ -44,20 +44,20 @@ all: mnist cnn;
 mnist: $(BUILDDIR)/mnist-main $(BUILDDIR)/mnist-utils $(BUILDDIR)/mnist-preview;
 
 $(BUILDDIR)/mnist-main: $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o
-	$(CC)  $(CFLAGS)  $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main
+	$(CC)     $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS)
 
 $(BUILDDIR)/mnist-utils: $(MNIST_SRCDIR)/utils.c $(BUILDDIR)/mnist_neural_network.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist.o
-	$(CC)  $(CFLAGS)  $^ -o $@
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/mnist-preview: $(MNIST_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
-	$(CC)  $(CFLAGS)  $^ -o $@
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 # .o files
 $(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
-	$(CC)  $(CFLAGS)  -c $< -o $@
+	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
-	$(CC)  $(CFLAGS)  -c $< -o $@
+	$(CC)  -c $< -o $@  $(CFLAGS)
 
 
 #
@@ -66,13 +66,13 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 cnn: $(BUILDDIR)/cnn-main;
 
 $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
-	$(CC)  $(CFLAGS)  $^ -o $@
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
-	$(CC)  $(CFLAGS)  -c $< -o $@
+	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 ifndef NVCC_INSTALLED
@@ -84,7 +84,7 @@ endif
 # Build general files
 #
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
-	$(CC)  $(CFLAGS)  -c $< -o $@
+	$(CC) -c $< -o $@  $(CFLAGS)
 
 #
 # Tests
@@ -101,11 +101,11 @@ prepare-tests:
 
 
 build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
-	$(CC)  $(CFLAGS)  $^ -o $@
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
-	$(CC)  $(CFLAGS)  $^ -o $@
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 ifndef NVCC_INSTALLED
