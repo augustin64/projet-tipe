@@ -29,8 +29,6 @@ Network* create_network(int max_size, int learning_rate, int dropout, int initia
     network->kernel[0]->nn = NULL; 
     network->kernel[0]->cnn = NULL; 
     create_a_cube_input_layer(network, 0, input_depth, input_dim); 
-    // create_a_cube_input_z_layer(network, 0, input_depth, input_dim); 
-    // This shouldn't be used (if I'm not mistaken) so to save space, we can do:
     network->input_z[0] = NULL; // As we don't backpropagate the input
     return network;
 }
@@ -105,6 +103,7 @@ void add_2d_average_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = 100*kernel_size; // Ne contient pas de fonction d'activation
+    network->kernel[k_pos]->linearisation = 0;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
     network->size++;
@@ -124,6 +123,7 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     int kernel_size = dim_input - dim_output +1;
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = activation;
+    network->kernel[k_pos]->linearisation = 0;
     network->kernel[k_pos]->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
     Kernel_cnn* cnn = network->kernel[k_pos]->cnn;
 
@@ -179,6 +179,7 @@ void add_dense(Network* network, int output_units, int activation) {
     network->kernel[k_pos]->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
+    network->kernel[k_pos]->linearisation = 0;
     nn->input_units = input_units;
     nn->output_units = output_units;
     nn->bias = (float*)malloc(sizeof(float)*output_units);
@@ -214,6 +215,7 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     network->kernel[k_pos]->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
+    network->kernel[k_pos]->linearisation = 1;
     nn->input_units = input_units;
     nn->output_units = output_units;
     

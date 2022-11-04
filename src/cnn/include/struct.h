@@ -23,7 +23,7 @@ typedef struct Kernel_nn {
 typedef struct Kernel {
     Kernel_cnn* cnn; // NULL si ce n'est pas un cnn
     Kernel_nn* nn; // NULL si ce n'est pas un nn
-    int activation; // Vaut l'activation sauf pour un pooling où il: vaut pooling_size*100 + activation
+    int activation; // Vaut l'activation sauf pour un pooling où il: vaut pooling_size*100
     int linearisation; // Vaut 1 si c'est la linéarisation d'une couche, 0 sinon ?? Ajouter dans les autres
 } Kernel;
 
