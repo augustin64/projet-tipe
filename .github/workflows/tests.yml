@@ -13,8 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: print versions
-      run: make --version; gcc --version
+    - name: make all
+      run: make all
     - name: run-tests
       run: make run-tests
     - name: mnist main train
