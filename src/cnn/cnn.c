@@ -111,7 +111,7 @@ void backward_propagation(Network* network, float wanted_number) {
         output = network->input[i+1];
         output_depth = network->depth[i+1];
         output_width = network->width[i+1];
-        activation = i==0?SIGMOID:k_i->activation;
+        activation = i==0?SIGMOID:network->kernel[i-1]->activation;
 
         
         if (k_i->cnn) { // Convolution
