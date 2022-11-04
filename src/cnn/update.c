@@ -22,7 +22,7 @@ void update_weights(Network* network) {
                 for (int b=0; b<output_depth; b++) {
                     for (int c=0; c<k_size; c++) {
                         for (int d=0; d<k_size; d++) {
-                            cnn->w[a][b][c][d] += cnn->d_w[a][b][c][d];
+                            cnn->w[a][b][c][d] += network->learning_rate * cnn->d_w[a][b][c][d];
                             cnn->d_w[a][b][c][d] = 0;
                         }
                     }
@@ -33,7 +33,7 @@ void update_weights(Network* network) {
                 Kernel_nn* nn = k_i_1->nn;
                 for (int a=0; a<input_width; a++) {
                     for (int b=0; b<output_width; b++) {
-                        nn->weights[a][b] += nn->d_weights[a][b];
+                        nn->weights[a][b] += network->learning_rate * nn->d_weights[a][b];
                         nn->d_weights[a][b] = 0;
                     }
                 }
@@ -42,7 +42,7 @@ void update_weights(Network* network) {
                 int input_size = input_width*input_width*input_depth;
                 for (int a=0; a<input_size; a++) {
                     for (int b=0; b<output_width; b++) {
-                        nn->weights[a][b] += nn->d_weights[a][b];
+                        nn->weights[a][b] += network->learning_rate * nn->d_weights[a][b];
                         nn->d_weights[a][b] = 0;
                     }
                 }
@@ -69,7 +69,7 @@ void update_bias(Network* network) {
             for (int a=0; a<output_depth; a++) {
                 for (int b=0; b<output_width; b++) {
                     for (int c=0; c<output_width; c++) {
-                        cnn->bias[a][b][c] += cnn->d_bias[a][b][c];
+                        cnn->bias[a][b][c] += network->learning_rate * cnn->d_bias[a][b][c];
                         cnn->d_bias[a][b][c] = 0;
                     }
                 }
@@ -77,7 +77,7 @@ void update_bias(Network* network) {
         } else if (k_i->nn) { // Full connection
             Kernel_nn* nn = k_i_1->nn;
             for (int a=0; a<output_width; a++) {
-                nn->bias[a] += nn->d_bias[a];
+                nn->bias[a] += network->learning_rate * nn->d_bias[a];
                 nn->d_bias[a] = 0;
             }
         } else { // Pooling
