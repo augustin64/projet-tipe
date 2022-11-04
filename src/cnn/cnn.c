@@ -57,6 +57,12 @@ void forward_propagation(Network* network) {
         output_width = network->width[i+1];
         activation = k_i->activation;
 
+        if (k_i->nn) {
+            drop_neurones(input, 1, 1, input_width, network->dropout);
+        } else {
+            drop_neurones(input, input_depth, input_width, input_width, network->dropout);
+        }
+
         if (k_i->cnn) { // Convolution
             make_convolution(k_i->cnn, input, output, output_width);
             copy_input_to_input_z(output, output_a, output_depth, output_width, output_width);
@@ -123,6 +129,17 @@ void backward_propagation(Network* network, float wanted_number) {
         }
     }
     free(wanted_output);
+}
+
+void drop_neurones(float*** input, int depth, int dim1, int dim2, int dropout) {
+    for (int i=0; i<depth; i++) {
+        for (int j=0; j<dim1; j++) {
+            for (int k=0; k<dim2; k++) {
+                if (will_be_drop(dropout))
+                    input[i][j][k] = 0;
+            }
+        }
+    }
 }
 
 void copy_input_to_input_z(float*** output, float*** output_a, int output_depth, int output_rows, int output_columns) {
