@@ -140,7 +140,7 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
             cnn->d_w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
             for (int k=0; k < kernel_size; k++) {
                 cnn->w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
-                cnn->d_w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
+                cnn->d_w[i][j][k] = (float*)calloc(kernel_size, sizeof(float));
             }
         }
     }
@@ -151,19 +151,15 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
         cnn->d_bias[i] = (float**)malloc(sizeof(float*)*bias_size);
         for (int j=0; j < bias_size; j++) {
             cnn->bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
-            cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
+            cnn->d_bias[i][j] = (float*)calloc(bias_size, sizeof(float));
         }
     }
+    int n_in = network->width[n-1]*network->width[n-1]*network->depth[n-1];
+    int n_out = network->width[n]*network->width[n]*network->depth[n];
+    initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, dim_output, dim_output, n_in, n_out);
+    initialisation_4d_matrix(network->initialisation, cnn->w, depth_input, depth_output, kernel_size, kernel_size, n_in, n_out);
     create_a_cube_input_layer(network, n, depth_output, bias_size);
     create_a_cube_input_z_layer(network, n, depth_output, bias_size);
-    // int n_int = network->width[n-1]*network->width[n-1]*network->depth[n-1];
-    // int n_out = network->width[n]*network->width[n]*network->depth[n];
-    /* Not currently used 
-    initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, kernel_size, kernel_size, n_int+n_out);
-    initialisation_3d_matrix(ZERO, cnn->d_bias, depth_output, kernel_size, kernel_size, n_int+n_out);
-    initialisation_4d_matrix(network->initialisation, cnn->w, depth_input, depth_output, kernel_size, kernel_size, n_int+n_out);
-    initialisation_4d_matrix(ZERO, cnn->d_w, depth_input, depth_output, kernel_size, kernel_size, n_int+n_out);
-    */
     network->size++;
 }
 
@@ -183,21 +179,17 @@ void add_dense(Network* network, int output_units, int activation) {
     nn->input_units = input_units;
     nn->output_units = output_units;
     nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    nn->d_bias = (float*)calloc(output_units, sizeof(float));
     nn->weights = (float**)malloc(sizeof(float*)*input_units);
     nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
     for (int i=0; i < input_units; i++) {
         nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
+        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
     }
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
+    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
-    /* Not currently used
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, output_units+input_units);
-    initialisation_1d_matrix(ZERO, nn->d_bias, output_units, output_units+input_units);
-    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
-    initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units);
-    */
     network->size++;
 }
 
@@ -220,20 +212,16 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     nn->output_units = output_units;
     
     nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    nn->d_bias = (float*)calloc(output_units, sizeof(float));
     nn->weights = (float**)malloc(sizeof(float*)*input_units);
     nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
     for (int i=0; i < input_units; i++) {
         nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
+        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
     }
-    /* Not currently used
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, output_units+input_units);
-    initialisation_1d_matrix(ZERO, nn->d_bias, output_units, output_units+input_units);
-    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, output_units+input_units);
-    initialisation_2d_matrix(ZERO, nn->d_weights, input_units, output_units, output_units+input_units); */
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
+    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
-
     network->size++;
 }

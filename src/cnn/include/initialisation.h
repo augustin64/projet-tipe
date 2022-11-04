@@ -5,29 +5,28 @@
 #define RAND_FLT() ((float)rand())/((float)RAND_MAX)
 
 #define ZERO 0
-#define GLOROT_NORMAL 1
-#define GLOROT_UNIFROM 2
-#define HE_NORMAL 3
-#define HE_UNIFORM 4
+#define GLOROT 1
+#define XAVIER 1 // Xavier and Glorot initialisations are the same
+#define HE 2
 
 /*
-* Initialise une matrice 1d rows de float en fonction du type d'initialisation
+* Initialise une matrice 1d dim de float en fonction du type d'initialisation
 */
-void initialisation_1d_matrix(int initialisation, float* matrix, int rows, int n); // TODO (UNIFORM AND VARIATIONS)
+void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in, int n_out);
 
 /*
-* Initialise une matrice 2d rows*columns de float en fonction du type d'initialisation
+* Initialise une matrice 2d dim1*dim2 de float en fonction du type d'initialisation
 */
-void initialisation_2d_matrix(int initialisation, float** matrix, int rows, int columns, int n); // TODO
+void initialisation_2d_matrix(int initialisation, float** matrix, int dim1, int dim2, int n_in, int n_out);
 
 /*
-* Initialise une matrice 3d depth*dim*columns de float en fonction du type d'initialisation
+* Initialise une matrice 3d depth*dim1*dim2 de float en fonction du type d'initialisation
 */
-void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, int rows, int columns, int n); // TODO
+void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, int dim1, int dim2, int n_in, int n_out);
 
 /*
-* Initialise une matrice 4d rows*columns*rows1*columns1 de float en fonction du type d'initialisation
+* Initialise une matrice 4d depth1*depth2*dim1*dim2 de float en fonction du type d'initialisation
 */
-void initialisation_4d_matrix(int initialisation, float**** matrix, int rows, int columns, int rows1, int columns1, int n); // TODO
+void initialisation_4d_matrix(int initialisation, float**** matrix, int depth1, int depth2, int dim1, int dim2, int n_in, int n_out);
 
 #endif
