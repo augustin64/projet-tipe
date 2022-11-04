@@ -84,7 +84,7 @@ endif
 # Build general files
 #
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
-	$(CC) -c $< -o $@  $(CFLAGS)
+	$(CC)  -c $< -o $@  $(CFLAGS)
 
 #
 # Tests
