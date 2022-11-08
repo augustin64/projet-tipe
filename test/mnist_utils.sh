@@ -3,14 +3,15 @@
 set -e
 
 OUT="build"
-[[ -f "$OUT/mnist-utils" ]] || make $OUT/mnist-utils
+make $OUT/mnist-utils
 
 echo "Compte des labels"
-"$OUT/mnist-utils" count-labels -l data/mnist/t10k-labels-idx1-ubyte > /dev/null
+"$OUT/mnist-utils" count-labels -l data/mnist/t10k-labels-idx1-ubyte
 echo "OK"
 
 echo "Création du réseau"
-"$OUT/mnist-utils" creer-reseau -n 3 -o .test-cache/reseau.bin > /dev/null
+mkdir -p .test-cache
+"$OUT/mnist-utils" creer-reseau -n 3 -o .test-cache/reseau.bin
 echo "OK"
 
 echo "Affichage poids"
