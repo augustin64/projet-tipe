@@ -11,14 +11,14 @@
 #define purple printf("\033[0;35m")
 #define reset_color printf("\033[0m")
 
-void print_kernel_cnn(Kernel_cnn* k, int depth_input, int dim_input, int depth_output, int dim_output) {
+void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth_output, int dim_output) {
     int k_size = dim_input - dim_output + 1;
     // print bias
     green;
     for (int i=0; i<depth_output; i++) {
         for (int j=0; j<dim_output; j++) {
             for (int k=0; k<dim_output; k++) {
-                printf("%.2f", k->bias[i][j][k]);
+                printf("%.2f", ker->bias[i][j][k]);
             }
             print_space;
         }
@@ -29,12 +29,12 @@ void print_kernel_cnn(Kernel_cnn* k, int depth_input, int dim_input, int depth_o
 
     //print weights
     red;
-    for (int i=0; i<; i++) {
+    for (int i=0; i<depth_input; i++) {
         printf("------Line %d-----\n", i);
-        for (int j=0; j<; j++) {
-            for (int k=0; k<; k++) {
-                for (int l=0; l<; l++) {
-                    printf("%.2f", k->w[i][j][k][l]);
+        for (int j=0; j<depth_output; j++) {
+            for (int k=0; k<k_size; k++) {
+                for (int l=0; l<k_size; l++) {
+                    printf("%.2f", ker->w[i][j][k][l]);
                 }
                 print_space;
             }
@@ -56,11 +56,11 @@ void print_pooling(int size) {
     print_dspace;
 }
 
-void print_kernel_nn(Kernel_nn* k, int size_input, int size_output) {
+void print_kernel_nn(Kernel_nn* ker, int size_input, int size_output) {
     // print bias
     green;
     for (int i=0; i<size_output; i++) {
-        printf("%.2f ", k->bias[i]);
+        printf("%.2f ", ker->bias[i]);
     }
     print_dspace;
     reset_color;
@@ -69,7 +69,7 @@ void print_kernel_nn(Kernel_nn* k, int size_input, int size_output) {
     red;
     for (int i=0; i<size_output; i++) {
         for (int j=0; j<size_input; j++) {
-            printf("%.2f ", k->weights[j][i]);
+            printf("%.2f ", ker->weights[j][i]);
         }
         print_space;
     }
@@ -97,17 +97,18 @@ void print_input(float*** input, int depth, int dim) {
 void print_cnn(Network* network) {
     int n = network->size;
     int input_depth, input_width, output_depth, output_width;
+    //float*** output;
+    //float*** input;
     Kernel* k_i;
     for (int i=0; i<(n-1); i++) {
-        input = network->input[i];
+        //input = network->input[i];
         input_depth = network->depth[i];
         input_width = network->width[i];
-        output = network->input[i+1];
+        //output = network->input[i+1];
         output_depth = network->depth[i+1];
         output_width = network->width[i+1];
         k_i = network->kernel[i];
 
-        print_input(input, input_depth, input_width);
 
         if (k_i->cnn) { // Convolution
             print_kernel_cnn(k_i->cnn, input_depth, input_width, output_depth, output_width);
@@ -119,5 +120,4 @@ void print_cnn(Network* network) {
             print_pooling(input_width - output_width +1);
         }
     }
-    print_input(input[n-1], network->depth[n-1], network->width[n-1]);
 }

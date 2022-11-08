@@ -1,3 +1,5 @@
+#include "struct.h"
+
 #ifndef DEF_UPDATE_H
 #define DEF_UPDATE_H
 
