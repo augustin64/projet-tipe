@@ -47,17 +47,19 @@ void write_network(char* filename, Network* network) {
 
     // Écriture du pré-corps et corps
     for (int i=0; i < size; i++) {
-        write_couche(network->kernel[i], type_couche[i], ptr);
+        write_couche(network, i, type_couche[i], ptr);
     }
 
     fclose(ptr);
 }
 
 
-void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
+void write_couche(Network* network, int indice_couche, int type_couche, FILE* ptr) {
+    Kernel* kernel = network->kernel[indice_couche];
     int indice_buffer = 0;
     if (type_couche == 0) { // Cas du CNN
         Kernel_cnn* cnn = kernel->cnn;
+        int output_dim = network->width[indice_couche];
 
         // Écriture du pré-corps
         uint32_t pre_buffer[4];
@@ -68,11 +70,12 @@ void write_couche(Kernel* kernel, int type_couche, FILE* ptr) {
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
-        float buffer[cnn->k_size*cnn->k_size*cnn->columns*(cnn->rows+1)];
+        float buffer[cnn->columns*(cnn->k_size*cnn->k_size*cnn->rows+output_dim*output_dim)];
 
         for (int i=0; i < cnn->columns; i++) {
-            for (int j=0; j < cnn->k_size; j++) {
-                for (int k=0; k < cnn->k_size; k++) {
+            for (int j=0; j < output_dim; j++) {
+                for (int k=0; k < output_dim; k++) {
+                    printf("%f\n", cnn->bias[i][j][k]);
                     bufferAdd(cnn->bias[i][j][k]);
                 }
             }
@@ -166,7 +169,7 @@ Network* read_network(char* filename) {
     network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
 
     for (int i=0; i < (int)size; i++) {
-        network->kernel[i] = read_kernel(type_couche[i], ptr);
+        network->kernel[i] = read_kernel(type_couche[i], network->width[i], ptr);
     }
 
     network->input = (float****)malloc(sizeof(float***)*size);
@@ -187,7 +190,7 @@ Network* read_network(char* filename) {
     return network;
 }
 
-Kernel* read_kernel(int type_couche, FILE* ptr) {
+Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
     Kernel* kernel = (Kernel*)malloc(sizeof(Kernel));
     if (type_couche == 0) { // Cas du CNN
         // Lecture du "Pré-corps"
@@ -209,12 +212,12 @@ Kernel* read_kernel(int type_couche, FILE* ptr) {
         cnn->bias = (float***)malloc(sizeof(float**)*cnn->columns);
         cnn->d_bias = (float***)malloc(sizeof(float**)*cnn->columns);
         for (int i=0; i < cnn->columns; i++) {
-            cnn->bias[i] = (float**)malloc(sizeof(float*)*cnn->k_size);
-            cnn->d_bias[i] = (float**)malloc(sizeof(float*)*cnn->k_size);
-            for (int j=0; j < cnn->k_size; j++) {
-                cnn->bias[i][j] = (float*)malloc(sizeof(float)*cnn->k_size);
-                cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*cnn->k_size);
-                for (int k=0; k < cnn->k_size; k++) {
+            cnn->bias[i] = (float**)malloc(sizeof(float*)*output_dim);
+            cnn->d_bias[i] = (float**)malloc(sizeof(float*)*output_dim);
+            for (int j=0; j < output_dim; j++) {
+                cnn->bias[i][j] = (float*)malloc(sizeof(float)*output_dim);
+                cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*output_dim);
+                for (int k=0; k < output_dim; k++) {
                     fread(&tmp, sizeof(tmp), 1, ptr);
                     cnn->bias[i][j][k] = tmp;
                     cnn->d_bias[i][j][k] = 0.;

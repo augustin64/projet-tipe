@@ -78,7 +78,7 @@ void count_labels(char* filename) {
     }
 
     for (int i=0; i < 10; i++) {
-        printf("Nombre de %d: %x\n", i, tab[i]);
+        printf("Nombre de %d: %u\n", i, tab[i]);
     }
     free(labels);
 }
