@@ -20,7 +20,7 @@ void write_network(char* filename, Network* network);
 /*
 * Écrit une couche dans le fichier spécifié par le pointeur ptr
 */
-void write_couche(Kernel* kernel, int type_couche, FILE* ptr);
+void write_couche(Network* network, int indice_couche, int type_couche, FILE* ptr);
 
 
 // Lecture d'un réseau neuronal 
@@ -33,5 +33,5 @@ Network* read_network(char* filename);
 /*
 * Lit une kernel dans le fichier spécifié par le pointeur ptr
 */
-Kernel* read_kernel(int type_couche, FILE* ptr);
+Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr);
 #endif
