@@ -112,10 +112,10 @@ ptr get_function_activation(int activation) {
     } else if (activation == -SIGMOID) {
         return &sigmoid_derivative;
     } else if (activation == SOFTMAX) {
-        printf("Erreur, impossible de renvoyer la fonction softmax");
+        printf("Erreur, impossible de renvoyer la fonction softmax\n");
         return NULL;
     } else if (activation == -SOFTMAX) {
-        printf("Erreur, impossible de renvoyer la dérivée de la fonction softmax");
+        printf("Erreur, impossible de renvoyer la dérivée de la fonction softmax\n");
         return NULL;
     } else if (activation == TANH) {
         return &tanh_;

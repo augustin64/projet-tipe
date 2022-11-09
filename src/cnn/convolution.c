@@ -21,6 +21,33 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 #endif
 
+bool check_cuda_compatibility() {
+    #ifdef __CUDACC__
+    int nDevices;
+    cudaDeviceProp prop;
+
+    cudaGetDeviceCount(&nDevices);
+    if (nDevices == 0) {
+        printf("Pas d'utilisation du GPU\n\n");
+        return false;
+    }
+
+    printf("GPUs disponibles:\n");
+
+    for (int i=0; i < nDevices; i++) {
+        cudaGetDeviceProperties(&prop, i);
+        printf(" - %s\n", prop.name);
+    }
+
+    cudaGetDeviceProperties(&prop, 0);
+    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
+    return true;
+    #else
+    printf("Pas d'utilisation du GPU\n\n");
+    return false;
+    #endif
+}
+
 void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
     // c'est le kernel de input
     // input[kernel->rows][kernel_k_size + output_dim-1][kernel_k_size + output_dim-1]

@@ -75,6 +75,32 @@ void free_matrix(float*** matrix, int n, int p) {
     free(matrix);
 }
 
+bool check_cuda_compatibility() {
+    #ifdef __CUDACC__
+    int nDevices;
+    cudaDeviceProp prop;
+
+    cudaGetDeviceCount(&nDevices);
+    if (nDevices == 0) {
+        printf("Pas d'utilisation du GPU\n\n");
+        return false;
+    }
+
+    printf("GPUs disponibles:\n");
+
+    for (int i=0; i < nDevices; i++) {
+        cudaGetDeviceProperties(&prop, i);
+        printf(" - %s\n", prop.name);
+    }
+
+    cudaGetDeviceProperties(&prop, 0);
+    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
+    return true;
+    #else
+    printf("Pas d'utilisation du GPU\n\n");
+    return false;
+    #endif
+}
 
 bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int acceptation) {
     for (int i=0; i < n; i++) {
@@ -163,6 +189,14 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
 
 
 int main() {
+    printf("Checking CUDA compatibility.\n");
+    bool cuda_compatible = check_cuda_compatibility();
+    if (!cuda_compatible) {
+        printf("CUDA not compatible, skipping tests.\n");
+        return 0;
+    }
+    printf("OK\n");
+    
     srand(time(NULL));
 
     run_convolution_test(20, 15, 30, 40);

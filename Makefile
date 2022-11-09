@@ -90,8 +90,8 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 # Tests
 #
 run-tests: build-tests
-	$(foreach file, $(wildcard $(BUILDDIR)/test-*), $(file);)
 	$(foreach file, $(wildcard $(TEST_SRCDIR)/*.sh), $(file);)
+	@echo "$$(for file in build/test-*; do echo $$file; $$file; done)"
 
 build-tests: prepare-tests $(TESTS_OBJ) $(BUILDDIR)/test-cnn_matrix_multiplication $(BUILDDIR)/test-cnn_convolution
 
