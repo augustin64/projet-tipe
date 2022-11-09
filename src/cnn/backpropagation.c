@@ -3,6 +3,7 @@
 #include "include/backpropagation.h"
 #include "include/struct.h"
 
+// The first layer needs to be a convolution or a fully connected one
 
 int min(int a, int b) {
     return a<b?a:b;
@@ -91,8 +92,8 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
             for (int l=0; l < dim_input; l++) {
                 for (int j=0; j < size_output; j++) {
                     ker->d_weights[cpt][j] += input[i][k][l]*output[j];
-                    cpt++;
                 }
+                cpt++;
             }
         }
     }
@@ -166,9 +167,3 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
         }
     }
 }
-
-
-// Only last_... have been done, we have to deal with the d_... part
-// It's EASY but it needs to be done
-
-// The first layer needs to be a convolution or a fully connected one
