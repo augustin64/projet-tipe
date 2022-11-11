@@ -3,7 +3,7 @@ SRCDIR       := ./src
 CACHE_DIR    := ./cache
 NVCC         := nvcc
 
-NVCC_INSTALLED := $(shell command -v nvcc 2> /dev/null)
+NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 
 MNIST_SRCDIR := $(SRCDIR)/mnist
 CNN_SRCDIR   := $(SRCDIR)/cnn
@@ -76,7 +76,7 @@ $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 ifndef NVCC_INSTALLED
-	@echo "nvcc not found, skipping"
+	@echo "$(NVCC) not found, skipping"
 else
 	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
 endif
@@ -87,7 +87,11 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
+ifndef NVCC_INSTALLED
+	@echo "$(NVCC) not found, skipping"
+else
 	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+endif	
 
 #
 # Tests
@@ -112,7 +116,7 @@ build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 ifndef NVCC_INSTALLED
-	@echo "nvcc not found, skipping"
+	@echo "$(NVCC) not found, skipping"
 else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 endif
