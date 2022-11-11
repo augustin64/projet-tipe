@@ -7,6 +7,8 @@
 
 #include "../src/cnn/include/convolution.h"
 #include "../src/cnn/include/struct.h"
+#include "../src/include/colors.h"
+#include "../src/include/utils.h"
 
 
 float random_float(float low, float high) {
@@ -75,39 +77,12 @@ void free_matrix(float*** matrix, int n, int p) {
     free(matrix);
 }
 
-bool check_cuda_compatibility() {
-    #ifdef __CUDACC__
-    int nDevices;
-    cudaDeviceProp prop;
-
-    cudaGetDeviceCount(&nDevices);
-    if (nDevices == 0) {
-        printf("Pas d'utilisation du GPU\n\n");
-        return false;
-    }
-
-    printf("GPUs disponibles:\n");
-
-    for (int i=0; i < nDevices; i++) {
-        cudaGetDeviceProperties(&prop, i);
-        printf(" - %s\n", prop.name);
-    }
-
-    cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
-    return true;
-    #else
-    printf("Pas d'utilisation du GPU\n\n");
-    return false;
-    #endif
-}
-
 bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int acceptation) {
     for (int i=0; i < n; i++) {
         for (int j=0; j < p; j++) {
             for (int k=0; k < q; k++) {
                 if (fabs(m1[i][j][k] - m2[i][j][k]) > 0.01*acceptation) {
-                    printf("diff %d %d %d: %f val: %f et %f\n", i, j, k, fabs(m1[i][j][k] - m2[i][j][k]), m1[i][j][k], m2[i][j][k]);
+                    printf(RED "diff %d %d %d: %f val: %f et %f\n" RESET, i, j, k, fabs(m1[i][j][k] - m2[i][j][k]), m1[i][j][k], m2[i][j][k]);
                     return false;
                 }
             }
@@ -170,7 +145,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     if (!check_matrices_equality(output_gpu, output_cpu, kernel->columns, output_dim, output_dim, kernel->k_size)) {// TODO: change acceptation
         exit(1);
     }
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
 
     free_matrix(kernel->bias, kernel->columns, output_dim);
     free_matrix(kernel->d_bias, kernel->columns, output_dim);
@@ -192,16 +167,16 @@ int main() {
     printf("Checking CUDA compatibility.\n");
     bool cuda_compatible = check_cuda_compatibility();
     if (!cuda_compatible) {
-        printf("CUDA not compatible, skipping tests.\n");
+        printf(RED "CUDA not compatible, skipping tests.\n" RESET);
         return 0;
     }
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
     
     srand(time(NULL));
 
     run_convolution_test(20, 15, 30, 40);
     run_convolution_test(30, 25, 40, 50);
-    run_convolution_test(200, 10, 40, 50);
+    run_convolution_test(250, 200, 3, 3);
     
     return 0;
 }

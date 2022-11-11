@@ -2,27 +2,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "../include/colors.h"
+#include "../include/utils.h"
+
 #define BLOCKSIZE_x 16
 #define BLOCKSIZE_y 16
 
 #ifdef __CUDACC__
-/* CUDA memcheck */
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true) {
-   if (code != cudaSuccess) {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
-}
-#endif
-
-
-#ifdef __CUDACC__
-int i_div_up(int a, int b) { // Partie entière supérieure de a/b
-    return ((a % b) != 0) ? (a / b + 1) : (a / b);
-}
-
-
 __global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p, int q, size_t pitch_m, size_t pitch_n, size_t pitch_p) {
     // Chaque thread calcule toutes les multiplications utilisant l'élément Nd[tx][ty]
     int tx = (blockIdx.x*blockDim.x) + threadIdx.x; // Indice de colonne
@@ -88,34 +74,6 @@ void matrix_multiplication_device(float** m1, float** m2, float** result, int n,
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
-
-
-bool check_cuda_compatibility() {
-    #ifdef __CUDACC__
-    int nDevices;
-    cudaDeviceProp prop;
-
-    cudaGetDeviceCount(&nDevices);
-    if (nDevices == 0) {
-        printf("Pas d'utilisation du GPU\n\n");
-        return false;
-    }
-
-    printf("GPUs disponibles:\n");
-
-    for (int i=0; i < nDevices; i++) {
-        cudaGetDeviceProperties(&prop, i);
-        printf(" - %s\n", prop.name);
-    }
-
-    cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
-    return true;
-    #else
-    printf("Pas d'utilisation du GPU\n\n");
-    return false;
-    #endif
-}
 
 
 void matrix_multiplication_host(float** m1, float** m2, float** result, int n, int p, int q) {

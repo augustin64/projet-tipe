@@ -1,26 +1,11 @@
-/* This file is a copy of src/cnn/convolution.cu */
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 
 #include "include/struct.h"
-
-#define BLOCKSIZE_x 16
-#define BLOCKSIZE_y 8
-#define BLOCKSIZE_z 8
-
-
 #ifdef __CUDACC__
-/* CUDA memcheck */
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true) {
-   if (code != cudaSuccess) {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
-}
-#endif
-
+    #include "../include/utils.h"
+#else
 bool check_cuda_compatibility() {
     #ifdef __CUDACC__
     int nDevices;
@@ -40,13 +25,19 @@ bool check_cuda_compatibility() {
     }
 
     cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: %s (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
+    printf("Utilisation du GPU: " BLUE "%s" RESET " (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
     return true;
     #else
     printf("Pas d'utilisation du GPU\n\n");
     return false;
     #endif
 }
+#endif
+
+#define BLOCKSIZE_x 16
+#define BLOCKSIZE_y 8
+#define BLOCKSIZE_z 8
+
 
 void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
     // c'est le kernel de input
@@ -72,9 +63,6 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
 }
 
 #ifdef __CUDACC__
-int i_div_up(int a, int b) { // Partie entière supérieure de a/b
-    return ((a % b) != 0) ? (a / b + 1) : (a / b);
-}
 
 __global__ void make_convolution_kernel(int k_size, int columns, int rows, float*** bias, size_t pitch_bias, float**** w, size_t pitch_w, float*** input, size_t pitch_input, float*** output, size_t pitch_output, int output_dim) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu

@@ -5,6 +5,8 @@
 #include <time.h>
 
 #include "../src/cnn/include/matrix_multiplication.h"
+#include "../src/include/colors.h"
+#include "../src/include/utils.h"
 
 
 float random_float(float low, float high) {
@@ -76,30 +78,27 @@ void run_matrices_test(int n, int p, int q) {
     float** result_gpu = create_empty_matrix(n, q);
     float** result_cpu = create_empty_matrix(n, q);
 
-    printf("(%d,%d)x(%d,%d) Computing on GPU.\n", n, p, p, q);
+    printf("(%d,%d)x(%d,%d) Data generation complete.\n", n, p, p, q);
     start = clock();
     matrix_multiplication_device(matrix1, matrix2, result_gpu, n, p, q);
     end = clock();
 
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("(%d,%d)x(%d,%d) Time used for GPU: %lf seconds\n", n, p, p, q, cpu_time_used);
-    printf("OK\n");
     
-    printf("(%d,%d)x(%d,%d) Computing on CPU.\n", n, p, p, q);
     start = clock();
     matrix_multiplication_host(matrix1, matrix2, result_cpu, n, p, q);
     end = clock();
 
     gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("(%d,%d)x(%d,%d) Time used for CPU: %lf seconds\n", n, p, p, q, gpu_time_used);
-    printf("OK\n");
 
     // Vérification de l'égalité des matrices
     printf("(%d,%d)x(%d,%d) Checking equality.\n", n, p, p, q);
     if (!check_matrices_equality(result_gpu, result_cpu, n, q, p)) {
         exit(1);
     }
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
 
     // On libère l'espace mémoire alloué
     for (int i=0; i < n; i++) {
@@ -131,7 +130,7 @@ int main() {
         printf("CUDA not compatible, skipping tests.\n");
         return 0;
     }
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
 
     srand(time(NULL));
     run_matrices_test(200, 1000, 200);
