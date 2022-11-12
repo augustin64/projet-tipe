@@ -51,7 +51,7 @@ bool equals_networks(Network* network1, Network* network2) {
             }
         } else {
             // Type CNN
-            output_dim = network1->width[i];
+            output_dim = network1->width[i+1];
             checkEquals(kernel[i]->cnn->k_size, "kernel[i]->k_size", i);
             checkEquals(kernel[i]->cnn->rows, "kernel[i]->rows", i);
             checkEquals(kernel[i]->cnn->columns, "kernel[i]->columns", i);
@@ -152,7 +152,7 @@ Network* copy_network(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
-            output_dim = network->width[i];
+            output_dim = network->width[i+1];
             
 
             network_cp->kernel[i]->nn = NULL;

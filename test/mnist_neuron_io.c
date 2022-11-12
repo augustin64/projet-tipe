@@ -6,6 +6,7 @@
 
 #include "../src/mnist/include/neuron_io.h"
 #include "../src/mnist/include/neural_network.h"
+#include "../src/include/colors.h"
 
 
 Neuron* creer_neuron(int nb_sortants) {
@@ -63,20 +64,20 @@ Network* create_network(int nb_layers, int nb_max_neurons, int nb_min_neurons) {
 int main() {
     printf("Création du réseau\n");
     Network* network = create_network(5, 300, 10);
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
 
     printf("Écriture du réseau\n");
-    write_network(".test-cache/neuron_io.bin", network);
-    printf("OK\n");
+    write_network((char*)".test-cache/neuron_io.bin", network);
+    printf(GREEN "OK\n" RESET);
 
     printf("Vérification de l'accès en lecture\n");
-    Network* network2 = read_network(".test-cache/neuron_io.bin");
-    printf("OK\n");
+    Network* network2 = read_network((char*)".test-cache/neuron_io.bin");
+    printf(GREEN "OK\n" RESET);
 
     printf("Suppression des réseaux\n");
     deletion_of_network(network);
     deletion_of_network(network2);
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
 
     return 0;
 }

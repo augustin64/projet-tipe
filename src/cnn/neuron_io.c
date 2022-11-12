@@ -59,7 +59,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
     int indice_buffer = 0;
     if (type_couche == 0) { // Cas du CNN
         Kernel_cnn* cnn = kernel->cnn;
-        int output_dim = network->width[indice_couche];
+        int output_dim = network->width[indice_couche+1];
 
         // Écriture du pré-corps
         uint32_t pre_buffer[4];
@@ -75,7 +75,6 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         for (int i=0; i < cnn->columns; i++) {
             for (int j=0; j < output_dim; j++) {
                 for (int k=0; k < output_dim; k++) {
-                    printf("%f\n", cnn->bias[i][j][k]);
                     bufferAdd(cnn->bias[i][j][k]);
                 }
             }
@@ -169,7 +168,7 @@ Network* read_network(char* filename) {
     network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
 
     for (int i=0; i < (int)size; i++) {
-        network->kernel[i] = read_kernel(type_couche[i], network->width[i], ptr);
+        network->kernel[i] = read_kernel(type_couche[i], network->width[i+1], ptr);
     }
 
     network->input = (float****)malloc(sizeof(float***)*size);

@@ -3,6 +3,7 @@
 #include <inttypes.h>
 
 #include "../src/mnist/include/mnist.h"
+#include "../src/include/colors.h"
 
 
 void read_test(int nb_images, int width, int height, int*** images, unsigned int* labels) {
@@ -10,7 +11,7 @@ void read_test(int nb_images, int width, int height, int*** images, unsigned int
     for (int i=0; i < nb_images; i++) {
         (void)labels[i];
     }
-    printf("\tOK\n");
+    printf(GREEN "\tOK\n" RESET);
     printf("\tLecture des images\n");
     for (int i=0; i < nb_images; i++) {
         for (int j=0; j < height; j++) {
@@ -19,12 +20,12 @@ void read_test(int nb_images, int width, int height, int*** images, unsigned int
             }
         }
     }
-    printf("\tOK\n");
+    printf(GREEN "\tOK\n" RESET);
 }
 
 int main() {
-    char* image_file = "data/mnist/t10k-images-idx3-ubyte";
-    char* labels_file = "data/mnist/t10k-labels-idx1-ubyte";
+    char* image_file = (char*)"data/mnist/t10k-images-idx3-ubyte";
+    char* labels_file = (char*)"data/mnist/t10k-labels-idx1-ubyte";
     printf("Chargement des paramètres\n");
 
     int* parameters = read_mnist_images_parameters(image_file);
@@ -32,21 +33,21 @@ int main() {
     int height = parameters[1];
     int width = parameters[2];
 
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
     printf("Chargement des images\n");
 
     int*** images = read_mnist_images(image_file);
 
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
     printf("Chargement des labels\n");
 
     unsigned int* labels = read_mnist_labels(labels_file);
 
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
     printf("Vérification de l'accès en lecture\n");
 
     read_test(nb_images, width, height, images, labels);
 
-    printf("OK\n");
+    printf(GREEN "OK\n" RESET);
     return 0;
 }

@@ -7,10 +7,6 @@
 
 
 #ifdef __CUDACC__
-/*
-* Partie entière supérieure de a/b
-*/
-int i_div_up(int a, int b);
 
 /*
 * Fonction exécutée par chaque thread lancé dans `matrix_multiplication_device`
@@ -22,11 +18,6 @@ __global__ void matrix_mul_kernel(float* Md, float* Nd, float* Pd, int n, int p,
 */
 void matrix_multiplication_device(float** m1, float** m2, float** result, int n, int p, int q);
 #endif
-
-/*
-* Vérification de la compatibilité CUDA
-*/
-bool check_cuda_compatibility();
 
 /*
 * Multiplication naïve de matrices sur le CPU (1 seul coeur)
