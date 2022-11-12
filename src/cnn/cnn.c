@@ -90,7 +90,6 @@ void forward_propagation(Network* network) {
 }
 
 void backward_propagation(Network* network, float wanted_number) {
-    printf_warning("Appel de backward_propagation, incomplet\n");
     float* wanted_output = generate_wanted_output(wanted_number);
     int n = network->size;
     int activation, input_depth, input_width, output_depth, output_width;

@@ -9,6 +9,15 @@ float max_float(float a, float b) {
     return a < b ? b:a;
 }
 
+float identity(float x) {
+    return x;
+}
+
+float identity_derivative(float x) {
+    (void)x;
+    return 1;
+}
+
 float sigmoid(float x) {
     return 1/(1 + exp(-x));
 }
@@ -105,26 +114,38 @@ void choose_apply_function_vector(int activation, float*** input, int dim) {
 ptr get_function_activation(int activation) {
     if (activation == RELU) {
         return &relu;
-    } else if (activation == -RELU) {
+    }
+    if (activation == -RELU) {
         return &relu_derivative;
-    } else if (activation == SIGMOID) {
+    }
+    if (activation == -IDENTITY) {
+        return &identity_derivative;
+    }
+    if (activation == IDENTITY) {
+        return &identity;
+    }
+    if (activation == SIGMOID) {
         return &sigmoid;
-    } else if (activation == -SIGMOID) {
+    }
+    if (activation == -SIGMOID) {
         return &sigmoid_derivative;
-    } else if (activation == SOFTMAX) {
+    }
+    if (activation == SOFTMAX) {
         printf("Erreur, impossible de renvoyer la fonction softmax\n");
         return NULL;
-    } else if (activation == -SOFTMAX) {
+    }
+    if (activation == -SOFTMAX) {
         printf("Erreur, impossible de renvoyer la dérivée de la fonction softmax\n");
         return NULL;
-    } else if (activation == TANH) {
-        return &tanh_;
-    } else if (activation == -TANH) {
-        return &tanh_derivative;
-    } else {
-        printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
-        return NULL;
     }
+    if (activation == TANH) {
+        return &tanh_;
+    }
+    if (activation == -TANH) {
+        return &tanh_derivative;
+    }
+    printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
+    return NULL;
 }
 // to use: 
 // float a = 5; int activation;

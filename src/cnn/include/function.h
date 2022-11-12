@@ -3,10 +3,12 @@
 
 
 // Les dérivées sont l'opposé
-#define TANH 1
-#define SIGMOID 2
-#define RELU 3
-#define SOFTMAX 4
+#define IDENTITY 1
+#define TANH 2
+#define SIGMOID 3
+#define RELU 4
+#define SOFTMAX 5
+
 
 typedef float (*ptr)(float);
 typedef ptr (*pm)();
@@ -15,6 +17,10 @@ typedef ptr (*pm)();
 * Fonction max pour les floats
 */
 float max_float(float a, float b);
+
+float identity(float x);
+
+float identity_derivative(float x);
 
 float sigmoid(float x);
 
@@ -29,12 +35,12 @@ float tanh_(float x);
 float tanh_derivative(float x);
 
 /*
-* Applique softmax sur ????
+* Applique softmax sur input[depth][rows][columns]
 */
 void apply_softmax_input(float ***input, int depth, int rows, int columns);
 
 /*
-* Applique la fonction f sur ????
+* Applique la fonction f sur input[depth][rows][columns]
 */
 void apply_function_input(float (*f)(float), float*** input, int depth, int rows, int columns);
 

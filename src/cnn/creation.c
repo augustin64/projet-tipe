@@ -102,8 +102,8 @@ void add_2d_average_pooling(Network* network, int dim_output) {
     }
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
-    network->kernel[k_pos]->activation = 100*kernel_size; // Ne contient pas de fonction d'activation
-    network->kernel[k_pos]->linearisation = 0;
+    network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
+    network->kernel[k_pos]->linearisation = kernel_size;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
     network->size++;

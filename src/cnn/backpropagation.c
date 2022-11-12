@@ -146,19 +146,19 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
     // Input
     if (is_first==1) // Pas besoin de backpropager dans l'input
         return;
-
+    int min_m, max_m, min_n, max_n;
     for (int i=0; i < depth_input; i++) {
         for (int j=0; j < dim_input; j++) {
             for (int k=0; k < dim_input; k++) {
                 float tmp = 0;
                 for (int l=0; l < depth_output; l++) {
-                    int min_m = k_size - max(k_size, dim_input-i);
-                    int max_m =  min(k_size, i+1);
-                    int min_n = k_size - max(k_size, dim_input-j);
-                    int max_n = min(k_size, j+1);
+                    min_m = max(0, k_size-1-j);
+                    max_m = min(k_size, dim_input - j);
+                    min_n = max(0, k_size-1-k);
+                    max_n = min(k_size, dim_input-k);
                     for (int m=min_m; m < max_m; m++) {
                         for (int n=min_n; n < max_n; n++) {
-                            tmp += output[l][i-m][j-n]*ker->w[i][l][m][n];
+                            tmp += output[l][j-k_size+m+1][k-k_size+n+1]*ker->w[i][l][m][n];
                         }
                     }
                 }
