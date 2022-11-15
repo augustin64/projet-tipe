@@ -10,7 +10,6 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
     // output[output_depth][output_dim][output_dim]
     float average;
     int n = size*size;
-
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
@@ -20,7 +19,7 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
                         average += input[i][size*j +a][size*k +b];
                     }
                 }
-                output[i][j][k] = average/n;
+                output[i][j][k] = average/(float)n;
             }
         }
     }

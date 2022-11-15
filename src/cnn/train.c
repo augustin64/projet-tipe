@@ -10,6 +10,7 @@
 #include "../include/colors.h"
 #include "include/function.h"
 #include "include/creation.h"
+#include "include/update.h"
 #include "include/utils.h"
 #include "include/free.h"
 #include "include/cnn.h"
@@ -45,14 +46,20 @@ void* train_thread(void* parameters) {
     int start = param->start;
     int nb_images = param->nb_images;
     float accuracy = 0.;
-
+    int cpt=1;
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
             write_image_in_network_32(images[i], height, width, network->input[0][0]);
             forward_propagation(network);
+            maxi = indice_max(network, 10);
             backward_propagation(network, labels[i]);
-
-            maxi = indice_max(network->input[network->size-1][0][0], network->width[network->size-1]);
+            if (cpt==16) { // Update the network
+                printf("a\n");
+                update_weights(network);
+                update_bias(network);
+                cpt = 0;
+            }
+            cpt++;
             if (maxi == labels[i]) {
                 accuracy += 1.;
             }
