@@ -82,7 +82,7 @@ void forward_propagation(Network* network) {
                 printf("Le réseau ne peut pas finir par une pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
-                make_average_pooling(input, output, activation/100, output_depth, output_width);
+                make_average_pooling(input, output, activation, output_depth, output_width);
             }
             copy_input_to_input_z(output, output_a, output_depth, output_width, output_width);
         }
