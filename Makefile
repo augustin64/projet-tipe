@@ -65,10 +65,10 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 #
 cnn: $(BUILDDIR)/cnn-main;
 
-$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
-$(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
