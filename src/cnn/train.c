@@ -105,7 +105,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     }
 
     // Initialisation du réseau
-    Network* network = create_network_lenet5(0, 0, TANH, GLOROT, input_dim, input_depth);
+    Network* network = create_network_lenet5(0.01, 0, TANH, GLOROT, input_dim, input_depth);
 
     #ifdef USE_MULTITHREADING
     int nb_remaining_images; // Nombre d'images restantes à lancer pour une série de threads
