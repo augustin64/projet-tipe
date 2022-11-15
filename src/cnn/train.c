@@ -51,7 +51,7 @@ void* train_thread(void* parameters) {
         if (dataset_type == 0) {
             write_image_in_network_32(images[i], height, width, network->input[0][0]);
             forward_propagation(network);
-            maxi = indice_max(network, 10);
+            maxi = indice_max(network->input[network->size-1][0][0], 10);
             backward_propagation(network, labels[i]);
             if (cpt==16) { // Update the network
                 printf("a\n");

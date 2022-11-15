@@ -2,11 +2,6 @@
 #include "include/update.h"
 #include "include/struct.h"
 
-
-#include <stdio.h>
-
-
-
 void update_weights(Network* network) {
     int n = network->size;
     int input_depth, input_width, output_depth, output_width, k_size;
@@ -19,7 +14,7 @@ void update_weights(Network* network) {
         output_width = network->width[i+1];
 
         if (k_i->cnn) { // Convolution
-            Kernel_cnn* cnn = k_i->cnn; // ERRORS
+            Kernel_cnn* cnn = k_i->cnn;
             k_size = cnn->k_size;
             for (int a=0; a<input_depth; a++) {
                 for (int b=0; b<output_depth; b++) {
