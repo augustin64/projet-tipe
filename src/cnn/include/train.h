@@ -4,7 +4,7 @@
 #define DEF_TRAIN_H
 
 #define EPOCHS 10
-#define BATCHES 100
+#define BATCHES 120
 #define USE_MULTITHREADING
 
 
