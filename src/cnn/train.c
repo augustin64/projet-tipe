@@ -195,10 +195,11 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             accuracy += train_params->accuracy / (float) nb_images_total;
             current_accuracy = accuracy * nb_images_total/(j*BATCHES);
             
-            update_weights(network);
-            update_bias(network);
+            update_weights(network, network);
+            update_bias(network, network);
             
             printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+            fflush(stdout);
             #endif
         }
         #ifdef USE_MULTITHREADING
