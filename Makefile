@@ -29,8 +29,8 @@ CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg
 NVCCFLAGS = -ljpeg
 
 # Additional warning rules
-CFLAGS   += -Wall -Wextra 
-NVCCFLAGS += 
+CFLAGS   += -Wall -Wextra
+NVCCFLAGS +=
 # Remove warnings about unused variables, functions, ...
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
 # Compile with debug
@@ -69,7 +69,11 @@ $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/c
 	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+ifndef NVCC_INSTALLED
+	@echo "$(NVCC) not found, skipping"
+else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+endif
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
