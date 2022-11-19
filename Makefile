@@ -13,7 +13,7 @@ CNN_SRC      := $(wildcard $(CNN_SRCDIR)/*.c)
 CNN_SRC_CUDA := $(wildcard $(CNN_SRCDIR)/*.cu)
 
 MNIST_OBJ     = $(filter-out $(BUILDDIR)/mnist_main.o $(BUILDDIR)/mnist_utils.o $(BUILDDIR)/mnist_preview.o, $(MNIST_SRC:$(MNIST_SRCDIR)/%.c=$(BUILDDIR)/mnist_%.o))
-CNN_OBJ       = $(filter-out $(BUILDDIR)/cnn_main.o, $(CNN_SRC:$(CNN_SRCDIR)/%.c=$(BUILDDIR)/cnn_%.o))
+CNN_OBJ       = $(filter-out $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_preview.o, $(CNN_SRC:$(CNN_SRCDIR)/%.c=$(BUILDDIR)/cnn_%.o))
 CNN_OBJ_CUDA  = $(CNN_SRC:$(CNN_SRCDIR)/%.cu=$(BUILDDIR)/cnn_%.o)
 
 
