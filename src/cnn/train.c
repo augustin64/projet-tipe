@@ -67,7 +67,7 @@ void* train_thread(void* parameters) {
             }
             write_image_in_network_260(param->dataset->images[i], height, width, network->input[0]);
             forward_propagation(network);
-            maxi = indice_max(network->input[network->size-1][0][0], 10);
+            maxi = indice_max(network->input[network->size-1][0][0], param->dataset->numCategories);
             backward_propagation(network, param->dataset->labels[i]);
 
             if (maxi == (int)param->dataset->labels[i]) {

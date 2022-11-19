@@ -7,12 +7,19 @@
 
 
 void print_image(unsigned char* image, int height, int width) {
+    int red, green, blue;
+    for (int i=0; i < (int)height/2; i++) {
+        for (int j=0; j < (int)width; j++) {
+            red = (image[((2*i*width)+j)*3 + 0] + image[(((2*i+1)*width)+j)*3 + 0])/2;
+            green = (image[((2*i*width)+j)*3 + 1] + image[(((2*i+1)*width)+j)*3 + 1])/2;;
+            blue = (image[((2*i*width)+j)*3 + 2] + image[(((2*i+1)*width)+j)*3 + 2])/2;;
 
-    for (int i=0; i < (int)width; i++) {
-        for (int j=0; j < (int)height; j++) {
-            printf("\x1b[38;2;%d;%d;%dm#\x1b[0m", image[((i*width)+j)*3 + 0], image[((i*width)+j)*3 + 1], image[((i*width)+j)*3 + 2]);
+            // Make the text color opposed to background color
+            printf("\x1b[38;2;%d;%d;%dm", 255-red, 255-green, 255-blue);
+
+            printf("\x1b[48;2;%d;%d;%dm ", red, green, blue);
         }
-        printf("\n");
+        printf("\x1b[0m\n");
     }
 }
 
