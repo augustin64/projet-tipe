@@ -14,6 +14,7 @@
 #include "include/update.h"
 #include "include/utils.h"
 #include "include/free.h"
+#include "include/jpeg.h"
 #include "include/cnn.h"
 
 #include "include/train.h"
@@ -36,6 +37,7 @@ int indice_max(float* tab, int n) {
 void* train_thread(void* parameters) {
     TrainParameters* param = (TrainParameters*)parameters;
     Network* network = param->network;
+    imgRawImage* image;
     int maxi;
 
     int*** images = param->images;
@@ -58,8 +60,22 @@ void* train_thread(void* parameters) {
                 accuracy += 1.;
             }
         } else {
-            printf_error("Dataset de type JPG non implémenté\n");
-            exit(1);
+            if (!param->dataset->images[i]) {
+                image = loadJpegImageFile(param->dataset->fileNames[i]);
+                param->dataset->images[i] = image->lpData;
+                free(image);
+            }
+            write_image_in_network_260(param->dataset->images[i], height, width, network->input[0]);
+            forward_propagation(network);
+            maxi = indice_max(network->input[network->size-1][0][0], 10);
+            backward_propagation(network, param->dataset->labels[i]);
+
+            if (maxi == (int)param->dataset->labels[i]) {
+                accuracy += 1.;
+            }
+
+            free(param->dataset->images[i]);
+            param->dataset->images[i] = NULL;
         }
     }
 
@@ -79,6 +95,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
     int*** images;
     unsigned int* labels;
+    jpegDataset* dataset;
 
     if (dataset_type == 0) { // Type MNIST
         // Chargement des images du set de données MNIST
@@ -91,13 +108,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
         input_dim = 32;
         input_depth = 1;
-    } else { // TODO Type JPG
-        input_dim = 256;
-        input_depth = 3;
+    } else { // Type JPG
+        dataset = loadJpegDataset(data_dir);
+        input_dim = dataset->height + 4; // image_size + padding
+        input_depth = dataset->numComponents;
 
-        nb_images_total = 0;
-        printf_error("Dataset de type jpg non-implémenté.\n");
-        exit(1);
+        nb_images_total = dataset->numImages;
     }
 
     // Initialisation du réseau
@@ -120,11 +136,13 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         if (dataset_type == 0) {
             param->images = images;
             param->labels = labels;
-            param->data_dir = NULL;
+            param->dataset = NULL;
             param->width = 28;
             param->height = 28;
         } else {
-            param->data_dir = data_dir;
+            param->dataset = dataset;
+            param->width = dataset->width;
+            param->height = dataset->height;
             param->images = NULL;
             param->labels = NULL;
         }
@@ -133,7 +151,6 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     #else
     // Création des paramètres donnés à l'unique
     // thread dans l'hypothèse ou le multi-threading n'est pas utilisé.
-
     // Cela est utile à des fins de débogage notamment,
     // où l'utilisation de threads rend vite les choses plus compliquées qu'elles ne le sont.
     TrainParameters* train_params = (TrainParameters*)malloc(sizeof(TrainParameters));
@@ -145,12 +162,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         train_params->labels = labels;
         train_params->width = 28;
         train_params->height = 28;
-        train_params->data_dir = NULL;
+        train_params->dataset = NULL;
     } else {
-        train_params->data_dir = data_dir;
+        train_params->dataset = dataset;
+        train_params->width = dataset->width;
+        train_params->height = dataset->height;
         train_params->images = NULL;
-        train_params->width = 0;
-        train_params->height = 0;
         train_params->labels = NULL;
     }
     train_params->nb_images = BATCHES;
@@ -185,7 +202,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 // TODO patch_network(network, train_parameters[k]->network, train_parameters[k]->nb_images);
                 free_network(train_parameters[k]->network);
             }
-            current_accuracy = accuracy * nb_images_total/(j*BATCHES);
+            current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
             printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
             #else
             train_params->start = j*BATCHES;
@@ -193,7 +210,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             train_thread((void*)train_params);
             
             accuracy += train_params->accuracy / (float) nb_images_total;
-            current_accuracy = accuracy * nb_images_total/(j*BATCHES);
+            current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
             
             update_weights(network, network);
             update_bias(network, network);

@@ -38,6 +38,30 @@ void write_image_in_network_32(int** image, int height, int width, float** input
     }
 }
 
+void write_image_in_network_260(unsigned char* image, int height, int width, float*** input) {
+    int input_size = 260;
+    int padding = (input_size - height)/2;
+
+    for (int i=0; i < padding; i++) {
+        for (int j=0; j < input_size; j++) {
+            for (int composante=0; composante < 3; composante++) {
+                input[composante][i][j] = 0.;
+                input[composante][input_size-1-i][j] = 0.;
+                input[composante][j][i] = 0.;
+                input[composante][j][input_size-1-i] = 0.;
+            }
+        }
+    }
+
+    for (int i=0; i < width; i++) {
+        for (int j=0; j < height; j++) {
+            for (int composante=0; composante < 3; composante++) {
+                input[composante][i+2][j+2] = (float)image[(i*height+j)*3 + composante] / 255.0f;
+            }
+        }
+    }
+}
+
 void forward_propagation(Network* network) {
     int activation, input_depth, input_width, output_depth, output_width;
     int n = network->size;

@@ -55,16 +55,109 @@
       "preLaunchTask": "build-mnist"
     },
     {
-      "name": "cnn/main train",
+      "name": "cnn/main train mnist",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/cnn-main",
       "args": [
         "train",
-        "--dataset", "mnist",
-        "--images","data/mnist/train-images-idx3-ubyte",
-        "--labels","data/mnist/train-labels-idx1-ubyte",
-        "--epochs", "10"
+        "--dataset",
+        "mnist",
+        "--images",
+        "data/mnist/train-images-idx3-ubyte",
+        "--labels",
+        "data/mnist/train-labels-idx1-ubyte",
+        "--epochs",
+        "10"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build-cnn"
+    },
+    {
+      "name": "cnn/main train-test mnist",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/cnn-main",
+      "args": [
+        "train",
+        "--dataset",
+        "mnist",
+        "--images",
+        "data/mnist/t10k-images-idx3-ubyte",
+        "--labels",
+        "data/mnist/t10k-labels-idx1-ubyte",
+        "--epochs",
+        "3"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build-cnn"
+    },
+    {
+      "name": "cnn/main train jpg",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/cnn-main",
+      "args": [
+        "train",
+        "--dataset",
+        "jpg",
+        "--datadir",
+        "data/50States10K/train",
+        "--epochs",
+        "10"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build-cnn"
+    },
+    {
+      "name": "cnn/main train-test jpg",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/cnn-main",
+      "args": [
+        "train",
+        "--dataset",
+        "jpg",
+        "--datadir",
+        "data/50States10K/test",
+        "--epochs",
+        "10"
       ],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
@@ -121,6 +214,29 @@
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
           "ignoreFailures": false
+        }
+      ]
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [
+        ""
+      ],
+      "stopAtEntry": false,
+      "cwd": "/home/augustin64/Documents/tipe/projet-tipe",
+      "environment": [],
+      "program": "/home/augustin64/Documents/tipe/projet-tipe/build/Debug/outDebug",
+      "internalConsoleOptions": "openOnSessionStart",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "externalConsole": false,
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         }
       ]
     }
