@@ -63,7 +63,7 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 #
 # Build cnn
 #
-cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda;
+cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview;
 
 $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o  $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)     $^ -o $@  $(CFLAGS)
@@ -74,6 +74,9 @@ ifndef NVCC_INSTALLED
 else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 endif
+
+$(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o
+	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
