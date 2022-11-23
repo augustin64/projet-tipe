@@ -210,7 +210,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                 pthread_create( &tid[j], NULL, train_thread, (void*) train_parameters[j]);
             }
             for(int j=0; j < nb_threads; j++ ) {
-                // On join les threads créés sur le CPU
+                // On récupère les threads créés sur le CPU
                 pthread_join( tid[j], NULL );
                 
                 accuracy += train_parameters[j]->accuracy / (float) nb_images_total;

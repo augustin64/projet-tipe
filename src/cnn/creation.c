@@ -28,8 +28,8 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     network->depth[0] = input_depth; 
     network->kernel[0]->nn = NULL; 
     network->kernel[0]->cnn = NULL; 
-    create_a_cube_input_layer(network, 0, input_depth, input_dim); 
-    network->input_z[0] = NULL; // As we don't backpropagate the input
+    create_a_cube_input_layer(network, 0, input_depth, input_dim);
+    create_a_cube_input_z_layer(network, 0, input_depth, input_dim); 
     return network;
 }
 

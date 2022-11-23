@@ -4,6 +4,7 @@
 #include "../src/include/colors.h"
 #include "../src/cnn/include/creation.h"
 #include "../src/cnn/include/utils.h"
+#include "../src/cnn/include/free.h"
 #include "../src/include/colors.h"
 
 int main() {
@@ -22,5 +23,7 @@ int main() {
     }
     printf(GREEN "OK\n" RESET);
 
+    free_network(network_cp);
+    free_network(network);
     return 0;
 }

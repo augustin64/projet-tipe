@@ -193,13 +193,15 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 }
                 train_parameters[k]->network = copy_network(network);
                 train_parameters[k]->start = BATCHES*j + (nb_images_total/BATCHES)*k;
-                pthread_create( &tid[j], NULL, train_thread, (void*) train_parameters[k]);
+                pthread_create( &tid[k], NULL, train_thread, (void*) train_parameters[k]);
             }
             for (int k=0; k < nb_threads; k++) {
                 // On attend la terminaison de chaque thread un à un
-                pthread_join( tid[j], NULL );
+                pthread_join( tid[k], NULL );
                 accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
-                // TODO patch_network(network, train_parameters[k]->network, train_parameters[k]->nb_images);
+
+                update_weights(network, train_parameters[k]->network);
+                update_bias(network, train_parameters[k]->network);
                 free_network(train_parameters[k]->network);
             }
             current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
