@@ -7,6 +7,7 @@
 #include "../src/cnn/include/neuron_io.h"
 #include "../src/cnn/include/creation.h"
 #include "../src/cnn/include/utils.h"
+#include "../src/cnn/include/free.h"
 #include "../src/include/colors.h"
 
 
@@ -28,6 +29,11 @@ int main() {
         printf_error(RED "Les deux réseaux obtenus ne sont pas égaux.\n" RESET);
         exit(1);
     }
+    printf(GREEN "OK\n" RESET);
+
+    printf("Libération de la mémoire\n");
+    free_network(network);
+    free_network(network2);
     printf(GREEN "OK\n" RESET);
 
     return 0;
