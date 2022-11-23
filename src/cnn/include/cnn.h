@@ -15,6 +15,11 @@ int will_be_drop(int dropout_prob);
 void write_image_in_network_32(int** image, int height, int width, float** input);
 
 /*
+* Écrit une image linéarisée de 256*256*3 pixels dans un tableau de taille 260*260*3
+*/
+void write_image_in_network_260(unsigned char* image, int height, int width, float*** input);
+
+/*
 * Propage en avant le cnn
 */
 void forward_propagation(Network* network);

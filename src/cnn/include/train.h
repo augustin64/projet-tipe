@@ -1,4 +1,5 @@
 #include "struct.h"
+#include "jpeg.h"
 
 #ifndef DEF_TRAIN_H
 #define DEF_TRAIN_H
@@ -12,16 +13,17 @@
 * Structure donnée en argument à la fonction 'train_thread'
 */
 typedef struct TrainParameters {
-    Network* network;
-    int*** images;
-    unsigned int* labels;
-    int width;
-    int height;
-    int dataset_type;
-    char* data_dir;
-    int start;
-    int nb_images;
-    float accuracy;
+    Network* network; // Réseau
+    jpegDataset* dataset; // Dataset si de type JPEG
+    int* index; // Sert à réordonner les images
+    int*** images; // Images si de type MNIST
+    unsigned int* labels; // Labels si de type MNIST
+    int width; // Largeur des images
+    int height; // Hauteur des images
+    int dataset_type; // Type de dataset
+    int start; // Début des images
+    int nb_images; // Nombre d'images àn traiter
+    float accuracy; // Accuracy (à renvoyer)
 } TrainParameters;
 
 
