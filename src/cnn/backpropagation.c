@@ -14,16 +14,11 @@ int max(int a, int b) {
 }
 
 // Euh..... tout peut être faux à cause de la source
-void rms_backward(float* input, float* input_z, float* output, int size) {
+void softmax_backward(float* input, float* input_z, float* output, int size) {
     /* Input et output ont la même taille
     On considère que la dernière couche a utilisée softmax */
-    float sum=0;
-    for (int i=0; i < size; i++)
-        sum += exp(input_z[i]);
-    float denom = sum*sum;
     for (int i=0; i < size; i++){
-        float e_i = exp(input_z[i]);
-        input[i] = 2*(input[i]-output[i])*((e_i*(sum-e_i))/denom); // ∂E/∂out_i * ∂out_i/∂net_i = 𝛿_i
+        input[i] = (output[i]-input[i])*input[i]; // ∂E/∂out_i * ∂out_i/∂net_i = 𝛿_i
     }
 }
 
