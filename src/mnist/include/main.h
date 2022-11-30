@@ -1,3 +1,5 @@
+#include "neural_network.h"
+
 #ifndef DEF_MAIN_H
 #define DEF_MAIN_H
 
@@ -48,6 +50,16 @@ void* train_thread(void* parameters);
 * start: index auquel démarrer si nb_images_to_process est utilisé (0 si non utilisé)
 */
 void train(int epochs, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start);
+
+/*
+* Échange deux éléments d'un tableau
+*/
+void swap(int* tab, int i, int j);
+
+/*
+* Mélange un tableau avec le mélange de Knuth
+*/
+void knuth_shuffle(int* tab, int n);
 
 /*
 * Reconnaissance d'un set d'images, renvoie un tableau de float contentant les prédictions
