@@ -245,6 +245,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     for (int j=0; j < nb_threads; j++) {
         free(train_parameters[j]);
     }
+    free(shuffle_indices);
     free(train_parameters);
     // On libère les espaces mémoire utilisés spécialement sur le CPU
     free(tid);
