@@ -16,6 +16,19 @@
 // Augmente les dimensions de l'image d'entrée
 #define PADDING_INPUT 2
 
+int indice_max(float* tab, int n) {
+    int indice = -1;
+    float maxi = FLT_MIN;
+    
+    for (int i=0; i < n; i++) {
+        if (tab[i] > maxi) {
+            maxi = tab[i];
+            indice = i;
+        }
+    }
+    return indice;
+}
+
 int will_be_drop(int dropout_prob) {
     return (rand() % 100) < dropout_prob;
 }

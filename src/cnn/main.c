@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 #include <float.h>
 
 #include "include/initialisation.h"
+#include "include/test_network.h"
 #include "../include/colors.h"
 #include "include/function.h"
 #include "include/creation.h"
@@ -15,10 +17,8 @@
 
 
 void help(char* call) {
-    printf("Usage: %s ( train | dev ) [OPTIONS]\n\n", call);
+    printf("Usage: %s ( train | recognize | test ) [OPTIONS]\n\n", call);
     printf("OPTIONS:\n");
-    printf("\tdev:\n");
-    printf("\t\t--conv | -c\tTester la fonction dev_conv().\n");
     printf("\ttrain:\n");
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat du set de données.\n");
     printf("\t(mnist)\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
@@ -26,12 +26,17 @@ void help(char* call) {
     printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
     printf("\t\t--epochs  | -e [int]\t\tNombre d'époques.\n");
     printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
-}
-
-
-void dev_conv() {
-    Network* network = create_network_lenet5(0, 0, TANH, GLOROT, 32, 1);
-    forward_propagation(network);
+    printf("\trecognize:\n");
+    printf("\t\t--dataset | -d (mnist|jpg)\tFormat de l'image à reconnaître.\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau entraîné.\n");
+    printf("\t\t--input   | -i [FILENAME]\tImage jpeg ou fichier binaire à reconnaître.\n");
+    printf("\ttest:\n");
+    printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau entraîné.\n");
+    printf("\t\t--dataset | -d (mnist|jpg)\tFormat du set de données.\n");
+    printf("\t(mnist)\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
+    printf("\t(mnist)\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
+    printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
+    printf("\t\t--preview-fails | -p\t\tAfficher les images ayant échoué.\n");
 }
 
 
@@ -40,27 +45,6 @@ int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Pas d'action spécifiée\n");
         help(argv[0]);
-        return 1;
-    }
-    if (! strcmp(argv[1], "dev")) {
-        int option = 0;
-        // 0 pour la fonction dev_conv()
-        int i = 2;
-        while (i < argc) {
-            // Utiliser un switch serait sans doute plus élégant
-            if ((! strcmp(argv[i], "--conv"))||(! strcmp(argv[i], "-c"))) {
-                option = 0;
-                i++;
-            } else {
-                printf("Option choisie inconnue: %s\n", argv[i]);
-                i++;
-            }
-        }
-        if (option == 0) {
-            dev_conv();
-            return 0;
-        }
-        printf("Option choisie inconnue: dev %d\n", option);
         return 1;
     }
     if (! strcmp(argv[1], "train")) {
@@ -128,6 +112,118 @@ int main(int argc, char* argv[]) {
             out = "out.bin";
         }
         train(dataset_type, images_file, labels_file, data_dir, epochs, out);
+        return 0;
+    }
+    if (! strcmp(argv[1], "test")) {
+        char* dataset = NULL; // mnist ou jpg
+        char* modele = NULL; // Fichier contenant le modèle
+        char* images_file = NULL; // Fichier d'images (mnist)
+        char* labels_file = NULL; // Fichier de labels (mnist)
+        char* data_dir = NULL; // Dossier d'images (jpg)
+        int dataset_type; // Type de dataset (0 pour mnist, 1 pour jpg)
+        bool preview_fails = false;
+        int i = 2;
+        while (i < argc) {
+            if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
+                dataset = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
+                modele = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
+                images_file = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--labels"))||(! strcmp(argv[i], "-l"))) {
+                labels_file = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--datadir"))||(! strcmp(argv[i], "-dd"))) {
+                data_dir = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
+                preview_fails = true;
+                i++;
+            }
+            else {
+                printf("Option choisie inconnue: %s\n", argv[i]);
+                i++;
+            }
+        }
+        if ((dataset!=NULL) && !strcmp(dataset, "mnist")) {
+            dataset_type = 0;
+            if (!images_file) {
+                printf("Pas de fichier d'images spécifié\n");
+                return 1;
+            }
+            if (!labels_file) {
+                printf("Pas de fichier de labels spécifié\n");
+                return 1;
+            }
+        }
+        else if ((dataset!=NULL) && !strcmp(dataset, "jpg")) {
+            dataset_type = 1;
+            if (!data_dir) {
+                printf("Pas de dossier de données spécifié.\n");
+                return 1;
+            }
+        }
+        else {
+            printf("Pas de type de dataset spécifié.\n");
+            return 1;
+        }
+
+        if (!modele) {
+            printf("Pas de modèle à utiliser spécifié.\n");
+            return 1;
+        }
+        test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails);
+        return 0;
+    }
+    if (! strcmp(argv[1], "recognize")) {
+        char* dataset = NULL; // mnist ou jpg
+        char* modele = NULL; // Fichier contenant le modèle
+        char* input_file = NULL; // Image à reconnaître
+        int dataset_type;
+        int i = 2;
+        while (i < argc) {
+            if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
+                dataset = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
+                modele = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--input"))||(! strcmp(argv[i], "-i"))) {
+                input_file = argv[i+1];
+                i += 2;
+            } else {
+                printf("Option choisie inconnue: %s\n", argv[i]);
+                i++;
+            }
+        }
+        if ((dataset!=NULL) && !strcmp(dataset, "mnist")) {
+            dataset_type = 0;
+        } else if ((dataset!=NULL) && !strcmp(dataset, "jpg")) {
+            dataset_type = 1;
+        }
+        else {
+            printf("Pas de type de dataset spécifié.\n");
+            return 1;
+        }
+        if (!input_file) {
+            printf("Pas de fichier d'entrée spécifié, rien à faire.\n");
+            return 1;
+        }
+        if (!modele) {
+            printf("Pas de modèle à utiliser spécifié.\n");
+            return 1;
+        }
+        recognize(dataset_type, modele, input_file);
         return 0;
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

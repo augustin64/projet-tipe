@@ -3,6 +3,11 @@
 #ifndef DEF_MAIN_H
 #define DEF_MAIN_H
 
+/*
+* Renvoie l'indice de l'élément de valeur maximale dans un tableau de flottants
+* Utilisé pour trouver le neurone le plus activé de la dernière couche (résultat de la classification)
+*/
+int indice_max(float* tab, int n);
 
 /*
 * Renvoie si oui ou non (1 ou 0) le neurone va être abandonné

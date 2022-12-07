@@ -28,11 +28,6 @@ typedef struct TrainParameters {
 
 
 /*
-* Renvoie l'indice maximal d'un tableau tab de taille n
-*/
-int indice_max(float* tab, int n);
-
-/*
  * Fonction auxiliaire d'entraînement destinée à être exécutée sur plusieurs threads à la fois
 */
 void* train_thread(void* parameters);

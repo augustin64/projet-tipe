@@ -184,6 +184,20 @@ Network* read_network(char* filename) {
             }
         }
     }
+
+    network->input_z = (float****)malloc(sizeof(float***)*size);
+    for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
+        network->input_z[i] = (float***)malloc(sizeof(float**)*network->depth[i]);
+        for (int j=0; j < network->depth[i]; j++) {
+            network->input_z[i][j] = (float**)malloc(sizeof(float*)*network->width[i]);
+            for (int k=0; k < network->width[i]; k++) {
+                network->input_z[i][j][k] = (float*)malloc(sizeof(float)*network->width[i]);
+                for (int l=0; l < network->width[i]; l++) {
+                    network->input_z[i][j][k][l] = 0.;
+                }
+            }
+        }
+    }
     
     fclose(ptr);
     return network;
