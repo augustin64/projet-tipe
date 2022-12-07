@@ -75,8 +75,9 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out) {
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover) {
     srand(time(NULL));
+    Network* network;
     int input_dim = -1;
     int input_depth = -1;
     float accuracy;
@@ -111,7 +112,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     }
 
     // Initialisation du réseau
-    Network* network = create_network_lenet5(1, 0, TANH, GLOROT, input_dim, input_depth);
+    if (!recover) {
+        network = create_network_lenet5(1, 0, TANH, GLOROT, input_dim, input_depth);
+    } else {
+        network = read_network(recover);
+    }
+    
 
     shuffle_index = (int*)malloc(sizeof(int)*nb_images_total);
     for (int i=0; i < nb_images_total; i++) {
@@ -184,6 +190,9 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         knuth_shuffle(shuffle_index, nb_images_total);
         batches_epoques = div_up(nb_images_total, BATCHES);
         nb_images_total_remaining = nb_images_total;
+        #ifndef USE_MULTITHREADING
+        train_params->nb_images = BATCHES;
+        #endif
         for (int j=0; j < batches_epoques; j++) {
             #ifdef USE_MULTITHREADING
             if (j == batches_epoques-1) {
@@ -222,6 +231,11 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             (void)nb_images_total_remaining; // Juste pour enlever un warning
 
             train_params->start = j*BATCHES;
+
+            // Ne pas dépasser le nombre d'images à cause de la partie entière
+            if (j == batches_epoques-1) {
+                train_params->nb_images = nb_images_total - j*BATCHES;
+            }
             
             train_thread((void*)train_params);
             

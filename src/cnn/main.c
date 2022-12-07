@@ -24,6 +24,7 @@ void help(char* call) {
     printf("\t(mnist)\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t(mnist)\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
+    printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--epochs  | -e [int]\t\tNombre d'époques.\n");
     printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
     printf("\trecognize:\n");
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
         int epochs = EPOCHS;
         int dataset_type = 0;
         char* out = NULL;
+        char* recover = NULL;
         int i = 2;
         while (i < argc) {
             if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
@@ -79,6 +81,9 @@ int main(int argc, char* argv[]) {
             }
             else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
+                i += 2;
+            } else if ((! strcmp(argv[i], "--recover"))||(! strcmp(argv[i], "-r"))) {
+                recover = argv[i+1];
                 i += 2;
             } else {
                 printf("Option choisie inconnue: %s\n", argv[i]);
@@ -111,7 +116,7 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier de sortie spécifié, défaut: out.bin\n");
             out = "out.bin";
         }
-        train(dataset_type, images_file, labels_file, data_dir, epochs, out);
+        train(dataset_type, images_file, labels_file, data_dir, epochs, out, recover);
         return 0;
     }
     if (! strcmp(argv[1], "test")) {
