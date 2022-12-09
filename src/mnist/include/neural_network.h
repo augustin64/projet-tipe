@@ -66,7 +66,8 @@ void network_modification(Network* network, uint32_t nb_modifs);
 void network_initialisation(Network* network);
 
 /*
-* Les deux réseaux donnés sont supposés de même dimensions
+* Les deux réseaux donnés sont supposés de même dimensions,
+* Applique les modifications contenues dans delta à network
 */
 void patch_network(Network* network, Network* delta, uint32_t nb_modifs);
 
