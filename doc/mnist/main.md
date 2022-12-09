@@ -57,7 +57,7 @@ Le réseau de neurones est sauvegardé dans le fichier de sortie à la fin de ch
 ## Reconnaissance d'images
 
 La reconnaissance d'images se fait avec un fichier formaté de la même manière que le jeu de données MNIST.  
-Le plus simple pour dessiner à la main est d'utiliser le [serveur web](/doc/webserver/README.md) prévu à cet effet  
+Le plus simple pour dessiner à la main est d'utiliser le [serveur web](/doc/webserver) prévu à cet effet  
 
 Exemple:
 ```bash
