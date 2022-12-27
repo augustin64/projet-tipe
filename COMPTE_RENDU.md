@@ -54,3 +54,12 @@ Le réseau neuronal simple donnant des résultats convaincants (approximativemen
 Le réseau neuronal convolutif a commencé à être développé depuis [6532ad2](https://github.com/julienChemillier/TIPE/commit/6532ad2545f8882638209cc6918bf37a9f816840).  
 Ce commit introduit l'enregistrement du réseau de neurones convolutif,
 suivi de près par les tests unitaires correspondants [b12a03c](https://github.com/julienChemillier/TIPE/commit/b12a03c1baa8e8505066fa07ae2f20882a24854b).
+
+<br/>
+<br/>
+<br/>
+
+### **30 Novembre 2022** Réparation du NN simple [ffc0c6e](https://github.com/julienChemillier/TIPE/commit/ffc0c6ea9fe30c7e98624ca26867d984ec90c693)
+Après un peu de débogage sur le réseau convolutif, on s'est rendu compte que le réseau simple ne fonctionnait pas bien avec des couches intermédiaires et du multithreading.  
+Le problème principal étant la découpe des batches étant la même à chaque époque.  
+Après implémentation d'un mélange de Knuth, tout est rentré dans l'ordre donnant des résultats encore plus satisfaisants pour les couches intermédiaires. (De l'ordre de 70% avec deux couches intermédiaires et utilisation du multithreading).

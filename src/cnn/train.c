@@ -32,6 +32,7 @@ void* train_thread(void* parameters) {
 
     int*** images = param->images;
     int* labels = (int*)param->labels;
+    int* index = param->index;
 
     int width = param->width;
     int height = param->height;
@@ -41,31 +42,31 @@ void* train_thread(void* parameters) {
     float accuracy = 0.;
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
-            write_image_in_network_32(images[i], height, width, network->input[0][0]);
+            write_image_in_network_32(images[index[i]], height, width, network->input[0][0]);
             forward_propagation(network);
             maxi = indice_max(network->input[network->size-1][0][0], 10);
             backward_propagation(network, labels[i]);
 
-            if (maxi == labels[i]) {
+            if (maxi == labels[index[i]]) {
                 accuracy += 1.;
             }
         } else {
-            if (!param->dataset->images[i]) {
-                image = loadJpegImageFile(param->dataset->fileNames[i]);
-                param->dataset->images[i] = image->lpData;
+            if (!param->dataset->images[index[i]]) {
+                image = loadJpegImageFile(param->dataset->fileNames[index[i]]);
+                param->dataset->images[index[i]] = image->lpData;
                 free(image);
             }
-            write_image_in_network_260(param->dataset->images[i], height, width, network->input[0]);
+            write_image_in_network_260(param->dataset->images[index[i]], height, width, network->input[0]);
             forward_propagation(network);
             maxi = indice_max(network->input[network->size-1][0][0], param->dataset->numCategories);
-            backward_propagation(network, param->dataset->labels[i]);
+            backward_propagation(network, param->dataset->labels[index[i]]);
 
-            if (maxi == (int)param->dataset->labels[i]) {
+            if (maxi == (int)param->dataset->labels[index[i]]) {
                 accuracy += 1.;
             }
 
-            free(param->dataset->images[i]);
-            param->dataset->images[i] = NULL;
+            free(param->dataset->images[index[i]]);
+            param->dataset->images[index[i]] = NULL;
         }
     }
 
@@ -74,8 +75,9 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out) {
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover) {
     srand(time(NULL));
+    Network* network;
     int input_dim = -1;
     int input_depth = -1;
     float accuracy;
@@ -85,9 +87,10 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     int nb_images_total_remaining; // Images restantes dans un batch
     int batches_epoques; // Batches par époque
 
-    int*** images;
-    unsigned int* labels;
-    jpegDataset* dataset;
+    int*** images; // Images sous forme de tableau de tableaux de tableaux de pixels (degré de gris, MNIST)
+    unsigned int* labels; // Labels associés aux images du dataset MNIST
+    jpegDataset* dataset; // Structure de données décrivant un dataset d'images jpeg
+    int* shuffle_index; // shuffle_index[i] contient le nouvel index de l'élément à l'emplacement i avant mélange
 
     if (dataset_type == 0) { // Type MNIST
         // Chargement des images du set de données MNIST
@@ -109,7 +112,17 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     }
 
     // Initialisation du réseau
-    Network* network = create_network_lenet5(0.01, 0, TANH, GLOROT, input_dim, input_depth);
+    if (!recover) {
+        network = create_network_lenet5(1, 0, TANH, GLOROT, input_dim, input_depth);
+    } else {
+        network = read_network(recover);
+    }
+    
+
+    shuffle_index = (int*)malloc(sizeof(int)*nb_images_total);
+    for (int i=0; i < nb_images_total; i++) {
+        shuffle_index[i] = i;
+    }
 
     #ifdef USE_MULTITHREADING
     int nb_remaining_images; // Nombre d'images restantes à lancer pour une série de threads
@@ -120,7 +133,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     // Création des paramètres donnés à chaque thread dans le cas du multi-threading
     TrainParameters** train_parameters = (TrainParameters**)malloc(sizeof(TrainParameters*)*nb_threads);
     TrainParameters* param;
-
+    
     for (int k=0; k < nb_threads; k++) {
         train_parameters[k] = (TrainParameters*)malloc(sizeof(TrainParameters));
         param = train_parameters[k];
@@ -139,6 +152,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             param->labels = NULL;
         }
         param->nb_images = BATCHES / nb_threads;
+        param->index = shuffle_index;
     }
     #else
     // Création des paramètres donnés à l'unique
@@ -163,6 +177,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         train_params->labels = NULL;
     }
     train_params->nb_images = BATCHES;
+    train_params->index = shuffle_index;
     #endif
 
     for (int i=0; i < epochs; i++) {
@@ -172,8 +187,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         // du multi-threading car chaque copie du réseau initiale sera légèrement différente
         // et donnera donc des résultats différents sur les mêmes images.
         accuracy = 0.;
+        knuth_shuffle(shuffle_index, nb_images_total);
         batches_epoques = div_up(nb_images_total, BATCHES);
         nb_images_total_remaining = nb_images_total;
+        #ifndef USE_MULTITHREADING
+        train_params->nb_images = BATCHES;
+        #endif
         for (int j=0; j < batches_epoques; j++) {
             #ifdef USE_MULTITHREADING
             if (j == batches_epoques-1) {
@@ -200,24 +219,34 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 // On attend la terminaison de chaque thread un à un
                 pthread_join( tid[k], NULL );
                 accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
-
-                update_weights(network, train_parameters[k]->network);
-                update_bias(network, train_parameters[k]->network);
+            }
+            
+            // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
+            for (int k=0; k < nb_threads; k++) {
+                update_weights(network, train_parameters[k]->network, train_parameters[k]->nb_images);
+                update_bias(network, train_parameters[k]->network, train_parameters[k]->nb_images);
                 free_network(train_parameters[k]->network);
             }
             current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
             printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
             fflush(stdout);
             #else
+            (void)nb_images_total_remaining; // Juste pour enlever un warning
+
             train_params->start = j*BATCHES;
+
+            // Ne pas dépasser le nombre d'images à cause de la partie entière
+            if (j == batches_epoques-1) {
+                train_params->nb_images = nb_images_total - j*BATCHES;
+            }
             
             train_thread((void*)train_params);
             
             accuracy += train_params->accuracy / (float) nb_images_total;
             current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
             
-            update_weights(network, network);
-            update_bias(network, network);
+            update_weights(network, network, train_params->nb_images);
+            update_bias(network, network, train_params->nb_images);
             
             printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
             fflush(stdout);
@@ -230,6 +259,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         #endif
         write_network(out, network);
     }
+    free(shuffle_index);
     free_network(network);
     #ifdef USE_MULTITHREADING
     free(tid);

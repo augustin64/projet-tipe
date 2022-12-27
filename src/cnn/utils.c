@@ -12,9 +12,21 @@
 if (network1->var != network2->var) {                                               \
     printf_error("network1->" name " et network2->" name " ne sont pas égaux\n");   \
     if (indice != -1) {                                                             \
-        printf(BOLDBLUE"[ INFO_ ]" RESET " indice: %d\n", indice);                    \
+        printf(BOLDBLUE"[ INFO_ ]" RESET " indice: %d\n", indice);                  \
         }                                                                           \
     return false;                                                                   \
+}
+
+void swap(int* tab, int i, int j) {
+    int tmp = tab[i];
+    tab[i] = tab[j];
+    tab[j] = tmp;
+}
+
+void knuth_shuffle(int* tab, int n) {
+    for(int i=1; i < n; i++) {
+        swap(tab, i, rand() %i);
+    }
 }
 
 bool equals_networks(Network* network1, Network* network2) {

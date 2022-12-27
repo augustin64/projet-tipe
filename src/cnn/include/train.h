@@ -35,6 +35,6 @@ void* train_thread(void* parameters);
 /*
  * Fonction principale d'entraînement du réseau neuronal convolutif
 */
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out);
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover);
 
 #endif

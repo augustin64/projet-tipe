@@ -1,4 +1,4 @@
-# Réseau de neurones convolutionnel [lien](/src/cnn)
+# Neuron IO
 
 ## Lecture/ Écriture du réseau de neurone:
 Le fichier est au format IDX (format binaire)
