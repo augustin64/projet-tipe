@@ -63,14 +63,16 @@ float max_float(float a, float b) {
 bool check_matrices_equality(float** m1, float** m2, int n, int p) {
     float err_max = 0.;
     float err_moy = 0.;
+    float err_percent = 0.;
     for (int i=0; i < n; i++) {
         for (int j=0; j < p; j++) {
             if (fabs(m1[i][j] - m2[i][j]) > 0.8) {
                 //printf("%d %d\n", i, j);
                 //return false;
             }
-            err_max = max_float(err_max, fabs(m1[i][j] - m2[i][j]));
-            err_moy += fabs(m1[i][j] - m2[i][j]);
+            err_percent = 2*fabs(m1[i][j] - m2[i][j])/fabs(m1[i][j] + m2[i][j]);
+            err_max = max_float(err_max, err_percent);
+            err_moy += err_percent;
         }
     }
     printf("err_max:%lf\n", err_max);
