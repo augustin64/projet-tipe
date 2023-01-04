@@ -1,14 +1,20 @@
+<!--
+Reveal.initialize({
+    slideNumber: true
+});
+-->
+
 # Présentation du TIPE
 
 Julien Chemillier  
 Augustin Lucas  
-Élèves en MP2I
+Élèves en MPI*
 
 ---
 
 ## Objectif - Lien avec le sujet
 
-![](https://augustin64.fr/tipe/geoguessr.png)
+![](https://augustin64.fr/tipe/geoguessr.jpg)
 
 Note:
 Est-ce que vous connaissez Geoguessr ?  
