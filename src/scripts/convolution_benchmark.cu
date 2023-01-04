@@ -5,10 +5,10 @@
 #include <math.h>
 #include <time.h>
 
-#include "../src/cnn/include/convolution.h"
-#include "../src/cnn/include/struct.h"
-#include "../src/include/colors.h"
-#include "../src/include/utils.h"
+#include "../cnn/include/convolution.h"
+#include "../cnn/include/struct.h"
+#include "../include/colors.h"
+#include "../include/utils.h"
 
 
 float random_float(float low, float high) {
