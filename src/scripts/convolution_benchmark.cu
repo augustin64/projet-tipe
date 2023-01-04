@@ -150,7 +150,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     end = clock();
 
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("CPU: %lf\n", rows, columns, input_dim, output_dim, cpu_time_used);    
+    printf("CPU: %lf\n", cpu_time_used);    
 
     // Vérification de l'égalité des matrices
     //printf("(%d, %d, %d, %d) Checking equality.\n", rows, columns, input_dim, output_dim);
