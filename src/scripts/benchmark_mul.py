@@ -17,8 +17,8 @@ def avg(vals):
         "depth": vals[0]["depth"]
     }
 
-def mul_matrix(n, p, q):
-    output = subprocess.check_output(["./a.out", str(n), str(p), str(q)])
+def mul_matrix(n, p, q, executable="./a.out"):
+    output = subprocess.check_output([executable, str(n), str(p), str(q)])
     result = [float(i.split(":")[-1]) for i in output.decode("utf8").split("\n") if i != ""]
     return {
         "GPUtime": result[0],
@@ -29,14 +29,39 @@ def mul_matrix(n, p, q):
         "depth": p
     }
 
-def generate_data():
+def conv_matrix(n, p, q, r, executable="./a.out"):
+    output = subprocess.check_output([executable, str(n), str(p), str(q), str(r)])
+    result = [float(i.split(":")[-1]) for i in output.decode("utf8").split("\n") if i != ""]
+    return {
+        "GPUtime": result[0],
+        "CPUtime": result[1],
+        "errMax": result[2],
+        "errMoy": result[3],
+        "width": q,
+        "depth": p
+    }
+
+def generate_data_mul():
     values = []
     depth = 40
     for i in range(60):
         values.append(avg([mul_matrix((i+1)*100, depth, (i+1)*100) for j in range(10)]))
         print(f"Added M({(i+1)*100}x{depth}) x M({depth}x{(i+1)*100})")
 
-    with open("result.json", "w") as file:
+    with open("result_mul.json", "w") as file:
+        json.dump(values, file, indent=4)
+
+
+def generate_data_conv():
+    values = []
+    output_dim = 40
+    rows = 40
+    columns = 40
+    for i in range(10):
+        values.append(avg([conv_matrix((i+1)*100, output_dim, rows, columns) for j in range(10)]))
+        print(f"Added ({(i+1)*100}, output_dim, rows, columns)")
+
+    with open("result_conv.json", "w") as file:
         json.dump(values, file, indent=4)
 
 
@@ -58,7 +83,7 @@ def plot_erreur(data):
     plt.plot(x, CPUtime)
     plt.show()
 
-def load_data():
-    with open("result.json", 'r') as f:
+def load_data(filename="result.json"):
+    with open(filename, 'r') as f:
         data = json.load(f)
     return data
