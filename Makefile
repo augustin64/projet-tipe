@@ -25,8 +25,8 @@ TESTS_SRC_CU += $(wildcard test/*.cu)
 TESTS_OBJ     = $(TESTS_SRC:test/%.c=$(BUILDDIR)/test-%) $(TESTS_SRC_CU:test/%.cu=$(BUILDDIR)/test-%)
 
 # Compile flags
-CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg
-NVCCFLAGS = -ljpeg
+CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg -fopenmp
+NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
 
 # Additional warning rules
 CFLAGS   += -Wall -Wextra
