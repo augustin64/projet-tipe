@@ -34,6 +34,7 @@ On stocke pour chaque couche des informations supplémentaires en fonction de so
 type | nom de la variable | commentaire
 :---:|:---:|:---:
 uint32_t|activation|
+uint32_t|linearisation|
 uint32_t|k_size|
 uint32_t|rows|
 uint32_t|columns|
@@ -42,17 +43,19 @@ uint32_t|columns|
 type | nom de la variable | commentaire
 :---:|:---:|:---:
 uint32_t|activation|
+uint32_t|linearisation|
 uint32_t|input_units|
 uint32_t|output_units|
 
 #### Si la couche est de type pooling:
 type | nom de la variable | commentaire
 :---:|:---:|:---:
+uint32_t|linearisation|
 uint32_t|pooling|
 
 
 ### Corps
-On constitue ensuite le corps du fichier à partir des données contenues dans chauqe couche de la manière suivante:
+On constitue ensuite le corps du fichier à partir des données contenues dans chaque couche de la manière suivante:
 
 - Si la couche est de type pooling, on ne rajoute rien.
 

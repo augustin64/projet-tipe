@@ -46,9 +46,10 @@ bool equals_networks(Network* network1, Network* network2) {
             printf(BOLDRED "[ ERROR ]" RESET "network1->kernel[%d] et network1->kernel[%d] diffèrent de type\n", i, i);
             return false;
         }
+        checkEquals(kernel[i]->linearisation, "kernel[i]->linearisation", i);
         if (!network1->kernel[i]->cnn && !network1->kernel[i]->nn) {
             // Type Pooling
-            // checkEquals(kernel[i]->linearisation, "kernel[i]->linearisation", i);
+            checkEquals(kernel[i]->activation, "kernel[i]->activation pour un pooling", i);
         } else if (!network1->kernel[i]->cnn) {
             // Type NN
             checkEquals(kernel[i]->nn->input_units, "kernel[i]->nn->input_units", i);
