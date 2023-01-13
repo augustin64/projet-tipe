@@ -21,7 +21,6 @@ int main() {
         kernel = network->kernel[i];
         if ((!kernel->cnn)&&(!kernel->nn)) {
             printf("\n==== Couche %d de type "YELLOW"Pooling"RESET" ====\n", i);
-            printf("Linéarisation: %d\n", kernel->linearisation);
         } else if (!kernel->cnn) {
             printf("\n==== Couche %d de type "GREEN"NN"RESET" ====\n", i);
             printf("input: %d\n", kernel->nn->input_units);
@@ -32,8 +31,12 @@ int main() {
             printf("rows: %d\n", kernel->cnn->rows);
             printf("columns: %d\n", kernel->cnn->columns);
         }
+        if (kernel->linearisation) {
+            printf(YELLOW"Linéarisation: %d\n"RESET, kernel->linearisation);
+        }
         printf("width: %d\n", network->width[i]);
         printf("depth: %d\n", network->depth[i]);
+        printf("activation: %d\n", kernel->activation);
     }
     printf(GREEN "\nOK\n" RESET);
 
