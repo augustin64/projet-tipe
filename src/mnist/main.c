@@ -8,6 +8,7 @@
 
 #include "include/main.h"
 #include "include/mnist.h"
+#include "../include/colors.h"
 #include "include/neuron_io.h"
 #include "include/neural_network.h"
 
@@ -140,6 +141,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
     int repartition[3] = {neurons, 42, nb_neurons_last_layer};
 
     float accuracy;
+    float current_accuracy;
 
     int nb_threads = get_nprocs();
     pthread_t *tid = (pthread_t *)malloc(nb_threads * sizeof(pthread_t));
@@ -229,10 +231,11 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
                 patch_network(network, train_parameters[j]->network, train_parameters[j]->nb_images);
                 deletion_of_network(train_parameters[j]->network);
             }
-            printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%", nb_threads, i, epochs, BATCHES*(k+1), nb_images_total, accuracy*100);
+            current_accuracy = accuracy*(nb_images_total/(BATCHES*(k+1)));
+            printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET, nb_threads, i, epochs, BATCHES*(k+1), nb_images_total, current_accuracy*100);
             fflush(stdout);
         }
-        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: %0.1f%%\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.1f%%"RESET"\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
         write_network(out, network);
         if (delta != NULL)
             write_delta_network(delta, delta_network);
