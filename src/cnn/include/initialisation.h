@@ -1,7 +1,7 @@
 #ifndef DEF_INITIALISATION_H
 #define DEF_INITIALISATION_H
 
-// Génère un flotant entre 0 et 1
+// Génère un flottant entre 0 et 1
 #define RAND_FLT() ((float)rand())/((float)RAND_MAX)
 
 #define ZERO 0
