@@ -203,9 +203,7 @@ void free_dataset(jpegDataset* dataset) {
     }
     free(dataset->fileNames);
     free(dataset->labels);
-    #ifdef STORE_IMAGES_TO_RAM
     free(dataset->images);
-    #endif
     free(dataset);
 }
 

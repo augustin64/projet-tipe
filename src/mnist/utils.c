@@ -63,9 +63,7 @@ void print_weights(char* filename) {
 
 void count_labels(char* filename) {
     uint32_t number_of_images = read_mnist_labels_nb_images(filename);
-
-    unsigned int* labels = (unsigned int*)malloc(sizeof(unsigned int)*number_of_images);
-    labels = read_mnist_labels(filename);
+    unsigned int* labels = read_mnist_labels(filename);
 
     unsigned int tab[10];
 

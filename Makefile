@@ -35,6 +35,8 @@ NVCCFLAGS +=
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
 # Compile with debug
 # -g
+# See memory leaks and Incorrect Read/Write
+# -fsanitize=address -lasan
 
 all: mnist cnn;
 #
