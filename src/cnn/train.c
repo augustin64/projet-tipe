@@ -288,11 +288,26 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     }
     free(shuffle_index);
     free_network(network);
+
     #ifdef USE_MULTITHREADING
     free(tid);
     #else
     free(train_params);
     #endif
+    
+    if (dataset_type == 0) {
+        for (int i=0; i < nb_images_total; i++) {
+            for (int j=0; j < 28; j++) {
+                free(images[i][j]);
+            }
+            free(images[i]);
+        }
+        free(images);
+        free(labels);
+    } else {
+        free_dataset(dataset);
+    }
+
     end_time = omp_get_wtime();
     elapsed_time = end_time - algo_start;
     printf("\nTemps total: %0.1f s\n", elapsed_time);
