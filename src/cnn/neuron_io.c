@@ -170,9 +170,10 @@ Network* read_network(char* filename) {
     // Lecture de chaque couche
     network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
 
-    for (int i=0; i < (int)size; i++) {
+    for (int i=0; i < (int)size-1; i++) {
         network->kernel[i] = read_kernel(type_couche[i], network->width[i+1], ptr);
     }
+    network->kernel[(int)size-1] = read_kernel(type_couche[(int)size-1], -1, ptr);
 
     network->input = (float****)malloc(sizeof(float***)*size);
     for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
