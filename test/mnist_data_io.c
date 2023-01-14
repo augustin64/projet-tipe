@@ -49,5 +49,14 @@ int main() {
     read_test(nb_images, width, height, images, labels);
 
     printf(GREEN "OK\n" RESET);
+    for (int i=0; i < nb_images; i++) {
+        for (int j=0; j < height; j++) {
+            free(images[i][j]);
+        }
+        free(images[i]);
+    }
+    free(images);
+    free(labels);
+    free(parameters);
     return 0;
 }

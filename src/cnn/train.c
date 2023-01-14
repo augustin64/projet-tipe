@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <sys/sysinfo.h>
 #include <time.h>
+#include <omp.h>
 
 #include "../mnist/include/mnist.h"
 #include "include/initialisation.h"
@@ -92,6 +93,13 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     jpegDataset* dataset; // Structure de données décrivant un dataset d'images jpeg
     int* shuffle_index; // shuffle_index[i] contient le nouvel index de l'élément à l'emplacement i avant mélange
 
+    double start_time, end_time;
+    double elapsed_time;
+
+    double algo_start = omp_get_wtime();
+
+    start_time = omp_get_wtime();
+
     if (dataset_type == 0) { // Type MNIST
         // Chargement des images du set de données MNIST
         int* parameters = read_mnist_images_parameters(images_file);
@@ -113,7 +121,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
     // Initialisation du réseau
     if (!recover) {
-        network = create_network_lenet5(1, 0, TANH, GLOROT, input_dim, input_depth);
+        network = create_network_lenet5(0.1, 0, TANH, GLOROT, input_dim, input_depth);
     } else {
         network = read_network(recover);
     }
@@ -179,8 +187,14 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     train_params->nb_images = BATCHES;
     train_params->index = shuffle_index;
     #endif
+    end_time = omp_get_wtime();
+
+    elapsed_time = end_time - start_time;
+    printf("Initialisation: %0.2lf s\n\n", elapsed_time);
 
     for (int i=0; i < epochs; i++) {
+
+        start_time = omp_get_wtime();
         // La variable accuracy permet d'avoir une ESTIMATION
         // du taux de réussite et de l'entraînement du réseau,
         // mais n'est en aucun cas une valeur réelle dans le cas
@@ -191,79 +205,110 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         batches_epoques = div_up(nb_images_total, BATCHES);
         nb_images_total_remaining = nb_images_total;
         #ifndef USE_MULTITHREADING
-        train_params->nb_images = BATCHES;
+            train_params->nb_images = BATCHES;
         #endif
         for (int j=0; j < batches_epoques; j++) {
             #ifdef USE_MULTITHREADING
-            if (j == batches_epoques-1) {
-                nb_remaining_images = nb_images_total_remaining;
-                nb_images_total_remaining = 0;
-            } else {
-                nb_images_total_remaining -= BATCHES;
-                nb_remaining_images = BATCHES;
-            }
-
-            for (int k=0; k < nb_threads; k++) {
-                if (k == nb_threads-1) {
-                    train_parameters[k]->nb_images = nb_remaining_images;
-                    nb_remaining_images = 0;
+                if (j == batches_epoques-1) {
+                    nb_remaining_images = nb_images_total_remaining;
+                    nb_images_total_remaining = 0;
                 } else {
-                    nb_remaining_images -= BATCHES / nb_threads;
+                    nb_images_total_remaining -= BATCHES;
+                    nb_remaining_images = BATCHES;
                 }
-                train_parameters[k]->start = BATCHES*j + (BATCHES/nb_threads)*k;
-                train_parameters[k]->network = copy_network(network);
 
-                pthread_create( &tid[k], NULL, train_thread, (void*) train_parameters[k]);
-            }
-            for (int k=0; k < nb_threads; k++) {
-                // On attend la terminaison de chaque thread un à un
-                pthread_join( tid[k], NULL );
-                accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
-            }
-            
-            // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
-            for (int k=0; k < nb_threads; k++) {
-                update_weights(network, train_parameters[k]->network, train_parameters[k]->nb_images);
-                update_bias(network, train_parameters[k]->network, train_parameters[k]->nb_images);
-                free_network(train_parameters[k]->network);
-            }
-            current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
-            printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
-            fflush(stdout);
+                for (int k=0; k < nb_threads; k++) {
+                    if (k == nb_threads-1) {
+                        train_parameters[k]->nb_images = nb_remaining_images;
+                        nb_remaining_images = 0;
+                    } else {
+                        nb_remaining_images -= BATCHES / nb_threads;
+                    }
+                    train_parameters[k]->start = BATCHES*j + (BATCHES/nb_threads)*k;
+
+                    if (train_parameters[k]->start+train_parameters[k]->nb_images >= nb_images_total) {
+                        train_parameters[k]->nb_images = nb_images_total - train_parameters[k]->start -1;
+                    }
+                    if (train_parameters[k]->nb_images > 0) {
+                        train_parameters[k]->network = copy_network(network);
+                        pthread_create( &tid[k], NULL, train_thread, (void*) train_parameters[k]);
+                    } else {
+                        train_parameters[k]->network = NULL;
+                    }
+                }
+                for (int k=0; k < nb_threads; k++) {
+                    // On attend la terminaison de chaque thread un à un
+                    if (train_parameters[k]->network) {
+                        pthread_join( tid[k], NULL );
+                        accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
+                    }
+                }
+                
+                // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
+                for (int k=0; k < nb_threads; k++) {
+                    if (train_parameters[k]->network) { // Si le fil a été utilisé
+                        update_weights(network, train_parameters[k]->network, train_parameters[k]->nb_images);
+                        update_bias(network, train_parameters[k]->network, train_parameters[k]->nb_images);
+                        free_network(train_parameters[k]->network);
+                    }
+                }
+                current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
+                printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.2f%%"RESET" ", nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                fflush(stdout);
             #else
-            (void)nb_images_total_remaining; // Juste pour enlever un warning
+                (void)nb_images_total_remaining; // Juste pour enlever un warning
 
-            train_params->start = j*BATCHES;
+                train_params->start = j*BATCHES;
 
-            // Ne pas dépasser le nombre d'images à cause de la partie entière
-            if (j == batches_epoques-1) {
-                train_params->nb_images = nb_images_total - j*BATCHES;
-            }
-            
-            train_thread((void*)train_params);
-            
-            accuracy += train_params->accuracy / (float) nb_images_total;
-            current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
-            
-            update_weights(network, network, train_params->nb_images);
-            update_bias(network, network, train_params->nb_images);
-            
-            printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.1f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
-            fflush(stdout);
+                // Ne pas dépasser le nombre d'images à cause de la partie entière
+                if (j == batches_epoques-1) {
+                    train_params->nb_images = nb_images_total - j*BATCHES;
+                }
+                
+                train_thread((void*)train_params);
+                
+                accuracy += train_params->accuracy / (float) nb_images_total;
+                current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
+                
+                update_weights(network, network, train_params->nb_images);
+                update_bias(network, network, train_params->nb_images);
+                
+                printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.4f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                fflush(stdout);
             #endif
         }
+        end_time = omp_get_wtime();
+        elapsed_time = end_time - start_time;
         #ifdef USE_MULTITHREADING
-        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.1f%%"RESET" \n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.4f%%"RESET"\tTemps: %0.2f s\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
         #else
-        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.1f%%"RESET" \n", i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.4f%%"RESET"\tTemps: %0.2f s\n", i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
         #endif
         write_network(out, network);
     }
     free(shuffle_index);
     free_network(network);
+
     #ifdef USE_MULTITHREADING
     free(tid);
     #else
     free(train_params);
     #endif
+    
+    if (dataset_type == 0) {
+        for (int i=0; i < nb_images_total; i++) {
+            for (int j=0; j < 28; j++) {
+                free(images[i][j]);
+            }
+            free(images[i]);
+        }
+        free(images);
+        free(labels);
+    } else {
+        free_dataset(dataset);
+    }
+
+    end_time = omp_get_wtime();
+    elapsed_time = end_time - algo_start;
+    printf("\nTemps total: %0.1f s\n", elapsed_time);
 }

@@ -62,11 +62,12 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         int output_dim = network->width[indice_couche+1];
 
         // Écriture du pré-corps
-        uint32_t pre_buffer[4];
+        uint32_t pre_buffer[5];
         pre_buffer[0] = kernel->activation;
-        pre_buffer[1] = cnn->k_size;
-        pre_buffer[2] = cnn->rows;
-        pre_buffer[3] = cnn->columns;
+        pre_buffer[1] = kernel->linearisation;
+        pre_buffer[2] = cnn->k_size;
+        pre_buffer[3] = cnn->rows;
+        pre_buffer[4] = cnn->columns;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
@@ -93,10 +94,11 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         Kernel_nn* nn = kernel->nn;
 
         // Écriture du pré-corps
-        uint32_t pre_buffer[3];
+        uint32_t pre_buffer[4];
         pre_buffer[0] = kernel->activation;
-        pre_buffer[1] = nn->input_units;
-        pre_buffer[2] = nn->output_units;
+        pre_buffer[1] = kernel->linearisation;
+        pre_buffer[2] = nn->input_units;
+        pre_buffer[3] = nn->output_units;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
@@ -111,8 +113,9 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         }
         fwrite(buffer, sizeof(buffer), 1, ptr);
     } else if (type_couche == 2) { // Cas du Pooling Layer
-        uint32_t pre_buffer[1];
+        uint32_t pre_buffer[2];
         pre_buffer[0] = kernel->activation; // Variable du pooling
+        pre_buffer[1] = kernel->linearisation;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
     }
 }
@@ -167,9 +170,10 @@ Network* read_network(char* filename) {
     // Lecture de chaque couche
     network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
 
-    for (int i=0; i < (int)size; i++) {
+    for (int i=0; i < (int)size-1; i++) {
         network->kernel[i] = read_kernel(type_couche[i], network->width[i+1], ptr);
     }
+    network->kernel[(int)size-1] = read_kernel(type_couche[(int)size-1], -1, ptr);
 
     network->input = (float****)malloc(sizeof(float***)*size);
     for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
@@ -209,14 +213,14 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         // Lecture du "Pré-corps"
         kernel->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
         kernel->nn = NULL;
-        uint32_t buffer[4];
+        uint32_t buffer[5];
         fread(&buffer, sizeof(buffer), 1, ptr);
         
         kernel->activation = buffer[0];
-        kernel->linearisation = 0;
-        kernel->cnn->k_size = buffer[1];
-        kernel->cnn->rows = buffer[2];
-        kernel->cnn->columns = buffer[3];
+        kernel->linearisation = buffer[1];
+        kernel->cnn->k_size = buffer[2];
+        kernel->cnn->rows = buffer[3];
+        kernel->cnn->columns = buffer[4];
 
         // Lecture du corps
         Kernel_cnn* cnn = kernel->cnn;
@@ -261,12 +265,13 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         // Lecture du "Pré-corps"
         kernel->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
         kernel->cnn = NULL;
-        uint32_t buffer[3];
+        uint32_t buffer[4];
         fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
-        kernel->nn->input_units = buffer[1];
-        kernel->nn->output_units = buffer[2];
+        kernel->linearisation = buffer[1];
+        kernel->nn->input_units = buffer[2];
+        kernel->nn->output_units = buffer[3];
 
         // Lecture du corps
         Kernel_nn* nn = kernel->nn;
@@ -292,13 +297,14 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             }
         }
     } else if (type_couche == 2) { // Cas du Pooling Layer
-        uint32_t pooling;
+        uint32_t pooling, linearisation;
         fread(&pooling, sizeof(pooling), 1, ptr);
+        fread(&linearisation, sizeof(linearisation), 1, ptr);
 
         kernel->cnn = NULL;
         kernel->nn = NULL;
         kernel->activation = pooling;
-        kernel->linearisation = pooling; // TODO: mettre à 0 la variable inutile
+        kernel->linearisation = linearisation;
     }
     return kernel;
 }

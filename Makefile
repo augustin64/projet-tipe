@@ -25,8 +25,8 @@ TESTS_SRC_CU += $(wildcard test/*.cu)
 TESTS_OBJ     = $(TESTS_SRC:test/%.c=$(BUILDDIR)/test-%) $(TESTS_SRC_CU:test/%.cu=$(BUILDDIR)/test-%)
 
 # Compile flags
-CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg
-NVCCFLAGS = -ljpeg
+CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg -fopenmp
+NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
 
 # Additional warning rules
 CFLAGS   += -Wall -Wextra
@@ -35,6 +35,8 @@ NVCCFLAGS +=
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
 # Compile with debug
 # -g
+# See memory leaks and Incorrect Read/Write
+# -fsanitize=address -lasan
 
 all: mnist cnn;
 #

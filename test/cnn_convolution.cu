@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <math.h>
 #include <time.h>
+#include <omp.h>
 
 #include "../src/cnn/include/convolution.h"
 #include "../src/cnn/include/struct.h"
@@ -122,22 +123,23 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
 
 
     // Lancement des calculs
-    clock_t start, end;
+    double start_time, end_time;
     double cpu_time_used, gpu_time_used;
 
-    start = clock();
+    start_time = omp_get_wtime();
     make_convolution_device(kernel, input, output_gpu, output_dim);
-    end = clock();
+    end_time = omp_get_wtime();
 
-    gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    gpu_time_used = end_time - start_time;
     printf("(%d, %d, %d, %d) Time used for GPU: %lf seconds\n", rows, columns, input_dim, output_dim, gpu_time_used);
 
 
-    start = clock();
+    start_time = omp_get_wtime();
     make_convolution_cpu(kernel, input, output_cpu, output_dim);
-    end = clock();
+    end_time = omp_get_wtime();
 
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    cpu_time_used = end_time - start_time;
     printf("(%d, %d, %d, %d) Time used for CPU: %lf seconds\n", rows, columns, input_dim, output_dim, cpu_time_used);    
 
     // Vérification de l'égalité des matrices
