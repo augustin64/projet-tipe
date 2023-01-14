@@ -11,19 +11,21 @@
 
 Neuron* creer_neuron(int nb_sortants) {
     Neuron* neuron = (Neuron*)malloc(sizeof(Neuron));
-    neuron->weights = (float*)malloc(sizeof(float)*nb_sortants);
-    neuron->back_weights = (float*)malloc(sizeof(float)*nb_sortants);
-    neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_sortants);
+    if (nb_sortants != 0) {
+        neuron->weights = (float*)malloc(sizeof(float)*nb_sortants);
+        neuron->back_weights = (float*)malloc(sizeof(float)*nb_sortants);
+        neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_sortants);
 
-    for (int i=0; i < nb_sortants; i++) {
-        neuron->weights[i] = 0.5;
-        neuron->back_weights[i] = 0.0;
-        neuron->last_back_weights[i] = 0.0;
+        for (int i=0; i < nb_sortants; i++) {
+            neuron->weights[i] = 0.5;
+            neuron->back_weights[i] = 0.0;
+            neuron->last_back_weights[i] = 0.0;
+        }
+        neuron->z = 0.0;
+        neuron->bias = 0.0;
+        neuron->back_bias = 0.0;
+        neuron->last_back_bias = 0.0;
     }
-    neuron->z = 0.0;
-    neuron->bias = 0.0;
-    neuron->back_bias = 0.0;
-    neuron->last_back_bias = 0.0;
 
     return neuron;
 }

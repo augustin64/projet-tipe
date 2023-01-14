@@ -24,15 +24,17 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
     neuron->last_back_bias = 0.0;
     neuron->back_bias = 0.0;
 
-    neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_weights);
-    neuron->back_weights = (float*)malloc(sizeof(float)*nb_weights);
-    neuron->weights = (float*)malloc(sizeof(float)*nb_weights);
+    if (nb_weights != 0) {
+        neuron->last_back_weights = (float*)malloc(sizeof(float)*nb_weights);
+        neuron->back_weights = (float*)malloc(sizeof(float)*nb_weights);
+        neuron->weights = (float*)malloc(sizeof(float)*nb_weights);
 
-    for (int i=0; i < (int)nb_weights; i++) {
-        fread(&tmp, sizeof(float), 1, ptr);
-        neuron->weights[i] = tmp;
-        neuron->back_weights[i] = 0.0;
-        neuron->last_back_weights[i] = 0.0;
+        for (int i=0; i < (int)nb_weights; i++) {
+            fread(&tmp, sizeof(float), 1, ptr);
+            neuron->weights[i] = tmp;
+            neuron->back_weights[i] = 0.0;
+            neuron->last_back_weights[i] = 0.0;
+        }
     }
 
     return neuron;

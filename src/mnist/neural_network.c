@@ -84,14 +84,15 @@ void deletion_of_network(Network* network) {
 
     for (int i=0; i < network->nb_layers; i++) {
         layer = network->layers[i];
-        if (i != network->nb_layers-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
-            for (int j=0; j < network->layers[i]->nb_neurons; j++) {
-                neuron = layer->neurons[j];
+        
+        for (int j=0; j < network->layers[i]->nb_neurons; j++) {
+            neuron = layer->neurons[j];
+            if (i != network->nb_layers-1) { // On exclut la dernière couche dont les neurones ne contiennent pas de poids sortants
                 free(neuron->weights);
                 free(neuron->back_weights);
                 free(neuron->last_back_weights);
-                free(neuron);
             }
+            free(neuron);
         }
         free(layer->neurons);
         free(network->layers[i]);

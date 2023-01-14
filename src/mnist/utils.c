@@ -101,13 +101,15 @@ void create_network(char* filename, int sortie) {
 
             neuron->back_bias = 0.;
             neuron->last_back_bias = 0.;
-            neuron->weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
-            neuron->back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
-            neuron->last_back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
-            for (int k=0; k < neurons_per_layer[i+1]; k++) {
-                neuron->weights[k] = 0.;
-                neuron->back_weights[k] = 0.;
-                neuron->last_back_weights[k] = 0.;
+            if (i != network->nb_layers-1) {
+                neuron->weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
+                neuron->back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
+                neuron->last_back_weights = (float*)malloc(sizeof(float)*neurons_per_layer[i+1]);
+                for (int k=0; k < neurons_per_layer[i+1]; k++) {
+                    neuron->weights[k] = 0.;
+                    neuron->back_weights[k] = 0.;
+                    neuron->last_back_weights[k] = 0.;
+                }
             }
             layer->neurons[j] = neuron;
         }
