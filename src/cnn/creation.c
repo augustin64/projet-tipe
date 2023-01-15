@@ -18,7 +18,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     network->size = 1; 
     network->input = (float****)malloc(sizeof(float***)*max_size); 
     network->input_z = (float****)malloc(sizeof(float***)*max_size); 
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*max_size); 
+    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(max_size-1)); 
     network->width = (int*)malloc(sizeof(int*)*max_size); 
     network->depth = (int*)malloc(sizeof(int*)*max_size); 
     for (int i=0; i < max_size; i++) {
