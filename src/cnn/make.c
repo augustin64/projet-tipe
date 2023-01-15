@@ -33,7 +33,7 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
     for (int i=0; i < size_output; i++) {
         f = kernel->bias[i];
         for (int j=0; j < size_input; j++) {
-            f += kernel->weights[i][j]*input[j];
+            f += kernel->weights[j][i]*input[j];
         }
         output[i] = f;
     }
