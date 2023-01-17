@@ -147,7 +147,3 @@ ptr get_function_activation(int activation) {
     printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
     return NULL;
 }
-// to use: 
-// float a = 5; int activation;
-// pm u = get_function_activation;
-// printf("%f", (*u(activation))(a));

@@ -44,7 +44,7 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
     // input[kernel->rows][kernel_k_size + output_dim-1][kernel_k_size + output_dim-1]
     // output[kernel->columns][output_dim][output_dim]
     float f;
-    
+
     for (int i=0; i < kernel->columns; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
@@ -83,7 +83,7 @@ __global__ void make_convolution_kernel(int k_size, int columns, int rows, float
 
     bias_offset = (float*)((char*)bias + (idx*output_dim+idy)*pitch_bias);
     float f = bias_offset[idz];
-    
+
     for (int a=0; a < rows; a++) {
         for (int b=0; b < k_size; b++) {
             for (int c=0; c < k_size; c++) {
@@ -110,7 +110,7 @@ void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output
     float**** kernel_weight;
 
     int input_dim = output_dim+kernel->k_size - 1;
-    
+
     // Copy ***input
     gpuErrchk( cudaMallocPitch((void**)&input_dev, &pitch_input, input_dim*sizeof(float), kernel->rows*input_dim));
     for (int i=0; i < kernel->rows; i++) {

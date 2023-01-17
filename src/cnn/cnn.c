@@ -19,7 +19,7 @@
 int indice_max(float* tab, int n) {
     int indice = -1;
     float maxi = FLT_MIN;
-    
+
     for (int i=0; i < n; i++) {
         if (tab[i] > maxi) {
             maxi = tab[i];
@@ -134,7 +134,7 @@ void backward_propagation(Network* network, float wanted_number) {
     float*** input_z;
     float*** output;
     Kernel* k_i;
-    
+
     softmax_backward(network->input[n-1][0][0], network->input_z[n-1][0][0], wanted_output, network->width[n-1]); // Backward sur la dernière colonne
 
     for (int i=n-2; i >= 0; i--) {
@@ -149,7 +149,7 @@ void backward_propagation(Network* network, float wanted_number) {
         output_width = network->width[i+1];
         activation = i==0?SIGMOID:network->kernel[i-1]->activation;
 
-        
+
         if (k_i->cnn) { // Convolution
             ptr d_f = get_function_activation(activation);
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
@@ -214,7 +214,7 @@ float compute_cross_entropy_loss(float* output, float* wanted_output, int len) {
     }
     return loss;
 }
-                
+
 float* generate_wanted_output(float wanted_number) {
     float* wanted_output = (float*)malloc(sizeof(float)*10);
     for (int i=0; i < 10; i++) {

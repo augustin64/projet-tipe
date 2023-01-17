@@ -14,12 +14,19 @@
 void write_network(char* filename, Network* network) {
     FILE *ptr;
     int size = network->size;
-    int type_couche[size];
+    int type_couche[size-1];
     int indice_buffer = 0;
 
     ptr = fopen(filename, "wb");
 
-    uint32_t buffer[(network->size)*3+4];
+    // Le buffer est composé de:
+    // - MAGIC_NUMBER (1)
+    // - size (2)
+    // - network->initialisation (3)
+    // - network->dropout (4)
+    // - network->width[i] & network->depth[i] (4+network->size*2)
+    // - type_couche[i] (3+network->size*3) - On exclue la dernière couche
+    uint32_t buffer[(network->size)*3+3];
 
     bufferAdd(MAGIC_NUMBER);
     bufferAdd(size);
@@ -160,9 +167,9 @@ Network* read_network(char* filename) {
     }
 
     // Lecture du type de chaque couche
-    uint32_t type_couche[size];
+    uint32_t type_couche[size-1];
 
-    for (int i=0; i < (int)size; i++) {
+    for (int i=0; i < (int)size-1; i++) {
         fread(&tmp, sizeof(tmp), 1, ptr);
         type_couche[i] = tmp;
     }
@@ -201,7 +208,7 @@ Network* read_network(char* filename) {
             }
         }
     }
-    
+
     fclose(ptr);
     return network;
 }
@@ -214,7 +221,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         kernel->nn = NULL;
         uint32_t buffer[5];
         fread(&buffer, sizeof(buffer), 1, ptr);
-        
+
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
         kernel->cnn->k_size = buffer[2];

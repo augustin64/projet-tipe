@@ -10,7 +10,7 @@
 
 
 
-// Écriture d'un réseau neuronal 
+// Écriture d'un réseau neuronal
 
 /*
 * Écrit un réseau neuronal dans un fichier donné
@@ -23,7 +23,7 @@ void write_network(char* filename, Network* network);
 void write_couche(Network* network, int indice_couche, int type_couche, FILE* ptr);
 
 
-// Lecture d'un réseau neuronal 
+// Lecture d'un réseau neuronal
 
 /*
 * Lit un réseau neuronal dans un fichier donné

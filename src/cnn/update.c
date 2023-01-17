@@ -58,7 +58,7 @@ void update_weights(Network* network, Network* d_network, int nb_images) {
 }
 
 void update_bias(Network* network, Network* d_network, int nb_images) {
-    
+
     int n = network->size;
     int output_width, output_depth;
     Kernel* k_i;
