@@ -32,7 +32,7 @@ void write_network(char* filename, Network* network) {
         bufferAdd(network->depth[i]);
     }
 
-    for (int i=0; i < size; i++) {
+    for (int i=0; i < size-1; i++) {
         if ((!network->kernel[i]->cnn)&&(!network->kernel[i]->nn)) {
             type_couche[i] = 2;
         } else if (!network->kernel[i]->cnn) {
@@ -46,7 +46,7 @@ void write_network(char* filename, Network* network) {
     fwrite(buffer, sizeof(buffer), 1, ptr);
 
     // Écriture du pré-corps et corps
-    for (int i=0; i < size; i++) {
+    for (int i=0; i < size-1; i++) {
         write_couche(network, i, type_couche[i], ptr);
     }
 
@@ -168,12 +168,11 @@ Network* read_network(char* filename) {
     }
 
     // Lecture de chaque couche
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
+    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(size-1));
 
     for (int i=0; i < (int)size-1; i++) {
         network->kernel[i] = read_kernel(type_couche[i], network->width[i+1], ptr);
     }
-    network->kernel[(int)size-1] = read_kernel(type_couche[(int)size-1], -1, ptr);
 
     network->input = (float****)malloc(sizeof(float***)*size);
     for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
