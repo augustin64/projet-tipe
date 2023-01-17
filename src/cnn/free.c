@@ -117,7 +117,7 @@ void free_network(Network* network) {
         if (network->kernel[i]->cnn != NULL) { // Convolution
             free_convolution(network, i);
         } else if (network->kernel[i]->nn != NULL) {
-            if (network->depth[i]==1) { // Dense non linearised
+            if (network->kernel[i]->linearisation == 0) { // Dense non linearised
                 free_dense(network, i);
             } else { // Dense lineariation
                 free_dense_linearisation(network, i);

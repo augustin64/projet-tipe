@@ -106,7 +106,7 @@ void forward_propagation(Network* network) {
             choose_apply_function_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
-            if (input_depth==1) { // Vecteur -> Vecteur
+            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
             } else { // Matrice -> Vecteur
                 make_dense_linearised(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
@@ -155,7 +155,7 @@ void backward_propagation(Network* network, float wanted_number) {
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
         } else if (k_i->nn) { // Full connection
             ptr d_f = get_function_activation(activation);
-            if (input_depth==1) { // Vecteur -> Vecteur
+            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
                 backward_fully_connected(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
                 backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, d_f);
