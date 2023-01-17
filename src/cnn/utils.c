@@ -34,7 +34,7 @@ bool equals_networks(Network* network1, Network* network2) {
     checkEquals(size, "size", -1);
     checkEquals(initialisation, "initialisation", -1);
     checkEquals(dropout, "dropout", -1);
-    
+
     for (int i=0; i < network1->size; i++) {
         checkEquals(width[i], "input_width", i);
         checkEquals(depth[i], "input_depth", i);
@@ -166,7 +166,7 @@ Network* copy_network(Network* network) {
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
             output_dim = network->width[i+1];
-            
+
 
             network_cp->kernel[i]->nn = NULL;
             network_cp->kernel[i]->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));

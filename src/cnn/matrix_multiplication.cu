@@ -40,12 +40,12 @@ void matrix_multiplication_device(float** m1, float** m2, float** result, int n,
     float* m1_dev;
     float* m2_dev;
     float* result_dev;
-    
+
     gpuErrchk( cudaMallocPitch((void**)&m1_dev, &pitch_m1_dev, p * sizeof(float), n));
     for (int i=0; i < n; i++) {
         gpuErrchk( cudaMemcpy((void*)((char*)m1_dev + i*pitch_m1_dev), (const void*)&(m1[i][0]), p*sizeof(float), cudaMemcpyHostToDevice));
     }
-    
+
     gpuErrchk( cudaMallocPitch((void**)&m2_dev, &pitch_m2_dev, q * sizeof(float), p));
     for (int i=0; i < p; i++) {
         gpuErrchk( cudaMemcpy((void*)((char*)m2_dev + i*pitch_m2_dev), (const void*)&(m2[i][0]), q*sizeof(float), cudaMemcpyHostToDevice));

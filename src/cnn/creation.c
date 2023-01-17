@@ -10,32 +10,32 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     if (dropout < 0 || dropout > 100) {
         printf("Erreur, la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
-    Network* network = (Network*)malloc(sizeof(Network)); 
+    Network* network = (Network*)malloc(sizeof(Network));
     network->learning_rate = learning_rate;
-    network->max_size = max_size; 
-    network->dropout = dropout; 
-    network->initialisation = initialisation; 
-    network->size = 1; 
-    network->input = (float****)malloc(sizeof(float***)*max_size); 
-    network->input_z = (float****)malloc(sizeof(float***)*max_size); 
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(max_size-1)); 
-    network->width = (int*)malloc(sizeof(int*)*max_size); 
-    network->depth = (int*)malloc(sizeof(int*)*max_size); 
+    network->max_size = max_size;
+    network->dropout = dropout;
+    network->initialisation = initialisation;
+    network->size = 1;
+    network->input = (float****)malloc(sizeof(float***)*max_size);
+    network->input_z = (float****)malloc(sizeof(float***)*max_size);
+    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(max_size-1));
+    network->width = (int*)malloc(sizeof(int*)*max_size);
+    network->depth = (int*)malloc(sizeof(int*)*max_size);
     for (int i=0; i < max_size-1; i++) {
         network->kernel[i] = (Kernel*)malloc(sizeof(Kernel));
     }
-    network->width[0] = input_dim; 
-    network->depth[0] = input_depth; 
-    network->kernel[0]->nn = NULL; 
-    network->kernel[0]->cnn = NULL; 
+    network->width[0] = input_dim;
+    network->depth[0] = input_depth;
+    network->kernel[0]->nn = NULL;
+    network->kernel[0]->cnn = NULL;
     create_a_cube_input_layer(network, 0, input_depth, input_dim);
-    create_a_cube_input_z_layer(network, 0, input_depth, input_dim); 
+    create_a_cube_input_z_layer(network, 0, input_depth, input_dim);
     return network;
 }
 
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth);
-    network->kernel[0]->activation = activation;  
+    network->kernel[0]->activation = activation;
     network->kernel[0]->linearisation = 0;
     add_convolution(network, 6, 28, activation);
     add_2d_average_pooling(network, 14);
@@ -209,7 +209,7 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     network->kernel[k_pos]->linearisation = 1;
     nn->input_units = input_units;
     nn->output_units = output_units;
-    
+
     nn->bias = (float*)malloc(sizeof(float)*output_units);
     nn->d_bias = (float*)calloc(output_units, sizeof(float));
     nn->weights = (float**)malloc(sizeof(float*)*input_units);

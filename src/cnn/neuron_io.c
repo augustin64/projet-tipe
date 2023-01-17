@@ -201,7 +201,7 @@ Network* read_network(char* filename) {
             }
         }
     }
-    
+
     fclose(ptr);
     return network;
 }
@@ -214,7 +214,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         kernel->nn = NULL;
         uint32_t buffer[5];
         fread(&buffer, sizeof(buffer), 1, ptr);
-        
+
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
         kernel->cnn->k_size = buffer[2];

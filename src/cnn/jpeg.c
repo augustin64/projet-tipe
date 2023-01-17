@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h> 
+#include <dirent.h>
 #include <jerror.h>
 #include <jpeglib.h>
 
@@ -76,7 +76,7 @@ imgRawImage* loadJpegImageFile(char* lpFilename) {
 jpegDataset* loadJpegDataset(char* folderPath) {
     jpegDataset* dataset = (jpegDataset*)malloc(sizeof(jpegDataset));
     imgRawImage* image;
-    
+
     // We start by counting the number of images and categories
     dataset->numCategories = countDirectories(folderPath);
 	dataset->numImages = countFiles(folderPath);
@@ -128,7 +128,7 @@ jpegDataset* loadJpegDataset(char* folderPath) {
     dataset->width = image->width;
     dataset->height = image->height;
     dataset->numComponents = image->numComponents;
-    
+
     free(image->lpData);
     free(image);
 

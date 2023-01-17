@@ -20,10 +20,10 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
 
     // Load image
     int* mnist_parameters = read_mnist_images_parameters(images_file);
-    
+
     int*** images = read_mnist_images(images_file);
     unsigned int* labels = read_mnist_labels(labels_file);
-    
+
     nb_elem = mnist_parameters[0];
 
     width = mnist_parameters[1];

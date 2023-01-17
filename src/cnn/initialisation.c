@@ -13,9 +13,9 @@ void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_
     int n;
     if (initialisation == GLOROT) {
         n = (n_in + n_out)/2;
-    
+
     } else if (initialisation == HE) {
-        n = n_in/2; 
+        n = n_in/2;
     } else {
         printf_warning("Initialisation non reconnue dans 'initialisation_1d_matrix' \n");
         return ;
@@ -31,9 +31,9 @@ void initialisation_2d_matrix(int initialisation, float** matrix, int dim1, int 
     int n;
     if (initialisation == GLOROT) {
         n = (n_in + n_out)/2;
-    
+
     } else if (initialisation == HE) {
-        n = n_in/2; 
+        n = n_in/2;
     } else {
         printf_warning("Initialisation non reconnue dans 'initialisation_2d_matrix' \n");
         return ;
@@ -51,9 +51,9 @@ void initialisation_3d_matrix(int initialisation, float*** matrix, int depth, in
     int n;
     if (initialisation == GLOROT) {
         n = (n_in + n_out)/2;
-    
+
     } else if (initialisation == HE) {
-        n = n_in/2; 
+        n = n_in/2;
     } else {
         printf_warning("Initialisation non reconnue dans 'initialisation_3d_matrix' \n");
         return ;
@@ -73,9 +73,9 @@ void initialisation_4d_matrix(int initialisation, float**** matrix, int depth1, 
     int n;
     if (initialisation == GLOROT) {
         n = (n_in + n_out)/2;
-    
+
     } else if (initialisation == HE) {
-        n = n_in/2; 
+        n = n_in/2;
     } else {
         printf_warning("Initialisation non reconnue dans 'initialisation_3d_matrix' \n");
         return ;

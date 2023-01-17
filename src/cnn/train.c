@@ -125,7 +125,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     } else {
         network = read_network(recover);
     }
-    
+
 
     shuffle_index = (int*)malloc(sizeof(int)*nb_images_total);
     for (int i=0; i < nb_images_total; i++) {
@@ -141,7 +141,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     // Création des paramètres donnés à chaque thread dans le cas du multi-threading
     TrainParameters** train_parameters = (TrainParameters**)malloc(sizeof(TrainParameters*)*nb_threads);
     TrainParameters* param;
-    
+
     for (int k=0; k < nb_threads; k++) {
         train_parameters[k] = (TrainParameters*)malloc(sizeof(TrainParameters));
         param = train_parameters[k];
@@ -168,7 +168,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     // Cela est utile à des fins de débogage notamment,
     // où l'utilisation de threads rend vite les choses plus compliquées qu'elles ne le sont.
     TrainParameters* train_params = (TrainParameters*)malloc(sizeof(TrainParameters));
-    
+
     train_params->network = network;
     train_params->dataset_type = dataset_type;
     if (dataset_type == 0) {
@@ -243,7 +243,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                         accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
                     }
                 }
-                
+
                 // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
                 for (int k=0; k < nb_threads; k++) {
                     if (train_parameters[k]->network) { // Si le fil a été utilisé
@@ -264,15 +264,15 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 if (j == batches_epoques-1) {
                     train_params->nb_images = nb_images_total - j*BATCHES;
                 }
-                
+
                 train_thread((void*)train_params);
-                
+
                 accuracy += train_params->accuracy / (float) nb_images_total;
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
-                
+
                 update_weights(network, network, train_params->nb_images);
                 update_bias(network, network, train_params->nb_images);
-                
+
                 printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.4f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
                 fflush(stdout);
             #endif
