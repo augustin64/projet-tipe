@@ -70,8 +70,21 @@ def plot_temps_exec(data):
     GPUtime = [i["GPUtime"] for i in data]
     CPUtime = [i["CPUtime"] for i in data]
 
-    plt.plot(x, GPUtime)
-    plt.plot(x, CPUtime)
+    fig, ax = plt.subplots()
+    
+    #ax.set_yscale("log")
+    gputime, = ax.plot(x, GPUtime)
+    cputime, = ax.plot(x, CPUtime)
+
+    gputime.set_label("Temps GPU")
+    cputime.set_label("Temps CPU")
+    
+    ax.set_ylabel("Temps d'exécution (secondes)")
+    ax.set_xlabel("Taille de la matrice d'entrée")
+
+    ax.legend()
+
+    plt.grid(True)
     plt.show()
 
 def plot_erreur(data):

@@ -34,7 +34,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
 }
 
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth); 
+    Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth);
     network->kernel[0]->activation = activation;  
     network->kernel[0]->linearisation = 0;
     add_convolution(network, 6, 28, activation);
@@ -95,7 +95,6 @@ void add_2d_average_pooling(Network* network, int dim_output) {
         printf("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
         return;
     }
-    int kernel_size = dim_input/dim_output;
     if (dim_input%dim_output != 0) {
         printf("Erreur de dimension dans l'average pooling\n");
         return;

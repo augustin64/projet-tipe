@@ -30,7 +30,7 @@ void backward_2d_pooling(float*** input, float*** output, int input_width, int o
 void backward_fully_connected(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, ptr d_function, int is_first);
 
 /*
-* Transfert les informatiosn d'erreur à travers une couche de linéarisation
+* Transfert les informations d'erreur à travers une couche de linéarisation
 */
 void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, ptr d_function);
 

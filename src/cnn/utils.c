@@ -40,7 +40,7 @@ bool equals_networks(Network* network1, Network* network2) {
         checkEquals(depth[i], "input_depth", i);
     }
 
-    for (int i=0; i < network1->size; i++) {
+    for (int i=0; i < network1->size-1; i++) {
         checkEquals(kernel[i]->activation, "kernel[i]->activation", i);
         if ((!network1->kernel[i]->cnn ^ !network2->kernel[i]->cnn) || (!network1->kernel[i]->nn ^ !network2->kernel[i]->nn)) {
             printf(BOLDRED "[ ERROR ]" RESET "network1->kernel[%d] et network1->kernel[%d] diffèrent de type\n", i, i);
@@ -118,8 +118,8 @@ Network* copy_network(Network* network) {
         copyVar(depth[i]);
     }
 
-    network_cp->kernel = (Kernel**)malloc(sizeof(Kernel*)*size);
-    for (int i=0; i < size; i++) {
+    network_cp->kernel = (Kernel**)malloc(sizeof(Kernel*)*(size-1));
+    for (int i=0; i < size-1; i++) {
         network_cp->kernel[i] = (Kernel*)malloc(sizeof(Kernel));
         if (!network->kernel[i]->nn && !network->kernel[i]->cnn) { // Cas de la couche de linéarisation
             copyVar(kernel[i]->activation);
