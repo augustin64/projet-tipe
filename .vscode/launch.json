@@ -99,7 +99,7 @@
         "--labels",
         "data/mnist/t10k-labels-idx1-ubyte",
         "--epochs",
-        "3"
+        "10"
       ],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
