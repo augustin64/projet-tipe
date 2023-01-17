@@ -17,7 +17,7 @@ int main() {
     printf(GREEN "OK\n" RESET);
 
     printf("Architecture LeNet5:\n");
-    for (int i=0; i < network->size; i++) {
+    for (int i=0; i < network->size-1; i++) {
         kernel = network->kernel[i];
         if ((!kernel->cnn)&&(!kernel->nn)) {
             printf("\n==== Couche %d de type "YELLOW"Pooling"RESET" ====\n", i);

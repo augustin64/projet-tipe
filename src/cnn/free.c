@@ -101,7 +101,7 @@ void free_dense_linearisation(Network* network, int pos) {
 
 void free_network_creation(Network* network) {
     free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
-    for (int i=0; i<network->max_size; i++)
+    for (int i=0; i < network->max_size-1; i++)
         free(network->kernel[i]);
     free(network->width);
     free(network->depth);
