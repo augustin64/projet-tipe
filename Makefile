@@ -107,7 +107,7 @@ endif
 #
 run-tests: build-tests
 	$(foreach file, $(wildcard $(TEST_SRCDIR)/*.sh), $(file);)
-	@echo "$$(for file in build/test-*; do echo -e \\033[33m#####\\033[0m $$file \\033[33m#####\\033[0m; $$file || echo "Erreur sur $$file"; done)"
+	@echo "$$(for file in build/test-*; do echo -e \\033[33m#####\\033[0m $$file \\033[33m#####\\033[0m; $$file || echo -e "\\033[1m\\033[31mErreur sur $$file\\033[0m"; done)"
 
 build-tests: prepare-tests $(TESTS_OBJ) $(BUILDDIR)/test-cnn_matrix_multiplication $(BUILDDIR)/test-cnn_convolution
 
