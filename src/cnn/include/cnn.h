@@ -32,7 +32,7 @@ void forward_propagation(Network* network);
 /*
 * Propage en arrière le cnn
 */
-void backward_propagation(Network* network, float wanted_number);
+void backward_propagation(Network* network, int wanted_number);
 
 /*
 * Met à 0 chaque valeur de l'input avec une probabilité de dropout %
@@ -57,6 +57,6 @@ float compute_cross_entropy_loss(float* output, float* wanted_output, int len);
 /*
 * On considère que la sortie voulue comporte 10 éléments
 */
-float* generate_wanted_output(float wanted_number);
+float* generate_wanted_output(int wanted_number, int size_output);
 
 #endif

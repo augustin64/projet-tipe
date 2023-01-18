@@ -126,8 +126,8 @@ void forward_propagation(Network* network) {
     }
 }
 
-void backward_propagation(Network* network, float wanted_number) {
-    float* wanted_output = generate_wanted_output(wanted_number);
+void backward_propagation(Network* network, int wanted_number) {
+    float* wanted_output = generate_wanted_output(wanted_number, 10);
     int n = network->size;
     int activation, input_depth, input_width, output_depth, output_width;
     float*** input;
@@ -215,9 +215,9 @@ float compute_cross_entropy_loss(float* output, float* wanted_output, int len) {
     return loss;
 }
 
-float* generate_wanted_output(float wanted_number) {
-    float* wanted_output = (float*)malloc(sizeof(float)*10);
-    for (int i=0; i < 10; i++) {
+float* generate_wanted_output(int wanted_number, int size_output) {
+    float* wanted_output = (float*)malloc(sizeof(float)*size_output);
+    for (int i=0; i < size_output; i++) {
         if (i==wanted_number) {
             wanted_output[i]=1;
         }
