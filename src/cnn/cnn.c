@@ -127,7 +127,7 @@ void forward_propagation(Network* network) {
 }
 
 void backward_propagation(Network* network, int wanted_number) {
-    float* wanted_output = generate_wanted_output(wanted_number, 10);
+    float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]);
     int n = network->size;
     int activation, input_depth, input_width, output_depth, output_width;
     float*** input;
