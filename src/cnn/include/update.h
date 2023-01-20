@@ -7,13 +7,13 @@
 * Met à jours les poids à partir de données obtenus après plusieurs backpropagations
 * Puis met à 0 tous les d_weights
 */
-void update_weights(Network* network, Network* d_network, int nb_images);
+void update_weights(Network* network, Network* d_network);
 
 /*
 * Met à jours les biais à partir de données obtenus après plusieurs backpropagations
 * Puis met à 0 tous les d_bias
 */
-void update_bias(Network* network, Network* d_network, int nb_images);
+void update_bias(Network* network, Network* d_network);
 
 /*
 * Met à 0 toutes les données de backpropagation de poids

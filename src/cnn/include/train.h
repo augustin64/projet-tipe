@@ -5,8 +5,9 @@
 #define DEF_TRAIN_H
 
 #define EPOCHS 10
-#define BATCHES 120
+#define BATCHES 500
 #define USE_MULTITHREADING
+#define LEARNING_RATE 0.01
 
 
 /*
@@ -24,6 +25,7 @@ typedef struct TrainParameters {
     int start; // Début des images
     int nb_images; // Nombre d'images àn traiter
     float accuracy; // Accuracy (à renvoyer)
+    float loss; // Loss (à renvoyer)
 } TrainParameters;
 
 

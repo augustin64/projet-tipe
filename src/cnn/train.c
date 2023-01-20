@@ -40,12 +40,21 @@ void* train_thread(void* parameters) {
     int dataset_type = param->dataset_type;
     int start = param->start;
     int nb_images = param->nb_images;
+
+    float* wanted_output;
     float accuracy = 0.;
+    float loss = 0.;
+
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
             write_image_in_network_32(images[index[i]], height, width, network->input[0][0]);
             forward_propagation(network);
             maxi = indice_max(network->input[network->size-1][0][0], 10);
+            
+            wanted_output = generate_wanted_output(labels[index[i]], 10);
+            loss += compute_mean_squared_error(network->input[network->size-1][0][0], wanted_output, 10);
+            free(wanted_output);
+
             backward_propagation(network, labels[index[i]]);
 
             if (maxi == labels[index[i]]) {
@@ -72,6 +81,7 @@ void* train_thread(void* parameters) {
     }
 
     param->accuracy = accuracy;
+    param->loss = loss;
     return NULL;
 }
 
@@ -81,6 +91,9 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     Network* network;
     int input_dim = -1;
     int input_depth = -1;
+
+    float loss;
+    float batch_loss; // May be redundant with loss, but gives more informations
     float accuracy;
     float current_accuracy;
 
@@ -121,9 +134,10 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
     // Initialisation du réseau
     if (!recover) {
-        network = create_network_lenet5(0.1, 0, TANH, GLOROT, input_dim, input_depth);
+        network = create_network_lenet5(LEARNING_RATE, 0, TANH, GLOROT, input_dim, input_depth);
     } else {
         network = read_network(recover);
+        network->learning_rate = LEARNING_RATE;
     }
 
 
@@ -201,13 +215,16 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         // du multi-threading car chaque copie du réseau initiale sera légèrement différente
         // et donnera donc des résultats différents sur les mêmes images.
         accuracy = 0.;
+        loss = 0.;
         knuth_shuffle(shuffle_index, nb_images_total);
         batches_epoques = div_up(nb_images_total, BATCHES);
         nb_images_total_remaining = nb_images_total;
         #ifndef USE_MULTITHREADING
             train_params->nb_images = BATCHES;
         #endif
+
         for (int j=0; j < batches_epoques; j++) {
+            batch_loss = 0.;
             #ifdef USE_MULTITHREADING
                 if (j == batches_epoques-1) {
                     nb_remaining_images = nb_images_total_remaining;
@@ -241,14 +258,16 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                     if (train_parameters[k]->network) {
                         pthread_join( tid[k], NULL );
                         accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
+                        loss += train_parameters[k]->loss/nb_images_total;
+                        batch_loss += train_parameters[k]->loss/BATCHES;
                     }
                 }
 
                 // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
                 for (int k=0; k < nb_threads; k++) {
                     if (train_parameters[k]->network) { // Si le fil a été utilisé
-                        update_weights(network, train_parameters[k]->network, train_parameters[k]->nb_images);
-                        update_bias(network, train_parameters[k]->network, train_parameters[k]->nb_images);
+                        update_weights(network, train_parameters[k]->network);
+                        update_bias(network, train_parameters[k]->network);
                         free_network(train_parameters[k]->network);
                     }
                 }
@@ -269,13 +288,18 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
                 accuracy += train_params->accuracy / (float) nb_images_total;
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
+                loss += train_params->loss/nb_images_total;
+                batch_loss += train_params->loss/BATCHES;
 
-                update_weights(network, network, train_params->nb_images);
-                update_bias(network, network, train_params->nb_images);
+                update_weights(network, network);
+                update_bias(network, network);
 
                 printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.4f%%"RESET" ", i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
                 fflush(stdout);
             #endif
+            // Il serait intéressant d'utiliser la perte calculée pour
+            // savoir l'avancement dans l'apprentissage et donc comment adapter le taux d'apprentissage
+            //network->learning_rate = 0.01*batch_loss;
         }
         end_time = omp_get_wtime();
         elapsed_time = end_time - start_time;

@@ -50,13 +50,13 @@ void backward_2d_pooling(float*** input, float*** output, int input_width, int o
 void backward_fully_connected(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, ptr d_function, int is_first) {
     // Bias
     for (int j=0; j < size_output; j++) {
-        ker->d_bias[j] = output[j];
+        ker->d_bias[j] += output[j];
     }
 
     // Weights
     for (int i=0; i < size_input; i++) {
         for (int j=0; j < size_output; j++) {
-            ker->d_weights[i][j] = input[i]*output[j];
+            ker->d_weights[i][j] += input[i]*output[j];
         }
     }
 

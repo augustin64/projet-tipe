@@ -3,7 +3,7 @@
 #include "include/update.h"
 #include "include/struct.h"
 
-void update_weights(Network* network, Network* d_network, int nb_images) {
+void update_weights(Network* network, Network* d_network) {
     int n = network->size;
     int input_depth, input_width, output_depth, output_width, k_size;
     Kernel* k_i;
@@ -24,7 +24,7 @@ void update_weights(Network* network, Network* d_network, int nb_images) {
                 for (int b=0; b<output_depth; b++) {
                     for (int c=0; c<k_size; c++) {
                         for (int d=0; d<k_size; d++) {
-                            cnn->w[a][b][c][d] -= (network->learning_rate/nb_images) * d_cnn->d_w[a][b][c][d];
+                            cnn->w[a][b][c][d] -= network->learning_rate * d_cnn->d_w[a][b][c][d];
                             d_cnn->d_w[a][b][c][d] = 0;
                         }
                     }
@@ -36,7 +36,7 @@ void update_weights(Network* network, Network* d_network, int nb_images) {
                 Kernel_nn* d_nn = dk_i->nn;
                 for (int a=0; a<input_width; a++) {
                     for (int b=0; b<output_width; b++) {
-                        nn->weights[a][b] -= (network->learning_rate/nb_images) * d_nn->d_weights[a][b];
+                        nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
                         d_nn->d_weights[a][b] = 0;
                     }
                 }
@@ -46,7 +46,7 @@ void update_weights(Network* network, Network* d_network, int nb_images) {
                 int input_size = input_width*input_width*input_depth;
                 for (int a=0; a<input_size; a++) {
                     for (int b=0; b<output_width; b++) {
-                        nn->weights[a][b] -= (network->learning_rate/nb_images) * d_nn->d_weights[a][b];
+                        nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
                         d_nn->d_weights[a][b] = 0;
                     }
                 }
@@ -57,7 +57,7 @@ void update_weights(Network* network, Network* d_network, int nb_images) {
     }
 }
 
-void update_bias(Network* network, Network* d_network, int nb_images) {
+void update_bias(Network* network, Network* d_network) {
 
     int n = network->size;
     int output_width, output_depth;
@@ -75,7 +75,7 @@ void update_bias(Network* network, Network* d_network, int nb_images) {
             for (int a=0; a<output_depth; a++) {
                 for (int b=0; b<output_width; b++) {
                     for (int c=0; c<output_width; c++) {
-                        cnn->bias[a][b][c] -= (network->learning_rate/nb_images) * d_cnn->d_bias[a][b][c];
+                        cnn->bias[a][b][c] -= network->learning_rate * d_cnn->d_bias[a][b][c];
                         d_cnn->d_bias[a][b][c] = 0;
                     }
                 }
@@ -84,7 +84,7 @@ void update_bias(Network* network, Network* d_network, int nb_images) {
             Kernel_nn* nn = k_i->nn;
             Kernel_nn* d_nn = dk_i->nn;
             for (int a=0; a<output_width; a++) {
-                nn->bias[a] -= (network->learning_rate/nb_images) * d_nn->d_bias[a];
+                nn->bias[a] -= network->learning_rate * d_nn->d_bias[a];
                 d_nn->d_bias[a] = 0;
             }
         } else { // Pooling
