@@ -47,6 +47,15 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
     return network;
 }
 
+Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+    Network* network = create_network(3, learning_rate, dropout, initialisation, input_dim, input_depth);
+    network->kernel[0]->activation = activation;
+    network->kernel[0]->linearisation = 0;
+    add_dense_linearisation(network, 80, activation);
+    add_dense(network, 10, SOFTMAX);
+    return network;
+}
+
 void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
     network->input[pos] = (float***)malloc(sizeof(float**)*depth);
     for (int i=0; i < depth; i++) {
