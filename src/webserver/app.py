@@ -63,7 +63,8 @@ def recognize_mnist(image):
                 "cnn": json_data_cnn
             }
         }
-    except Error:
+    except subprocess.CalledProcessError as e:
+        print(e)
         return {
             "status": 500,
             "data": "Internal Server Error"
