@@ -14,6 +14,8 @@ var mouseY;
 var mouseDown = 0;
 
 const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const RES_STANDARD = "Résultats réseau de neurones standard";
+const RES_CONV = "Résultats réseau de neurones convolutif";
 var canvasSize;
 
 function init() {
@@ -44,6 +46,7 @@ function init() {
         canvas.addEventListener('touchmove', s_touchMove, false);
         canvas.addEventListener('touchend', s_mouseUp, false);
     }
+    clear();
 }
 
 
@@ -107,8 +110,9 @@ function s_touchMove(e) {
 
 
 function clear() {
-    document.getElementById("result").innerHTML = "";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  
+    document.getElementById("result_fc").innerHTML = RES_STANDARD;
+    document.getElementById("result_cnn").innerHTML = RES_CONV;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
@@ -141,6 +145,26 @@ function sendJSON(data,callback){
 
     // Sending data with the request
     xhr.send(data);
+}
+
+
+function addResults(elem, data, text) {
+    elem.innerHTML = text;
+    var elements = [];
+
+    for (let i=0; i < data.length; i++) elements.push([data[i], i]);
+    
+    elements.sort(function(a, b) {
+        a = a[1];
+        b = b[1];
+    
+        return a < b ? -1 : (a > b ? 1 : 0);
+    });
+
+    let res = elements.sort().reverse();
+    for (let j=0; j < res.length; j++) {
+        elem.innerHTML += "<br/>"+res[j][1]+" : "+res[j][0];
+    }
 }
 
 
@@ -184,23 +208,8 @@ function getPrediction() {
         if (data["status"] != 200) {
             document.getElementById("result").innerHTML = "500 Internal Server Error";
         } else {
-            let result = document.getElementById("result");
-            result.innerHTML = "Résultat:";
-            var elements = [];
-
-            for (let i=0; i < data["data"].length; i++) elements.push([data["data"][i], i]);
-            
-            elements.sort(function(a, b) {
-                a = a[1];
-                b = b[1];
-            
-                return a < b ? -1 : (a > b ? 1 : 0);
-            });
-
-            let res = elements.sort().reverse();
-            for (let j=0; j < res.length; j++) {
-                result  .innerHTML += "<br/>"+res[j][1]+" : "+res[j][0];
-            }
+            addResults(document.getElementById("result_fc"), data["data"]["fully_connected"], RES_STANDARD);
+            addResults(document.getElementById("result_cnn"), data["data"]["cnn"], RES_CONV);
         }
     })
 }

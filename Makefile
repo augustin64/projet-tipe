@@ -136,12 +136,22 @@ endif
 webserver: $(CACHE_DIR)/mnist-reseau.bin
 	FLASK_APP="src/webserver/app.py" flask run
 
-$(CACHE_DIR)/mnist-reseau.bin: $(BUILDDIR)/mnist-main
+$(CACHE_DIR)/mnist-reseau-fully-connected.bin: $(BUILDDIR)/mnist-main
 	@mkdir -p $(CACHE_DIR)
 	$(BUILDDIR)/mnist-main train \
 		--images "data/mnist/train-images-idx3-ubyte" \
 		--labels "data/mnist/train-labels-idx1-ubyte" \
-		--out "$(CACHE_DIR)/mnist-reseau.bin"
+		--out "$(CACHE_DIR)/mnist-reseau-fully-connected.bin"
+
+
+$(CACHE_DIR)/mnist-reseau-cnn.bin: $(BUILDDIR)/cnn-main
+	@mkdir -p $(CACHE_DIR)
+	$(BUILDDIR)/cnn-main train \
+		--dataset mnist \
+		--images data/mnist/train-images-idx3-ubyte \
+		--labels data/mnist/train-labels-idx1-ubyte \
+		--epochs 10 \
+		--out $(CACHE_DIR)/mnist-reseau-cnn.bin 
 
 
 #

@@ -31,6 +31,7 @@ void help(char* call) {
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat de l'image à reconnaître.\n");
     printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau entraîné.\n");
     printf("\t\t--input   | -i [FILENAME]\tImage jpeg ou fichier binaire à reconnaître.\n");
+    printf("\t\t--out     | -o (text|json)\tFormat de sortie.\n");
     printf("\ttest:\n");
     printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau entraîné.\n");
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat du set de données.\n");
@@ -192,6 +193,7 @@ int main(int argc, char* argv[]) {
         char* dataset = NULL; // mnist ou jpg
         char* modele = NULL; // Fichier contenant le modèle
         char* input_file = NULL; // Image à reconnaître
+        char* out = NULL;
         int dataset_type;
         int i = 2;
         while (i < argc) {
@@ -201,6 +203,10 @@ int main(int argc, char* argv[]) {
             }
             else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
                 modele = argv[i+1];
+                i += 2;
+            }
+            else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
+                out = argv[i+1];
                 i += 2;
             }
             else if ((! strcmp(argv[i], "--input"))||(! strcmp(argv[i], "-i"))) {
@@ -224,11 +230,14 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier d'entrée spécifié, rien à faire.\n");
             return 1;
         }
+        if (!out) {
+            out = "text";
+        }
         if (!modele) {
             printf("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
-        recognize(dataset_type, modele, input_file);
+        recognize(dataset_type, modele, input_file, out);
         return 0;
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

@@ -40,13 +40,30 @@ def recognize_mnist(image):
         output = subprocess.check_output([
             'build/mnist-main',
             'recognize',
-            '--modele', '.cache/mnist-reseau.bin',
+            '--modele', '.cache/mnist-reseau-fully-connected.bin',
             '--in', '.cache/image-idx3-ubyte',
             '--out', 'json'
         ]).decode("utf-8")
-        json_data = json.loads(output.replace("nan", "0.0"))["0"]
-        return {"status": 200, "data": json_data}
-    except subprocess.CalledProcessError:
+        json_data_fc = json.loads(output.replace("nan", "0.0"))["0"]
+
+        output = subprocess.check_output([
+            'build/cnn-main',
+            'recognize',
+            '--dataset', 'mnist',
+            '--modele', '.cache/mnist-reseau-cnn.bin',
+            '--input', '.cache/image-idx3-ubyte',
+            '--out', 'json'
+        ]).decode("utf-8")
+        json_data_cnn = json.loads(output.replace("nan", "0.0"))["0"]
+
+        return {
+            "status": 200,
+            "data": {
+                "fully_connected": json_data_fc,
+                "cnn": json_data_cnn
+            }
+        }
+    except Error:
         return {
             "status": 500,
             "data": "Internal Server Error"

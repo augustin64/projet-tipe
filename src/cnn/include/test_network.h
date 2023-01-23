@@ -11,15 +11,15 @@ void test_network(int dataset_type, char* modele, char* images_file, char* label
 /*
 * Classifie un fichier d'images sous le format MNIST à partir d'un réseau préalablement entraîné
 */
-void recognize_mnist(Network* network, char* input_file);
+void recognize_mnist(Network* network, char* input_file, char* out);
 
 /*
 * Classifie une image jpg à partir d'un réseau préalablement entraîné
 */
-void recognize_jpg(Network* network, char* input_file);
+void recognize_jpg(Network* network, char* input_file,char* out);
 
 /*
 * Classifie une image à partir d'un réseau préalablement entraîné
 */
-void recognize(int dataset_type, char* modele, char* input_file);
+void recognize(int dataset_type, char* modele, char* input_file, char* out);
 #endif

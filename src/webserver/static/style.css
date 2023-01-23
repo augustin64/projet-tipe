@@ -11,8 +11,11 @@ body {
     touch-action:none;
 }
 
-#result {
-    margin: 3%;
+.result-elem {
+    margin: 1%;
+    border-style: solid;
+    border-width: 1px;
+    padding: 2%;
 }
 
 /* For mobile devices */
@@ -23,7 +26,7 @@ body {
     button {
         width: 300px;
         height: 50px;
-        -webkit-appearance: none;
+        --webkit-appearance: none;
         font-size: large;
     }
     #digit-canvas {

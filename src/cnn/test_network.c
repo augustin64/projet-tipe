@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "../mnist/include/mnist.h"
 #include "include/neuron_io.h"
@@ -97,10 +98,9 @@ void test_network(int dataset_type, char* modele, char* images_file, char* label
 }
 
 
-void recognize_mnist(Network* network, char* input_file) {
+void recognize_mnist(Network* network, char* input_file, char* out) {
     int width, height; // Dimensions de l'image
     int nb_elem; // Nombre d'éléments
-    int maxi; // Catégorie reconnue
 
     // Load image
     int* mnist_parameters = read_mnist_images_parameters(input_file);
@@ -111,24 +111,54 @@ void recognize_mnist(Network* network, char* input_file) {
     height = mnist_parameters[2];
     free(mnist_parameters);
 
-    printf("Image\tCatégorie détectée\n");
+    if (! strcmp(out, "json")) {
+        printf("{\n");
+    } else {
+        printf("Image\tCatégorie détectée\n");
+    }
     // Load image in the first layer of the Network
     for (int i=0; i < nb_elem; i++) {
+        if (! strcmp(out, "json")) {
+            printf("\"%d\" : [", i);
+        }
+
         write_image_in_network_32(images[i], height, width, network->input[0][0]);
         forward_propagation(network);
-        maxi = indice_max(network->input[network->size-1][0][0], 10);
 
-        printf("%d\t%d\n", i, maxi);
+    
+        if (! strcmp(out, "json")) {
+            for (int j=0; j < 10; j++) {
+                printf("%f", network->input[network->size-1][0][0][j]);
+
+                if (j+1 < 10) {
+                    printf(", ");
+                }
+            }
+        } else {
+            printf("%d\t%d\n", i, indice_max(network->input[network->size-1][0][0], 10));
+        }
+
+        if (! strcmp(out, "json")) {
+            if (i+1 < nb_elem) {
+                printf("],\n");
+            } else {
+                printf("]\n");
+            }
+        }
 
         for (int j=0; j < height; j++) {
             free(images[i][j]);
         }
         free(images[i]);
     }
+    if (! strcmp(out, "json")) {
+        printf("}\n");
+    }
+
     free(images);
 }
 
-void recognize_jpg(Network* network, char* input_file) {
+void recognize_jpg(Network* network, char* input_file, char* out) {
     int width, height; // Dimensions de l'image
     int maxi;
 
@@ -136,22 +166,45 @@ void recognize_jpg(Network* network, char* input_file) {
     width = image->width;
     height = image->height;
 
+    if (! strcmp(out, "json")) {
+        printf("{\n");
+        printf("\"0\" : [");
+    }
+
+    // Load image in the first layer of the Network
     write_image_in_network_260(image->lpData, height, width, network->input[0]);
     forward_propagation(network);
-    maxi = indice_max(network->input[network->size-1][0][0], 50);
 
-    printf("Catégorie reconnue: %d\n", maxi);
+
+    if (! strcmp(out, "json")) {
+        for (int j=0; j < 50; j++) {
+            printf("%f", network->input[network->size-1][0][0][j]);
+
+            if (j+1 < 10) {
+                printf(", ");
+            }
+        }
+    } else {
+        maxi = indice_max(network->input[network->size-1][0][0], 50);
+        printf("Catégorie reconnue: %d\n", maxi);
+    }
+
+    if (! strcmp(out, "json")) {
+        printf("]\n");
+        printf("}\n");
+    }
+
     free(image->lpData);
     free(image);
 }
 
-void recognize(int dataset_type, char* modele, char* input_file) {
+void recognize(int dataset_type, char* modele, char* input_file, char* out) {
     Network* network = read_network(modele);
 
     if (dataset_type == 0) {
-        recognize_mnist(network, input_file);
+        recognize_mnist(network, input_file, out);
     } else {
-        recognize_jpg(network, input_file);
+        recognize_jpg(network, input_file, out);
     }
 
     free_network(network);
