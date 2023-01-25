@@ -3,6 +3,8 @@
 #ifndef DEF_UPDATE_H
 #define DEF_UPDATE_H
 
+#define MAX_RESEAU 100000000
+
 /*
 * Met à jours les poids à partir de données obtenus après plusieurs backpropagations
 * Puis met à 0 tous les d_weights
