@@ -115,7 +115,7 @@ def images_neurons(neurons, dest="neurons", exp=False):
     os.makedirs(dest, exist_ok=True)
     data = []
     for i in neurons:
-        os.system(f"./make.sh utils print-poids-neurone --reseau \
+        os.system(f"build/mnist-utils print-poids-neurone --reseau \
             .cache/reseau.bin --neurone {i} > .cache/poids.txt")
         data.append(image_from_list(".cache/poids.txt", exp=exp))
 
