@@ -148,7 +148,10 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
             cnn->d_w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
             for (int k=0; k < kernel_size; k++) {
                 cnn->w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
-                cnn->d_w[i][j][k] = (float*)calloc(kernel_size, sizeof(float));
+                cnn->d_w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
+                for (int l=0; l<kernel_size; l++) {
+                    cnn->d_w[i][j][k][l] = 0;
+                }
             }
         }
     }
@@ -159,7 +162,10 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
         cnn->d_bias[i] = (float**)malloc(sizeof(float*)*bias_size);
         for (int j=0; j < bias_size; j++) {
             cnn->bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
-            cnn->d_bias[i][j] = (float*)calloc(bias_size, sizeof(float));
+            cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
+            for (int k=0; k<bias_size; k++) {
+                cnn->d_bias[i][j][k] = 0;
+            }
         }
     }
     int n_in = network->width[n-1]*network->width[n-1]*network->depth[n-1];
@@ -187,12 +193,18 @@ void add_dense(Network* network, int output_units, int activation) {
     nn->input_units = input_units;
     nn->output_units = output_units;
     nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)calloc(output_units, sizeof(float));
+    nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    for (int i=0; i<output_units; i++) {
+        nn->d_bias[i] = 0;
+    }
     nn->weights = (float**)malloc(sizeof(float*)*input_units);
     nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
     for (int i=0; i < input_units; i++) {
         nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
+        nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
+        for (int j=0; j<output_units; j++) {
+            nn->d_weights[i][j] = 0;
+        }
     }
     initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
@@ -220,12 +232,18 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     nn->output_units = output_units;
 
     nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)calloc(output_units, sizeof(float));
+    nn->d_bias = (float*)malloc(sizeof(float)*output_units);
+    for (int i=0; i<output_units; i++) {
+        nn->d_bias[i] = 0;
+    }
     nn->weights = (float**)malloc(sizeof(float*)*input_units);
     nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
     for (int i=0; i < input_units; i++) {
         nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
+        nn->d_weights[i] = (float*)malloc(sizeof(float)*output_units);
+        for (int j=0; j<output_units; j++) {
+            nn->d_weights[i][j] = 0;
+        }
     }
     initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
