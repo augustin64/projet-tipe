@@ -24,8 +24,12 @@ void knuth_shuffle(int* tab, int n);
 bool equals_networks(Network* network1, Network* network2);
 
 /*
- * Duplique un réseau
+* Duplique un réseau
 */
 Network* copy_network(Network* network);
 
+/*
+* Copie les paramètres d'un réseau dans un réseau déjà alloué en mémoire
+*/
+void copy_network_parameters(Network* network_src, Network* network_dest);
 #endif

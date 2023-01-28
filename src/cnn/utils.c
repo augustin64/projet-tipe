@@ -7,6 +7,7 @@
 #include "include/struct.h"
 
 #define copyVar(var) network_cp->var = network->var
+#define copyVarParams(var) network_dest->var = network_src->var
 
 #define checkEquals(var, name, indice)                                              \
 if (network1->var != network2->var) {                                               \
@@ -240,4 +241,61 @@ Network* copy_network(Network* network) {
     }
 
     return network_cp;
+}
+
+
+void copy_network_parameters(Network* network_src, Network* network_dest) {
+    // Paramètre du réseau
+    int size = network_src->size;
+    // Paramètres des couches NN
+    int input_units;
+    int output_units;
+    // Paramètres des couches CNN
+    int rows;
+    int k_size;
+    int columns;
+    int output_dim;
+
+    copyVarParams(learning_rate);
+
+    for (int i=0; i < size-1; i++) {
+        if (!network_src->kernel[i]->cnn && network_src->kernel[i]->nn) { // Cas du NN
+
+            input_units = network_src->kernel[i]->nn->input_units;
+            output_units = network_src->kernel[i]->nn->output_units;
+
+            for (int j=0; j < output_units; j++) {
+                copyVarParams(kernel[i]->nn->bias[j]);
+            }
+            for (int j=0; j < input_units; j++) {
+                for (int k=0; k < output_units; k++) {
+                    copyVarParams(kernel[i]->nn->weights[j][k]);
+                }
+            }
+        }
+        else if (network_src->kernel[i]->cnn && !network_src->kernel[i]->nn) { // Cas du CNN
+
+            rows = network_src->kernel[i]->cnn->rows;
+            k_size = network_src->kernel[i]->cnn->k_size;
+            columns = network_src->kernel[i]->cnn->columns;
+            output_dim = network_src->width[i+1];
+
+            for (int j=0; j < columns; j++) {
+                for (int k=0; k < output_dim; k++) {
+                    for (int l=0; l < output_dim; l++) {
+                        copyVarParams(kernel[i]->cnn->bias[j][k][l]);
+                    }
+                }
+            }
+            for (int j=0; j < rows; j++) {
+                for (int k=0; k < columns; k++) {
+                    for (int l=0; l < k_size; l++) {
+                        for (int m=0; m < k_size; m++) {
+                            copyVarParams(kernel[i]->cnn->w[j][k][l][m]);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
