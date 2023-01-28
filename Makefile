@@ -90,6 +90,7 @@ $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/utils.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
+ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_train.cuda.o \
 		$(BUILDDIR)/cnn_test_network.cuda.o \
@@ -109,10 +110,10 @@ $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/mnist.cuda.o \
 		$(BUILDDIR)/utils.cuda.o \
 		$(BUILDDIR)/cuda_utils.o
-ifndef NVCC_INSTALLED
-	@echo "$(NVCC) not found, skipping"
-else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+else
+$(BUILDDIR)/cnn-main-cuda:
+	@echo "$(NVCC) not found, skipping"
 endif
 
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
@@ -124,11 +125,12 @@ $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 $(BUILDDIR)/cnn_%.cuda.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
 
+ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
-ifndef NVCC_INSTALLED
-	@echo "$(NVCC) not found, skipping"
-else
 	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+else
+$(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
+	@echo "$(NVCC) not found, skipping"
 endif
 #
 # Build general files
@@ -139,12 +141,12 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 $(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
 
+ifdef NVCC_INSTALLED
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
-ifndef NVCC_INSTALLED
-	@echo "$(NVCC) not found, skipping"
-else
 	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
-endif	
+else
+	@echo "$(NVCC) not found, skipping"
+endif
 
 #
 # Tests
@@ -167,15 +169,16 @@ build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
+ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
 		$(BUILDDIR)/cnn_cuda_%.o \
 		$(BUILDDIR)/cuda_utils.o \
 		$(BUILDDIR)/colors.cuda.o \
 		$(BUILDDIR)/mnist.cuda.o
-ifndef NVCC_INSTALLED
-	@echo "$(NVCC) not found, skipping"
-else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+else
+$(BUILDDIR)/test-cnn_%: test/cnn_%.cu
+	@echo "$(NVCC) not found, skipping"
 endif
 
 #
