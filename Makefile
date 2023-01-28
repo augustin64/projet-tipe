@@ -58,6 +58,9 @@ $(BUILDDIR)/mnist-preview: $(MNIST_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
 $(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
+$(BUILDDIR)/mnist.cuda.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
+
 $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
@@ -67,21 +70,59 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 #
 cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview;
 
-$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_test_network.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o  $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/cnn_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
+		$(BUILDDIR)/cnn_train.o \
+		$(BUILDDIR)/cnn_test_network.o \
+		$(BUILDDIR)/cnn_cnn.o \
+		$(BUILDDIR)/cnn_creation.o \
+		$(BUILDDIR)/cnn_initialisation.o \
+		$(BUILDDIR)/cnn_make.o \
+		$(BUILDDIR)/cnn_neuron_io.o \
+		$(BUILDDIR)/cnn_function.o  \
+		$(BUILDDIR)/cnn_utils.o \
+		$(BUILDDIR)/cnn_update.o \
+		$(BUILDDIR)/cnn_free.o \
+		$(BUILDDIR)/cnn_jpeg.o \
+		$(BUILDDIR)/cnn_convolution.o \
+		$(BUILDDIR)/cnn_backpropagation.o \
+		$(BUILDDIR)/colors.o \
+		$(BUILDDIR)/mnist.o \
+		$(BUILDDIR)/utils.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
-$(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_train.o $(BUILDDIR)/cnn_test_network.o $(BUILDDIR)/cnn_cnn.o $(BUILDDIR)/cnn_creation.o $(BUILDDIR)/cnn_initialisation.o $(BUILDDIR)/cnn_make.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/cnn_function.o  $(BUILDDIR)/cnn_utils.o $(BUILDDIR)/cnn_update.o $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/cnn_cuda_convolution.o $(BUILDDIR)/cnn_backpropagation.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
+		$(BUILDDIR)/cnn_train.cuda.o \
+		$(BUILDDIR)/cnn_test_network.cuda.o \
+		$(BUILDDIR)/cnn_cnn.cuda.o \
+		$(BUILDDIR)/cnn_creation.cuda.o \
+		$(BUILDDIR)/cnn_initialisation.cuda.o \
+		$(BUILDDIR)/cnn_make.cuda.o \
+		$(BUILDDIR)/cnn_neuron_io.cuda.o \
+		$(BUILDDIR)/cnn_function.cuda.o  \
+		$(BUILDDIR)/cnn_utils.cuda.o \
+		$(BUILDDIR)/cnn_update.cuda.o \
+		$(BUILDDIR)/cnn_free.cuda.o \
+		$(BUILDDIR)/cnn_jpeg.cuda.o \
+		$(BUILDDIR)/cnn_cuda_convolution.o \
+		$(BUILDDIR)/cnn_backpropagation.cuda.o \
+		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/mnist.cuda.o \
+		$(BUILDDIR)/utils.cuda.o \
+		$(BUILDDIR)/cuda_utils.o
 ifndef NVCC_INSTALLED
 	@echo "$(NVCC) not found, skipping"
 else
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 endif
 
-$(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o
+$(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
+
+$(BUILDDIR)/cnn_%.cuda.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
 
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 ifndef NVCC_INSTALLED
@@ -94,6 +135,9 @@ endif
 #
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
+
+$(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
 
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
 ifndef NVCC_INSTALLED
@@ -116,14 +160,18 @@ prepare-tests:
 	@rm -f $(BUILDDIR)/test-*
 
 
-build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)     $^ -o $@  $(CFLAGS)
 
-$(BUILDDIR)/test-cnn_%: test/cnn_%.cu $(BUILDDIR)/cnn_cuda_%.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
+		$(BUILDDIR)/cnn_cuda_%.o \
+		$(BUILDDIR)/cuda_utils.o \
+		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/mnist.cuda.o
 ifndef NVCC_INSTALLED
 	@echo "$(NVCC) not found, skipping"
 else

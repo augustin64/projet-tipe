@@ -41,11 +41,11 @@ void print_matrix(float** mat, int n, int p) {
 
 
 float*** create_matrix(int n, int p, int q, float max_val) {
-    float*** matrix = (float***)malloc(n*sizeof(float**));
+    float*** matrix = (float***)nalloc(n*sizeof(float**));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float**)malloc(sizeof(float*)*p);
+        matrix[i] = (float**)nalloc(sizeof(float*)*p);
         for (int j=0; j < p; j++) {
-            matrix[i][j] = (float*)malloc(sizeof(float)*q);
+            matrix[i][j] = (float*)nalloc(sizeof(float)*q);
         }
     }
 
@@ -55,11 +55,11 @@ float*** create_matrix(int n, int p, int q, float max_val) {
 
 
 float*** create_empty_matrix(int n, int p, int q) {
-    float*** matrix = (float***)malloc(n*sizeof(float**));
+    float*** matrix = (float***)nalloc(n*sizeof(float**));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float**)malloc(sizeof(float*)*p);
+        matrix[i] = (float**)nalloc(sizeof(float*)*p);
         for (int j=0; j < p; j++) {
-            matrix[i][j] = (float*)malloc(sizeof(float)*q);
+            matrix[i][j] = (float*)nalloc(sizeof(float)*q);
             for (int k=0; k < q; k++) {
                 matrix[i][j][k] = 0.;
             }
@@ -71,11 +71,11 @@ float*** create_empty_matrix(int n, int p, int q) {
 void free_matrix(float*** matrix, int n, int p) {
     for (int i=0; i < n; i++) {
         for (int j=0; j < p; j++) {
-            free(matrix[i][j]);
+            gree(matrix[i][j]);
         }
-        free(matrix[i]);
+        gree(matrix[i]);
     }
-    free(matrix);
+    gree(matrix);
 }
 
 bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int acceptation) {
@@ -97,7 +97,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     int k_size = input_dim - output_dim +1;
 
     // Génération des données aléatoires
-    Kernel_cnn* kernel = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
+    Kernel_cnn* kernel = (Kernel_cnn*)nalloc(sizeof(Kernel_cnn));
     
     kernel->k_size = k_size;
     kernel->rows = rows;
@@ -108,8 +108,8 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
 
     // w[rows][columns][k_size][k_size]
-    kernel->w = (float****)malloc(sizeof(float***)*kernel->rows);
-    kernel->d_w = (float****)malloc(sizeof(float***)*kernel->rows);
+    kernel->w = (float****)nalloc(sizeof(float***)*kernel->rows);
+    kernel->d_w = (float****)nalloc(sizeof(float***)*kernel->rows);
     for (int i=0; i < kernel->rows; i++) {
         kernel->w[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 15.0f);
         kernel->d_w[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
@@ -156,8 +156,8 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
         free_matrix(kernel->w[i], kernel->columns, kernel->k_size);
         free_matrix(kernel->d_w[i], kernel->columns, kernel->k_size);
     }
-    free(kernel->w);
-    free(kernel->d_w);
+    gree(kernel->w);
+    gree(kernel->d_w);
 
     free_matrix(input, kernel->rows, input_dim);
     free_matrix(output_cpu, kernel->columns, output_dim);

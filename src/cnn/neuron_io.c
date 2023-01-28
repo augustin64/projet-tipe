@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "../include/colors.h"
+#include "../include/utils.h"
 #include "include/neuron_io.h"
 #include "include/struct.h"
 
@@ -130,7 +131,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
 
 Network* read_network(char* filename) {
     FILE *ptr;
-    Network* network = (Network*)malloc(sizeof(Network));
+    Network* network = (Network*)nalloc(sizeof(Network));
 
     ptr = fopen(filename, "rb");
 
@@ -156,8 +157,8 @@ Network* read_network(char* filename) {
     network->dropout = dropout;
 
     // Lecture de la taille de l'entrée des différentes matrices
-    network->width = (int*)malloc(sizeof(int)*size);
-    network->depth = (int*)malloc(sizeof(int)*size);
+    network->width = (int*)nalloc(sizeof(int)*size);
+    network->depth = (int*)nalloc(sizeof(int)*size);
 
     for (int i=0; i < (int)size; i++) {
         fread(&tmp, sizeof(uint32_t), 1, ptr);
@@ -175,19 +176,19 @@ Network* read_network(char* filename) {
     }
 
     // Lecture de chaque couche
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(size-1));
+    network->kernel = (Kernel**)nalloc(sizeof(Kernel*)*(size-1));
 
     for (int i=0; i < (int)size-1; i++) {
         network->kernel[i] = read_kernel(type_couche[i], network->width[i+1], ptr);
     }
 
-    network->input = (float****)malloc(sizeof(float***)*size);
+    network->input = (float****)nalloc(sizeof(float***)*size);
     for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
-        network->input[i] = (float***)malloc(sizeof(float**)*network->depth[i]);
+        network->input[i] = (float***)nalloc(sizeof(float**)*network->depth[i]);
         for (int j=0; j < network->depth[i]; j++) {
-            network->input[i][j] = (float**)malloc(sizeof(float*)*network->width[i]);
+            network->input[i][j] = (float**)nalloc(sizeof(float*)*network->width[i]);
             for (int k=0; k < network->width[i]; k++) {
-                network->input[i][j][k] = (float*)malloc(sizeof(float)*network->width[i]);
+                network->input[i][j][k] = (float*)nalloc(sizeof(float)*network->width[i]);
                 for (int l=0; l < network->width[i]; l++) {
                     network->input[i][j][k][l] = 0.;
                 }
@@ -195,13 +196,13 @@ Network* read_network(char* filename) {
         }
     }
 
-    network->input_z = (float****)malloc(sizeof(float***)*size);
+    network->input_z = (float****)nalloc(sizeof(float***)*size);
     for (int i=0; i < (int)size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
-        network->input_z[i] = (float***)malloc(sizeof(float**)*network->depth[i]);
+        network->input_z[i] = (float***)nalloc(sizeof(float**)*network->depth[i]);
         for (int j=0; j < network->depth[i]; j++) {
-            network->input_z[i][j] = (float**)malloc(sizeof(float*)*network->width[i]);
+            network->input_z[i][j] = (float**)nalloc(sizeof(float*)*network->width[i]);
             for (int k=0; k < network->width[i]; k++) {
-                network->input_z[i][j][k] = (float*)malloc(sizeof(float)*network->width[i]);
+                network->input_z[i][j][k] = (float*)nalloc(sizeof(float)*network->width[i]);
                 for (int l=0; l < network->width[i]; l++) {
                     network->input_z[i][j][k][l] = 0.;
                 }
@@ -214,10 +215,10 @@ Network* read_network(char* filename) {
 }
 
 Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
-    Kernel* kernel = (Kernel*)malloc(sizeof(Kernel));
+    Kernel* kernel = (Kernel*)nalloc(sizeof(Kernel));
     if (type_couche == 0) { // Cas du CNN
         // Lecture du "Pré-corps"
-        kernel->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
+        kernel->cnn = (Kernel_cnn*)nalloc(sizeof(Kernel_cnn));
         kernel->nn = NULL;
         uint32_t buffer[5];
         fread(&buffer, sizeof(buffer), 1, ptr);
@@ -232,14 +233,14 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         Kernel_cnn* cnn = kernel->cnn;
         float tmp;
 
-        cnn->bias = (float***)malloc(sizeof(float**)*cnn->columns);
-        cnn->d_bias = (float***)malloc(sizeof(float**)*cnn->columns);
+        cnn->bias = (float***)nalloc(sizeof(float**)*cnn->columns);
+        cnn->d_bias = (float***)nalloc(sizeof(float**)*cnn->columns);
         for (int i=0; i < cnn->columns; i++) {
-            cnn->bias[i] = (float**)malloc(sizeof(float*)*output_dim);
-            cnn->d_bias[i] = (float**)malloc(sizeof(float*)*output_dim);
+            cnn->bias[i] = (float**)nalloc(sizeof(float*)*output_dim);
+            cnn->d_bias[i] = (float**)nalloc(sizeof(float*)*output_dim);
             for (int j=0; j < output_dim; j++) {
-                cnn->bias[i][j] = (float*)malloc(sizeof(float)*output_dim);
-                cnn->d_bias[i][j] = (float*)malloc(sizeof(float)*output_dim);
+                cnn->bias[i][j] = (float*)nalloc(sizeof(float)*output_dim);
+                cnn->d_bias[i][j] = (float*)nalloc(sizeof(float)*output_dim);
                 for (int k=0; k < output_dim; k++) {
                     fread(&tmp, sizeof(tmp), 1, ptr);
                     cnn->bias[i][j][k] = tmp;
@@ -248,17 +249,17 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             }
         }
 
-        cnn->w = (float****)malloc(sizeof(float***)*cnn->rows);
-        cnn->d_w = (float****)malloc(sizeof(float***)*cnn->rows);
+        cnn->w = (float****)nalloc(sizeof(float***)*cnn->rows);
+        cnn->d_w = (float****)nalloc(sizeof(float***)*cnn->rows);
         for (int i=0; i < cnn->rows; i++) {
-            cnn->w[i] = (float***)malloc(sizeof(float**)*cnn->columns);
-            cnn->d_w[i] = (float***)malloc(sizeof(float**)*cnn->columns);
+            cnn->w[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
+            cnn->d_w[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
             for (int j=0; j < cnn->columns; j++) {
-                cnn->w[i][j] = (float**)malloc(sizeof(float*)*cnn->k_size);
-                cnn->d_w[i][j] = (float**)malloc(sizeof(float*)*cnn->k_size);
+                cnn->w[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
+                cnn->d_w[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
                 for (int k=0; k < cnn->k_size; k++) {
-                    cnn->w[i][j][k] = (float*)malloc(sizeof(float)*cnn->k_size);
-                    cnn->d_w[i][j][k] = (float*)malloc(sizeof(float)*cnn->k_size);
+                    cnn->w[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
+                    cnn->d_w[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
                     for (int l=0; l < cnn->k_size; l++) {
                         fread(&tmp, sizeof(tmp), 1, ptr);
                         cnn->w[i][j][k][l] = tmp;
@@ -269,7 +270,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         }
     } else if (type_couche == 1) { // Cas du NN
         // Lecture du "Pré-corps"
-        kernel->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
+        kernel->nn = (Kernel_nn*)nalloc(sizeof(Kernel_nn));
         kernel->cnn = NULL;
         uint32_t buffer[4];
         fread(&buffer, sizeof(buffer), 1, ptr);
@@ -283,19 +284,19 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         Kernel_nn* nn = kernel->nn;
         float tmp;
 
-        nn->bias = (float*)malloc(sizeof(float)*nn->output_units);
-        nn->d_bias = (float*)malloc(sizeof(float)*nn->output_units);
+        nn->bias = (float*)nalloc(sizeof(float)*nn->output_units);
+        nn->d_bias = (float*)nalloc(sizeof(float)*nn->output_units);
         for (int i=0; i < nn->output_units; i++) {
             fread(&tmp, sizeof(tmp), 1, ptr);
             nn->bias[i] = tmp;
             nn->d_bias[i] = 0.;
         }
 
-        nn->weights = (float**)malloc(sizeof(float*)*nn->input_units);
-        nn->d_weights = (float**)malloc(sizeof(float*)*nn->input_units);
+        nn->weights = (float**)nalloc(sizeof(float*)*nn->input_units);
+        nn->d_weights = (float**)nalloc(sizeof(float*)*nn->input_units);
         for (int i=0; i < nn->input_units; i++) {
-            nn->weights[i] = (float*)malloc(sizeof(float)*nn->output_units);
-            nn->d_weights[i] = (float*)malloc(sizeof(float)*nn->output_units);
+            nn->weights[i] = (float*)nalloc(sizeof(float)*nn->output_units);
+            nn->d_weights[i] = (float*)nalloc(sizeof(float)*nn->output_units);
             for (int j=0; j < nn->output_units; j++) {
                 fread(&tmp, sizeof(tmp), 1, ptr);
                 nn->weights[i][j] = tmp;

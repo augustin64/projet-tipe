@@ -3,6 +3,7 @@
 
 #include "include/initialisation.h"
 #include "include/function.h"
+#include "../include/utils.h"
 
 #include "include/creation.h"
 
@@ -10,19 +11,19 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     if (dropout < 0 || dropout > 100) {
         printf("Erreur, la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
-    Network* network = (Network*)malloc(sizeof(Network));
+    Network* network = (Network*)nalloc(sizeof(Network));
     network->learning_rate = learning_rate;
     network->max_size = max_size;
     network->dropout = dropout;
     network->initialisation = initialisation;
     network->size = 1;
-    network->input = (float****)malloc(sizeof(float***)*max_size);
-    network->input_z = (float****)malloc(sizeof(float***)*max_size);
-    network->kernel = (Kernel**)malloc(sizeof(Kernel*)*(max_size-1));
-    network->width = (int*)malloc(sizeof(int*)*max_size);
-    network->depth = (int*)malloc(sizeof(int*)*max_size);
+    network->input = (float****)nalloc(sizeof(float***)*max_size);
+    network->input_z = (float****)nalloc(sizeof(float***)*max_size);
+    network->kernel = (Kernel**)nalloc(sizeof(Kernel*)*(max_size-1));
+    network->width = (int*)nalloc(sizeof(int*)*max_size);
+    network->depth = (int*)nalloc(sizeof(int*)*max_size);
     for (int i=0; i < max_size-1; i++) {
-        network->kernel[i] = (Kernel*)malloc(sizeof(Kernel));
+        network->kernel[i] = (Kernel*)nalloc(sizeof(Kernel));
     }
     network->width[0] = input_dim;
     network->depth[0] = input_depth;
@@ -57,11 +58,11 @@ Network* create_simple_one(float learning_rate, int dropout, int activation, int
 }
 
 void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
-    network->input[pos] = (float***)malloc(sizeof(float**)*depth);
+    network->input[pos] = (float***)nalloc(sizeof(float**)*depth);
     for (int i=0; i < depth; i++) {
-        network->input[pos][i] = (float**)malloc(sizeof(float*)*dim);
+        network->input[pos][i] = (float**)nalloc(sizeof(float*)*dim);
         for (int j=0; j < dim; j++) {
-            network->input[pos][i][j] = (float*)malloc(sizeof(float)*dim);
+            network->input[pos][i][j] = (float*)nalloc(sizeof(float)*dim);
         }
     }
     network->width[pos] = dim;
@@ -69,11 +70,11 @@ void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
 }
 
 void create_a_cube_input_z_layer(Network* network, int pos, int depth, int dim) {
-    network->input_z[pos] = (float***)malloc(sizeof(float**)*depth);
+    network->input_z[pos] = (float***)nalloc(sizeof(float**)*depth);
     for (int i=0; i < depth; i++) {
-        network->input_z[pos][i] = (float**)malloc(sizeof(float*)*dim);
+        network->input_z[pos][i] = (float**)nalloc(sizeof(float*)*dim);
         for (int j=0; j < dim; j++) {
-            network->input_z[pos][i][j] = (float*)malloc(sizeof(float)*dim);
+            network->input_z[pos][i][j] = (float*)nalloc(sizeof(float)*dim);
         }
     }
     network->width[pos] = dim;
@@ -81,17 +82,17 @@ void create_a_cube_input_z_layer(Network* network, int pos, int depth, int dim) 
 }
 
 void create_a_line_input_layer(Network* network, int pos, int dim) {
-    network->input[pos] = (float***)malloc(sizeof(float**));
-    network->input[pos][0] = (float**)malloc(sizeof(float*));
-    network->input[pos][0][0] = (float*)malloc(sizeof(float)*dim);
+    network->input[pos] = (float***)nalloc(sizeof(float**));
+    network->input[pos][0] = (float**)nalloc(sizeof(float*));
+    network->input[pos][0][0] = (float*)nalloc(sizeof(float)*dim);
     network->width[pos] = dim;
     network->depth[pos] = 1;
 }
 
 void create_a_line_input_z_layer(Network* network, int pos, int dim) {
-    network->input_z[pos] = (float***)malloc(sizeof(float**));
-    network->input_z[pos][0] = (float**)malloc(sizeof(float*));
-    network->input_z[pos][0][0] = (float*)malloc(sizeof(float)*dim);
+    network->input_z[pos] = (float***)nalloc(sizeof(float**));
+    network->input_z[pos][0] = (float**)nalloc(sizeof(float*));
+    network->input_z[pos][0][0] = (float*)nalloc(sizeof(float)*dim);
     network->width[pos] = dim;
     network->depth[pos] = 1;
 }
@@ -132,34 +133,40 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 0;
-    network->kernel[k_pos]->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
+    network->kernel[k_pos]->cnn = (Kernel_cnn*)nalloc(sizeof(Kernel_cnn));
     Kernel_cnn* cnn = network->kernel[k_pos]->cnn;
 
     cnn->k_size = kernel_size;
     cnn->rows = depth_input;
     cnn->columns = depth_output;
-    cnn->w = (float****)malloc(sizeof(float***)*depth_input);
-    cnn->d_w = (float****)malloc(sizeof(float***)*depth_input);
+    cnn->w = (float****)nalloc(sizeof(float***)*depth_input);
+    cnn->d_w = (float****)nalloc(sizeof(float***)*depth_input);
     for (int i=0; i < depth_input; i++) {
-        cnn->w[i] = (float***)malloc(sizeof(float**)*depth_output);
-        cnn->d_w[i] = (float***)malloc(sizeof(float**)*depth_output);
+        cnn->w[i] = (float***)nalloc(sizeof(float**)*depth_output);
+        cnn->d_w[i] = (float***)nalloc(sizeof(float**)*depth_output);
         for (int j=0; j < depth_output; j++) {
-            cnn->w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
-            cnn->d_w[i][j] = (float**)malloc(sizeof(float*)*kernel_size);
+            cnn->w[i][j] = (float**)nalloc(sizeof(float*)*kernel_size);
+            cnn->d_w[i][j] = (float**)nalloc(sizeof(float*)*kernel_size);
             for (int k=0; k < kernel_size; k++) {
-                cnn->w[i][j][k] = (float*)malloc(sizeof(float)*kernel_size);
-                cnn->d_w[i][j][k] = (float*)calloc(kernel_size, sizeof(float));
+                cnn->w[i][j][k] = (float*)nalloc(sizeof(float)*kernel_size);
+                cnn->d_w[i][j][k] = (float*)nalloc(sizeof(float)*kernel_size);
+                for (int l=0; l < kernel_size; l++) {
+                    cnn->d_w[i][j][k][l] = 0.;
+                }
             }
         }
     }
-    cnn->bias = (float***)malloc(sizeof(float**)*depth_output);
-    cnn->d_bias = (float***)malloc(sizeof(float**)*depth_output);
+    cnn->bias = (float***)nalloc(sizeof(float**)*depth_output);
+    cnn->d_bias = (float***)nalloc(sizeof(float**)*depth_output);
     for (int i=0; i < depth_output; i++) {
-        cnn->bias[i] = (float**)malloc(sizeof(float*)*bias_size);
-        cnn->d_bias[i] = (float**)malloc(sizeof(float*)*bias_size);
+        cnn->bias[i] = (float**)nalloc(sizeof(float*)*bias_size);
+        cnn->d_bias[i] = (float**)nalloc(sizeof(float*)*bias_size);
         for (int j=0; j < bias_size; j++) {
-            cnn->bias[i][j] = (float*)malloc(sizeof(float)*bias_size);
-            cnn->d_bias[i][j] = (float*)calloc(bias_size, sizeof(float));
+            cnn->bias[i][j] = (float*)nalloc(sizeof(float)*bias_size);
+            cnn->d_bias[i][j] = (float*)nalloc(sizeof(float)*bias_size);
+            for (int k=0; k < bias_size; k++) {
+                cnn->d_bias[i][j][k] = 0.;
+            }
         }
     }
     int n_in = network->width[n-1]*network->width[n-1]*network->depth[n-1];
@@ -180,20 +187,29 @@ void add_dense(Network* network, int output_units, int activation) {
         return;
     }
     network->kernel[k_pos]->cnn = NULL;
-    network->kernel[k_pos]->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
+    network->kernel[k_pos]->nn = (Kernel_nn*)nalloc(sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 0;
+
     nn->input_units = input_units;
     nn->output_units = output_units;
-    nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)calloc(output_units, sizeof(float));
-    nn->weights = (float**)malloc(sizeof(float*)*input_units);
-    nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
-    for (int i=0; i < input_units; i++) {
-        nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
+    nn->bias = (float*)nalloc(sizeof(float)*output_units);
+    nn->d_bias = (float*)nalloc(sizeof(float)*output_units);
+    for (int i=0; i < output_units; i++) {
+        nn->d_bias[i] = 0.;
     }
+
+    nn->weights = (float**)nalloc(sizeof(float*)*input_units);
+    nn->d_weights = (float**)nalloc(sizeof(float*)*input_units);
+    for (int i=0; i < input_units; i++) {
+        nn->weights[i] = (float*)nalloc(sizeof(float)*output_units);
+        nn->d_weights[i] = (float*)nalloc(sizeof(float)*output_units);
+        for (int j=0; j < output_units; j++) {
+            nn->d_weights[i][j] = 0.;
+        }
+    }
+
     initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
     create_a_line_input_layer(network, n, output_units);
@@ -212,20 +228,26 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
         return;
     }
     network->kernel[k_pos]->cnn = NULL;
-    network->kernel[k_pos]->nn = (Kernel_nn*)malloc(sizeof(Kernel_nn));
+    network->kernel[k_pos]->nn = (Kernel_nn*)nalloc(sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 1;
     nn->input_units = input_units;
     nn->output_units = output_units;
 
-    nn->bias = (float*)malloc(sizeof(float)*output_units);
-    nn->d_bias = (float*)calloc(output_units, sizeof(float));
-    nn->weights = (float**)malloc(sizeof(float*)*input_units);
-    nn->d_weights = (float**)malloc(sizeof(float*)*input_units);
+    nn->bias = (float*)nalloc(sizeof(float)*output_units);
+    nn->d_bias = (float*)nalloc(sizeof(float)*output_units);
+    for (int i=0; i < output_units; i++) {
+        nn->d_bias[i] = 0.;
+    }
+    nn->weights = (float**)nalloc(sizeof(float*)*input_units);
+    nn->d_weights = (float**)nalloc(sizeof(float*)*input_units);
     for (int i=0; i < input_units; i++) {
-        nn->weights[i] = (float*)malloc(sizeof(float)*output_units);
-        nn->d_weights[i] = (float*)calloc(output_units, sizeof(float));
+        nn->weights[i] = (float*)nalloc(sizeof(float)*output_units);
+        nn->d_weights[i] = (float*)nalloc(sizeof(float)*output_units);
+        for (int j=0; j < output_units; j++) {
+            nn->d_weights[i][j] = 0.;
+        }
     }
     initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "../include/utils.h"
+
 #include "include/jpeg.h"
 
 
@@ -36,11 +38,11 @@ void preview_images(char* path, int limit) {
         if (!dataset->images[i]) {
             image = loadJpegImageFile(dataset->fileNames[i]);
             dataset->images[i] = image->lpData;
-            free(image);
+            gree(image);
         }
         print_image(dataset->images[i], dataset->height, dataset->width);
 
-        free(dataset->images[i]);
+        gree(dataset->images[i]);
     }
 }
 

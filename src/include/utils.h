@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include <stdbool.h>
+#ifdef USE_CUDA
+   #include "cuda_runtime.h"
+#endif
+
 #ifndef DEF_UTILS_CU_H
 #define DEF_UTILS_CU_H
 
@@ -22,4 +28,8 @@ int i_div_up(int a, int b);
 */
 bool check_cuda_compatibility();
 
+
+void* nalloc(size_t sz);
+
+void gree(void* ptr);
 #endif

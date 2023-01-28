@@ -11,6 +11,7 @@
 #include "include/initialisation.h"
 #include "include/neuron_io.h"
 #include "../include/colors.h"
+#include "../include/utils.h"
 #include "include/function.h"
 #include "include/creation.h"
 #include "include/update.h"
@@ -70,7 +71,7 @@ void* train_thread(void* parameters) {
             if (!param->dataset->images[index[i]]) {
                 image = loadJpegImageFile(param->dataset->fileNames[index[i]]);
                 param->dataset->images[index[i]] = image->lpData;
-                free(image);
+                gree(image);
             }
             write_image_in_network_260(param->dataset->images[index[i]], height, width, network->input[0]);
             forward_propagation(network);
@@ -81,7 +82,7 @@ void* train_thread(void* parameters) {
                 accuracy += 1.;
             }
 
-            free(param->dataset->images[index[i]]);
+            gree(param->dataset->images[index[i]]);
             param->dataset->images[index[i]] = NULL;
         }
     }
@@ -123,7 +124,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         // Chargement des images du set de données MNIST
         int* parameters = read_mnist_images_parameters(images_file);
         nb_images_total = parameters[0];
-        free(parameters);
+        gree(parameters);
 
         images = read_mnist_images(images_file);
         labels = read_mnist_labels(labels_file);
@@ -191,7 +192,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     // thread dans l'hypothèse ou le multi-threading n'est pas utilisé.
     // Cela est utile à des fins de débogage notamment,
     // où l'utilisation de threads rend vite les choses plus compliquées qu'elles ne le sont.
-    TrainParameters* train_params = (TrainParameters*)malloc(sizeof(TrainParameters));
+    TrainParameters* train_params = (TrainParameters*)nalloc(sizeof(TrainParameters));
 
     train_params->network = network;
     train_params->dataset_type = dataset_type;
@@ -283,7 +284,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                     }
                 }
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
-                printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.2f%%"RESET, nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.2f%%" RESET, nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
                 fflush(stdout);
             #else
                 (void)nb_images_total_remaining; // Juste pour enlever un warning
@@ -315,7 +316,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         end_time = omp_get_wtime();
         elapsed_time = end_time - start_time;
         #ifdef USE_MULTITHREADING
-        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.4f%%"RESET" \tTemps: %0.2f s\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: %0.2f s\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
         #else
         printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.4f%%"RESET" \tTemps: %0.2f s\n", i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
         #endif
@@ -332,7 +333,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     #ifdef USE_MULTITHREADING
     free(tid);
     for (int i=0; i < nb_threads; i++) {
-        free(train_parameters[i]->network);
+        free_network(train_parameters[i]->network);
     }
     free(train_parameters);
     #else
@@ -342,12 +343,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     if (dataset_type == 0) {
         for (int i=0; i < nb_images_total; i++) {
             for (int j=0; j < 28; j++) {
-                free(images[i][j]);
+                gree(images[i][j]);
             }
-            free(images[i]);
+            gree(images[i]);
         }
-        free(images);
-        free(labels);
+        gree(images);
+        gree(labels);
     } else {
         free_dataset(dataset);
     }

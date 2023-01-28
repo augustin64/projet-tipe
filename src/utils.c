@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
+#ifdef USE_CUDA
+    #include "cuda_runtime.h"
+#endif
 #include "include/utils.h"
 #include "include/colors.h"
 
@@ -36,7 +40,7 @@ bool check_cuda_compatibility() {
     #endif
 }
 
-#ifndef __CUDACC__
+#ifndef USE_CUDA
 
 void* nalloc(size_t sz) {
     void* ptr = malloc(sz);

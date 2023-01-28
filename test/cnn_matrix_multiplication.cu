@@ -37,9 +37,9 @@ void print_matrix(float** mat, int n, int p) {
 
 
 float** create_matrix(int n, int p) {
-    float** matrix = (float**)malloc(n*sizeof(float*));
+    float** matrix = (float**)nalloc(n*sizeof(float*));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float*)malloc(sizeof(float)*p);
+        matrix[i] = (float*)nalloc(sizeof(float)*p);
     }
 
     fill_matrix_random(matrix, n, p);
@@ -48,9 +48,9 @@ float** create_matrix(int n, int p) {
 
 
 float** create_empty_matrix(int n, int p) {
-    float** matrix = (float**)malloc(n*sizeof(float*));
+    float** matrix = (float**)nalloc(n*sizeof(float*));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float*)malloc(p*sizeof(float));
+        matrix[i] = (float*)nalloc(p*sizeof(float));
         for (int j=0; j < p; j++) {
             matrix[i][j] = 0.;
         }
@@ -103,24 +103,24 @@ void run_matrices_test(int n, int p, int q) {
 
     // On libère l'espace mémoire alloué
     for (int i=0; i < n; i++) {
-        free(matrix1[i]);
+        gree(matrix1[i]);
     }
-    free(matrix1);
+    gree(matrix1);
 
     for (int i=0; i < p; i++) {
-        free(matrix2[i]);
+        gree(matrix2[i]);
     }
-    free(matrix2);
+    gree(matrix2);
 
     for (int i=0; i < n; i++) {
-        free(result_cpu[i]);
+        gree(result_cpu[i]);
     }
-    free(result_cpu);
+    gree(result_cpu);
 
     for (int i=0; i < n; i++) {
-        free(result_gpu[i]);
+        gree(result_gpu[i]);
     }
-    free(result_gpu);
+    gree(result_gpu);
 }
 
 

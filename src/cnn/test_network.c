@@ -5,6 +5,7 @@
 
 #include "../mnist/include/mnist.h"
 #include "include/neuron_io.h"
+#include "../include/utils.h"
 #include "include/struct.h"
 #include "include/jpeg.h"
 #include "include/free.h"
@@ -29,7 +30,7 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
 
     width = mnist_parameters[1];
     height = mnist_parameters[2];
-    free(mnist_parameters);
+    gree(mnist_parameters);
 
     // Load image in the first layer of the Network
     for (int i=0; i < nb_elem; i++) {
@@ -46,11 +47,11 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
         }
 
         for (int j=0; j < height; j++) {
-            free(images[i][j]);
+            gree(images[i][j]);
         }
-        free(images[i]);
+        gree(images[i]);
     }
-    free(images);
+    gree(images);
     printf("%d Images. Taux de réussite: %.2f%%\n", nb_elem, 100*accuracy/(float)nb_elem);
 }
 
@@ -75,13 +76,13 @@ void test_network_jpg(Network* network, char* data_dir, bool preview_fails) {
             accuracy++;
         }
 
-        free(dataset->images[i]);
+        gree(dataset->images[i]);
     }
 
     printf("%d Images. Taux de réussite: %.2f%%\n", dataset->numImages, 100*accuracy/(float)dataset->numImages);
-    free(dataset->images);
-    free(dataset->labels);
-    free(dataset);
+    gree(dataset->images);
+    gree(dataset->labels);
+    gree(dataset);
 }
 
 
@@ -109,7 +110,7 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
 
     width = mnist_parameters[1];
     height = mnist_parameters[2];
-    free(mnist_parameters);
+    gree(mnist_parameters);
 
     if (! strcmp(out, "json")) {
         printf("{\n");
@@ -147,15 +148,15 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
         }
 
         for (int j=0; j < height; j++) {
-            free(images[i][j]);
+            gree(images[i][j]);
         }
-        free(images[i]);
+        gree(images[i]);
     }
     if (! strcmp(out, "json")) {
         printf("}\n");
     }
 
-    free(images);
+    gree(images);
 }
 
 void recognize_jpg(Network* network, char* input_file, char* out) {
@@ -194,8 +195,8 @@ void recognize_jpg(Network* network, char* input_file, char* out) {
         printf("}\n");
     }
 
-    free(image->lpData);
-    free(image);
+    gree(image->lpData);
+    gree(image);
 }
 
 void recognize(int dataset_type, char* modele, char* input_file, char* out) {
