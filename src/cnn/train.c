@@ -98,6 +98,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     bool compatibility = check_cuda_compatibility();
     if (!compatibility) {
         printf("Exiting.\n");
+        exit(1);
     }
     #endif
     srand(time(NULL));
