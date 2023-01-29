@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
-
 #ifdef USE_CUDA
-    #include "cuda_runtime.h"
+    #ifndef __CUDACC__
+        #include "cuda_runtime.h"
+    #endif
 #endif
+
 #include "include/utils.h"
 #include "include/colors.h"
 
@@ -13,6 +14,9 @@ int i_div_up(int a, int b) { // Partie entière supérieure de a/b
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
+#ifdef __CUDACC__
+extern "C" {
+#endif
 bool check_cuda_compatibility() {
     #ifdef __CUDACC__
     int nDevices;
@@ -39,28 +43,52 @@ bool check_cuda_compatibility() {
     return false;
     #endif
 }
+#ifdef __CUDACC__
+}
+#endif
+
 
 #ifndef USE_CUDA
+    #ifdef __CUDACC__
+    extern "C" {
+    #endif
+    void* nalloc(size_t sz) {
+        void* ptr = malloc(sz);
+        return ptr;
+    }
+    #ifdef __CUDACC__
+    }
+    #endif
 
-void* nalloc(size_t sz) {
-    void* ptr = malloc(sz);
-    return ptr;
-}
-
-void gree(void* ptr) {
-    free(ptr);
-}
-
+    #ifdef __CUDACC__
+    extern "C" {
+    #endif
+    void gree(void* ptr) {
+        free(ptr);
+    }
+    #ifdef __CUDACC__
+    }
+    #endif
 #else
+    #ifdef __CUDACC__
+    extern "C" {
+    #endif
+    void* nalloc(size_t sz) {
+        void* ptr;
+        cudaMallocManaged(&ptr, sz, cudaMemAttachHost);
+        return ptr;
+    }
+    #ifdef __CUDACC__
+    }
+    #endif
 
-void* nalloc(size_t sz) {
-    void* ptr;
-    cudaMallocManaged(&ptr, sz, cudaMemAttachHost);
-    return ptr;
-}
-
-void gree(void* ptr) {
-    cudaFree(ptr);
-}
-
+    #ifdef __CUDACC__
+    extern "C" {
+    #endif
+    void gree(void* ptr) {
+        cudaFree(ptr);
+    }
+    #ifdef __CUDACC__
+    }
+    #endif
 #endif

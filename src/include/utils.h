@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include <stdbool.h>
+
 #ifdef USE_CUDA
-   #include "cuda_runtime.h"
+   #ifndef __CUDACC__
+      #include "cuda_runtime.h"
+   #endif
+#else
+    #ifdef __CUDACC__
+        #define USE_CUDA
+    #endif
 #endif
 
 #ifndef DEF_UTILS_CU_H
@@ -26,10 +33,28 @@ int i_div_up(int a, int b);
 /*
 * Vérification de la compatibilité CUDA
 */
+#ifdef __CUDACC__
+extern "C" {
+#endif
 bool check_cuda_compatibility();
+#ifdef __CUDACC__
+}
+#endif
 
-
+#ifdef __CUDACC__
+extern "C" {
+#endif
 void* nalloc(size_t sz);
+#ifdef __CUDACC__
+}
+#endif
 
+#ifdef __CUDACC__
+extern "C" {
+#endif
 void gree(void* ptr);
+#ifdef __CUDACC__
+}
+#endif
+
 #endif

@@ -2,6 +2,7 @@ BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./cache
 NVCC         := nvcc
+CUDA_INCLUDE := /opt/cuda/include # Default instalmlation path for ArchLinux, may be different
 
 NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 
@@ -59,7 +60,7 @@ $(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/mnist.cuda.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
-	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I$(CUDA_INCLUDE)
 
 $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
@@ -94,21 +95,20 @@ ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_train.cuda.o \
 		$(BUILDDIR)/cnn_test_network.cuda.o \
-		$(BUILDDIR)/cnn_cnn.cuda.o \
+		$(BUILDDIR)/cnn_cnn.o \
 		$(BUILDDIR)/cnn_creation.cuda.o \
-		$(BUILDDIR)/cnn_initialisation.cuda.o \
-		$(BUILDDIR)/cnn_make.cuda.o \
+		$(BUILDDIR)/cnn_initialisation.o \
+		$(BUILDDIR)/cnn_make.o \
 		$(BUILDDIR)/cnn_neuron_io.cuda.o \
-		$(BUILDDIR)/cnn_function.cuda.o  \
+		$(BUILDDIR)/cnn_function.o  \
 		$(BUILDDIR)/cnn_utils.cuda.o \
-		$(BUILDDIR)/cnn_update.cuda.o \
+		$(BUILDDIR)/cnn_update.o \
 		$(BUILDDIR)/cnn_free.cuda.o \
 		$(BUILDDIR)/cnn_jpeg.cuda.o \
 		$(BUILDDIR)/cnn_cuda_convolution.o \
-		$(BUILDDIR)/cnn_backpropagation.cuda.o \
-		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/cnn_backpropagation.o \
+		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.cuda.o \
-		$(BUILDDIR)/utils.cuda.o \
 		$(BUILDDIR)/cuda_utils.o
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 else
@@ -123,7 +123,7 @@ $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn_%.cuda.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
-	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I$(CUDA_INCLUDE)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
@@ -139,7 +139,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
 $(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
-	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I/opt/cuda/include
+	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I$(CUDA_INCLUDE)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
@@ -173,7 +173,7 @@ ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
 		$(BUILDDIR)/cnn_cuda_%.o \
 		$(BUILDDIR)/cuda_utils.o \
-		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.cuda.o
 	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
 else

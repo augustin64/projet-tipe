@@ -94,6 +94,12 @@ void* train_thread(void* parameters) {
 
 
 void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover) {
+    #ifdef USE_CUDA
+    bool compatibility = check_cuda_compatibility();
+    if (!compatibility) {
+        printf("Exiting.\n");
+    }
+    #endif
     srand(time(NULL));
     Network* network;
     int input_dim = -1;
