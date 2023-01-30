@@ -40,6 +40,11 @@ void create_a_line_input_layer(Network* network, int pos, int dim);
 void add_2d_average_pooling(Network* network, int dim_output);
 
 /*
+* Ajoute au réseau une couche de max pooling valide de dimension dim*dim
+*/
+void add_2d_max_pooling(Network* network, int dim_output);
+
+/*
 * Ajoute au réseau une couche de convolution dim*dim et initialise les kernels
 */
 void add_convolution(Network* network, int depth_output, int dim_output, int activation);

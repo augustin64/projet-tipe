@@ -76,7 +76,7 @@ void write_image_in_network_260(unsigned char* image, int height, int width, flo
 }
 
 void forward_propagation(Network* network) {
-    int activation, input_depth, input_width, output_depth, output_width;
+    int activation, pooling, input_depth, input_width, output_depth, output_width;
     int n = network->size;
     float*** input;
     float*** output;
@@ -93,6 +93,7 @@ void forward_propagation(Network* network) {
         output_depth = network->depth[i+1];
         output_width = network->width[i+1];
         activation = k_i->activation;
+        pooling = k_i->pooling;
 
         if (k_i->nn) {
             drop_neurones(input, 1, 1, input_width, network->dropout);
@@ -119,7 +120,13 @@ void forward_propagation(Network* network) {
                 printf("Le réseau ne peut pas finir par une pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
-                make_average_pooling(input, output, activation, output_depth, output_width);
+                if (pooling==1) {
+                    make_average_pooling(input, output, activation, output_depth, output_width);
+                } else if (pooling==2) {
+                    make_max_pooling(input, output, activation, output_depth, output_width);
+                } else {
+                    printf("Erreur dans la reconnaissance de la couche de pooling: %d,%d \n", pooling, i);
+                }
             }
             copy_input_to_input_z(output, output_a, output_depth, output_width, output_width);
         }

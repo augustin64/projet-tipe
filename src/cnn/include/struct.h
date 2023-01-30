@@ -25,6 +25,7 @@ typedef struct Kernel {
     Kernel_nn* nn; // NULL si ce n'est pas un nn
     int activation; // Vaut l'identifiant de la fonction d'activation
     int linearisation; // Vaut 1 si c'est la linéarisation d'une couche, 0 sinon
+    int pooling; // 0 si pas pooling, 1 si average_pooling, 2 si max_pooling
 } Kernel;
 
 

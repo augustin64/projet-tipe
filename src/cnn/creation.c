@@ -24,6 +24,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     for (int i=0; i < max_size-1; i++) {
         network->kernel[i] = (Kernel*)malloc(sizeof(Kernel));
     }
+    network->kernel[0]->linearisation = 0;
     network->width[0] = input_dim;
     network->depth[0] = input_depth;
     network->kernel[0]->nn = NULL;
@@ -36,7 +37,6 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth);
     network->kernel[0]->activation = activation;
-    network->kernel[0]->linearisation = 0;
     add_convolution(network, 6, 28, activation);
     add_2d_average_pooling(network, 14);
     add_convolution(network, 16, 10, activation);
@@ -50,7 +50,6 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     Network* network = create_network(3, learning_rate, dropout, initialisation, input_dim, input_depth);
     network->kernel[0]->activation = activation;
-    network->kernel[0]->linearisation = 0;
     add_dense_linearisation(network, 80, activation);
     add_dense(network, 10, SOFTMAX);
     return network;
@@ -112,6 +111,29 @@ void add_2d_average_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
     network->kernel[k_pos]->linearisation = 0;
+    network->kernel[k_pos]->pooling = 1;
+    create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
+    create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
+    network->size++;
+}
+
+void add_2d_max_pooling(Network* network, int dim_output) {
+    int n = network->size;
+    int k_pos = n-1;
+    int dim_input = network->width[k_pos];
+    if (network->max_size == n) {
+        printf("Impossible de rajouter une couche de max pooling, le réseau est déjà plein\n");
+        return;
+    }
+    if (dim_input%dim_output != 0) {
+        printf("Erreur de dimension dans le max pooling\n");
+        return;
+    }
+    network->kernel[k_pos]->cnn = NULL;
+    network->kernel[k_pos]->nn = NULL;
+    network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
+    network->kernel[k_pos]->linearisation = 0;
+    network->kernel[k_pos]->pooling = 2;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
     network->size++;
@@ -132,6 +154,7 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 0;
+    network->kernel[k_pos]->pooling = 0;
     network->kernel[k_pos]->cnn = (Kernel_cnn*)malloc(sizeof(Kernel_cnn));
     Kernel_cnn* cnn = network->kernel[k_pos]->cnn;
 
@@ -190,6 +213,7 @@ void add_dense(Network* network, int output_units, int activation) {
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 0;
+    network->kernel[k_pos]->pooling = 0;
     nn->input_units = input_units;
     nn->output_units = output_units;
     nn->bias = (float*)malloc(sizeof(float)*output_units);
@@ -228,6 +252,7 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 1;
+    network->kernel[k_pos]->pooling = 0;
     nn->input_units = input_units;
     nn->output_units = output_units;
 
