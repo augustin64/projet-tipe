@@ -89,7 +89,7 @@ $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.o \
 		$(BUILDDIR)/utils.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
