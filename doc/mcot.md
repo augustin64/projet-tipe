@@ -14,7 +14,7 @@ J'ai ainsi voulu tenter de concevoir un modèle rivalisant avec des experts dans
 
 ## Ancrage
 
-Les villes peuvent sembler très similaire d'un premier point de vue mais se distinguent très nettement de par leur architecture et les couleurs de l'environnement alentour, mon réseau de neurones tentera donc de déceler ces différences difficiles à établir pour un observateur humain.
+Les villes peuvent sembler très similaires d'un premier point de vue mais se distinguent très nettement de par leur architecture et les couleurs de l'environnement alentour, mon réseau de neurones tentera donc de déceler ces différences difficiles à établir pour un observateur humain.
 
 ## Positionnement thématique
 
@@ -42,10 +42,10 @@ Depuis, la majorité des algorithmes de reconnaissance d'images ont adopté la s
 Cependant, les premiers travaux sur la géolocalisation ont choisi une approche différente d'un réseau de neurones, à savoir, un algorithme des k plus proches voisins. Le but est d'utiliser les k plus proches images dans une base de données pour en déduire la localisation de l'image [4]. Mais cette approche est coûteuse en espace puisqu'elle demande de conserver une grande base de données d'images réparties sur la carte et beaucoup de calculs pour trouver les plus proches voisins.  
 C'est pour résoudre ces problèmes qu'est né le modèle PlaNet, un CNN conçu par des chercheurs chez Google. C'est une grande avancée car il est à la fois moins coûteux que l'algorithme des plus proches voisins et obtient de meilleurs résultats. Et son efficacité vient en partie de son coûteux apprentissage avec 200 coeurs de CPU qui ont été utilisés pendant 2.5 mois pour traiter les 120 millions d'images [5]. Ce travail de recherche est donc le point de départ de notre TIPE.  
 
-Ce problème est alors abordé comme un problème de classification. C'est-à-dire que l'on sépare la carte du monde en une multitude de parcelles et l'algorithme renvoie selon sa prédiction la probabilité que l'image soit dans chacune des parcelles. Les parcelles sont réparties de sorte qu'elle ait le même nombre d'images lors de l'entraînement. Pour cela il existe une BDD (Base De Données) sur lequel les algorithmes peuvent s'entrainer [6]. Pour simplifier le problème, je ne vais non pas essayer de trouver la localisation d'une image sur la Terre entière mais plutôt me concentrer sur la carte des États-unis. On obtient alors un algorithme entrainé permettant de catégoriser les images dans les différents états des Etat-Unis.
+Ce problème est alors abordé comme un problème de classification. C'est-à-dire que l'on sépare la carte du monde en une multitude de parcelles et l'algorithme renvoie selon sa prédiction la probabilité que l'image soit dans chacune des parcelles. Les parcelles sont réparties de sorte qu'elle ait le même nombre d'images lors de l'entraînement. Pour cela il existe une BDD (Base De Données) sur lequel les algorithmes peuvent s'entraîner [6]. Pour simplifier le problème, je ne vais pas essayer de trouver la localisation d'une image sur la Terre entière mais plutôt me concentrer sur la carte des États-Unis. On obtient alors un algorithme entraîné permettant de catégoriser les images dans les différents états des Etat-Unis.
 
 ## Problématique retenue 
-Est-il possible de concevoir un algorithme de géolocalisation permettant de concurrencer des humains à cette tâche tout en conservant un temps d'entrainement raisonnable ?
+Est-il possible de concevoir un algorithme de géolocalisation permettant de concurrencer des humains à cette tâche tout en conservant un temps d'entraînement raisonnable ?
 
 ## Objectifs du TIPE - Julien
 1. Mise en place d'un réseau de neurones non convolutif reconnaissant des chiffres
@@ -57,7 +57,7 @@ Est-il possible de concevoir un algorithme de géolocalisation permettant de con
 
 ## Objectifs du TIPE - Augustin
 L'objectif de ce TIPE étant de construire un réseau de neurones convolutif classifiant des villes tout en comprenant comment fonctionne la technologie derrière, je progresserai par étapes successives en réalisant dans un premier temps un réseau de neurones non convolutif classifiant uniquement des photographies de chiffres.  
-Dans un second temps, je réaliserait un réseau convolutif plus élaboré afin de classifier des images de plus haute résolution représentant des villes.
+Dans un second temps, je réaliserais un réseau convolutif plus élaboré afin de classifier des images de plus haute résolution représentant des villes.
 
 ## Références bibliographiques
 Numéro | Auteur | Titre | Informations
