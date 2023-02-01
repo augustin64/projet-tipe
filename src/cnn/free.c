@@ -27,7 +27,7 @@ void free_a_line_input_layer(Network* network, int pos) {
     gree(network->input_z[pos]);
 }
 
-void free_2d_average_pooling(Network* network, int pos) {
+void free_2d_pooling(Network* network, int pos) {
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
 }
 
@@ -125,7 +125,7 @@ void free_network(Network* network) {
                 free_dense_linearisation(network, i);
             }
         } else { // Pooling
-            free_2d_average_pooling(network, i);
+            free_2d_pooling(network, i);
         }
     }
     free_network_creation(network);

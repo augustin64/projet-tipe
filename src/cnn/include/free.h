@@ -16,9 +16,9 @@ void free_a_cube_input_layer(Network* network, int pos, int depth, int dim);
 void free_a_line_input_layer(Network* network, int pos);
 
 /*
-* Libère l'espace mémoire alloué dans 'add_2d_average_pooling' (creation.c)
+* Libère l'espace mémoire alloué dans 'add_2d_average_pooling' ou 'add_2d_max_pooling' (creation.c)
 */
-void free_2d_average_pooling(Network* network, int pos);
+void free_2d_pooling(Network* network, int pos);
 
 /*
 * Libère l'espace mémoire dans 'add_convolution' (creation.c)

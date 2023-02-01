@@ -6,8 +6,8 @@
 
 #define EPOCHS 10
 #define BATCHES 500
-#define USE_MULTITHREADING
-#define LEARNING_RATE 0.01
+//#define USE_MULTITHREADING
+#define LEARNING_RATE 0.05
 
 
 /*

@@ -82,6 +82,7 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
 
     // Weights
     int cpt = 0;
+    int nb_elem = depth_input*dim_input*dim_input*size_output;
     for (int i=0; i < depth_input; i++) {
         for (int k=0; k < dim_input; k++) {
             for (int l=0; l < dim_input; l++) {

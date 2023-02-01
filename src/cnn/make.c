@@ -1,9 +1,17 @@
 #include <stdio.h>
+#include <float.h>
 
 #include "../include/colors.h"
 #include "include/convolution.h"
 #include "include/make.h"
 
+float max_flt(float a, float b) {
+    // Return the max between the two floats
+    if (a>b) {
+        return a;
+    }
+    return b;
+}
 
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim) {
     // input[output_depth][output_dim+size-1][output_dim+size-1]
@@ -20,6 +28,25 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
                     }
                 }
                 output[i][j][k] = sum/(float)n;
+            }
+        }
+    }
+}
+
+void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim) {
+    // input[output_depth][output_dim+size-1][output_dim+size-1]
+    // output[output_depth][output_dim][output_dim]
+    float m;
+    for (int i=0; i < output_depth; i++) {
+        for (int j=0; j < output_dim; j++) {
+            for (int k=0; k < output_dim; k++) {
+                m = FLT_MIN;
+                for (int a=0; a < size; a++) {
+                    for (int b=0; b < size; b++) {
+                        m = max_flt(m, input[i][size*j +a][size*k +b]);
+                    }
+                }
+                output[i][j][k] = m;
             }
         }
     }

@@ -12,10 +12,16 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
 * Effectue la convolution sur le CPU ou GPU
 */
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim);
+
 /*
 * Effectue un average pooling avec stride=size
 */
 void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim);
+
+/*
+* Effectue un max pooling avec stride=size
+*/
+void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim);
 
 /*
 * Effectue une full connection
