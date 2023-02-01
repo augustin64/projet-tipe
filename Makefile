@@ -25,13 +25,13 @@ TESTS_SRC_CU += $(wildcard test/*.cu)
 
 TESTS_OBJ     = $(TESTS_SRC:test/%.c=$(BUILDDIR)/test-%) $(TESTS_SRC_CU:test/%.cu=$(BUILDDIR)/test-%)
 
-# Compile flags
-CFLAGS   = -std=gnu99 -lm -lpthread -ljpeg -fopenmp
-NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
+# Linker only flags
+LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
+LD_NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
 
-# Additional warning rules
-CFLAGS   += -Wall -Wextra
-NVCCFLAGS +=
+# Compilation flag
+CFLAGS    = -Wall -Wextra -std=gnu99
+NVCCFLAGS =
 # Remove warnings about unused variables, functions, ...
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
 # Compile with debug
@@ -47,13 +47,13 @@ all: mnist cnn;
 mnist: $(BUILDDIR)/mnist-main $(BUILDDIR)/mnist-utils $(BUILDDIR)/mnist-preview;
 
 $(BUILDDIR)/mnist-main: $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o
-	$(CC)     $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS)
 
 $(BUILDDIR)/mnist-utils: $(MNIST_SRCDIR)/utils.c $(BUILDDIR)/mnist_neural_network.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/mnist-preview: $(MNIST_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 # .o files
 $(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
@@ -89,7 +89,7 @@ $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.o \
 		$(BUILDDIR)/utils.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
@@ -110,14 +110,14 @@ $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.cuda.o \
 		$(BUILDDIR)/cuda_utils.o
-	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
 else
 $(BUILDDIR)/cnn-main-cuda:
 	@echo "$(NVCC) not found, skipping"
 endif
 
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
@@ -163,11 +163,11 @@ prepare-tests:
 
 
 build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
-	$(CC)     $^ -o $@  $(CFLAGS)
+	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
@@ -175,7 +175,7 @@ $(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
 		$(BUILDDIR)/cuda_utils.o \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.cuda.o
-	$(NVCC)  $(NVCCFLAGS)  $^ -o $@
+	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
 else
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu
 	@echo "$(NVCC) not found, skipping"
