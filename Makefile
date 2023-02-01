@@ -47,13 +47,13 @@ all: mnist cnn;
 mnist: $(BUILDDIR)/mnist-main $(BUILDDIR)/mnist-utils $(BUILDDIR)/mnist-preview;
 
 $(BUILDDIR)/mnist-main: $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o
-	$(CC)  $(LD_CFLAGS) $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS)
+	$(CC)  $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/mnist-utils: $(MNIST_SRCDIR)/utils.c $(BUILDDIR)/mnist_neural_network.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/mnist-preview: $(MNIST_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 # .o files
 $(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
@@ -117,7 +117,7 @@ $(BUILDDIR)/cnn-main-cuda:
 endif
 
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
@@ -163,11 +163,11 @@ prepare-tests:
 
 
 build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
 build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
-	$(CC)  $(LD_CFLAGS) $^ -o $@  $(CFLAGS)
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
