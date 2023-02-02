@@ -124,12 +124,14 @@ Network* copy_network(Network* network) {
     for (int i=0; i < size-1; i++) {
         network_cp->kernel[i] = (Kernel*)nalloc(sizeof(Kernel));
         if (!network->kernel[i]->nn && !network->kernel[i]->cnn) { // Cas de la couche de linéarisation
+            copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 1
             network_cp->kernel[i]->cnn = NULL;
             network_cp->kernel[i]->nn = NULL;
         }
         else if (!network->kernel[i]->cnn) { // Cas du NN
+            copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 0
 
@@ -161,6 +163,7 @@ Network* copy_network(Network* network) {
             }
         }
         else { // Cas du CNN
+            copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 0
 
