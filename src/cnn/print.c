@@ -47,10 +47,14 @@ void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth
 
 }
 
-void print_pooling(int size) {
+void print_pooling(int size, int pooling) {
     print_bar;
     purple;
-    printf("-------Pooling %dx%d-------\n", size ,size);
+    if (pooling == 1) {
+        printf("-------Average Pooling %dx%d-------\n", size ,size);
+    } else {
+        printf("-------Max Pooling %dx%d-------\n", size ,size);
+    }
     reset_color;
     print_bar;
     print_dspace;
@@ -117,7 +121,7 @@ void print_cnn(Network* network) {
             print_kernel_nn(k_i->nn, input_width, output_width);
         }
         else { // Pooling
-            print_pooling(input_width - output_width +1);
+            print_pooling(input_width - output_width +1, k_i->pooling);
         }
     }
 }

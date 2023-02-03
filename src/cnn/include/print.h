@@ -11,7 +11,7 @@ void print_kernel_cnn(Kernel_cnn* k, int depth_input, int dim_input, int depth_o
 /*
 * Affiche une couche de pooling
 */
-void print_pooling(int size);
+void print_pooling(int size, int pooling);
 
 /*
 * Affiche le kernel d'une couche de fully connected

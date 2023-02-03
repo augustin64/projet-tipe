@@ -5,8 +5,10 @@
 
 #include "../include/colors.h"
 #include "../include/utils.h"
-#include "include/neuron_io.h"
+#include "include/function.h"
 #include "include/struct.h"
+
+#include "include/neuron_io.h"
 
 #define MAGIC_NUMBER 1012
 
@@ -122,8 +124,8 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         fwrite(buffer, sizeof(buffer), 1, ptr);
     } else if (type_couche == 2) { // Cas du Pooling Layer
         uint32_t pre_buffer[2];
-        pre_buffer[0] = kernel->activation; // Variable du pooling
-        pre_buffer[1] = kernel->linearisation;
+        pre_buffer[0] = kernel->linearisation;
+        pre_buffer[1] = kernel->pooling;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
     }
 }
@@ -305,12 +307,13 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         }
     } else if (type_couche == 2) { // Cas du Pooling Layer
         uint32_t pooling, linearisation;
-        fread(&pooling, sizeof(pooling), 1, ptr);
         fread(&linearisation, sizeof(linearisation), 1, ptr);
+        fread(&pooling, sizeof(pooling), 1, ptr);
 
         kernel->cnn = NULL;
         kernel->nn = NULL;
-        kernel->activation = pooling;
+        kernel->activation = IDENTITY;
+        kernel->pooling = pooling;
         kernel->linearisation = linearisation;
     }
     return kernel;

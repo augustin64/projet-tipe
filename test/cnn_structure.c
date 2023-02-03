@@ -20,7 +20,11 @@ int main() {
     for (int i=0; i < network->size-1; i++) {
         kernel = network->kernel[i];
         if ((!kernel->cnn)&&(!kernel->nn)) {
-            printf("\n==== Couche %d de type "YELLOW"Pooling"RESET" ====\n", i);
+            if (kernel->pooling == 1) {
+                printf("\n==== Couche %d de type "YELLOW"Average Pooling"RESET" ====\n", i);
+            } else {
+                printf("\n==== Couche %d de type "YELLOW"Max Pooling"RESET" ====\n", i);
+            }
         } else if (!kernel->cnn) {
             printf("\n==== Couche %d de type "GREEN"NN"RESET" ====\n", i);
             printf("input: %d\n", kernel->nn->input_units);

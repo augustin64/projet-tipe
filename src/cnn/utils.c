@@ -52,6 +52,7 @@ bool equals_networks(Network* network1, Network* network2) {
         if (!network1->kernel[i]->cnn && !network1->kernel[i]->nn) {
             // Type Pooling
             checkEquals(kernel[i]->activation, "kernel[i]->activation pour un pooling", i);
+            checkEquals(kernel[i]->pooling, "kernel[i]->pooling pour un pooling", i);
         } else if (!network1->kernel[i]->cnn) {
             // Type NN
             checkEquals(kernel[i]->nn->input_units, "kernel[i]->nn->input_units", i);
