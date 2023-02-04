@@ -7,8 +7,8 @@
 void help(char* call);
 
 /*
- * Fonction utilisée à des fins de développement du réseau convolutif
+ * Fonction principale
 */
-void dev_conv();
+int main(int argc, char* argv[]);
 
 #endif

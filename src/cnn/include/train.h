@@ -6,7 +6,7 @@
 
 #define EPOCHS 10
 #define BATCHES 500
-//#define USE_MULTITHREADING
+#define USE_MULTITHREADING
 #define LEARNING_RATE 0.05
 
 
@@ -23,10 +23,15 @@ typedef struct TrainParameters {
     int height; // Hauteur des images
     int dataset_type; // Type de dataset
     int start; // Début des images
-    int nb_images; // Nombre d'images àn traiter
+    int nb_images; // Nombre d'images à traiter
     float accuracy; // Accuracy (à renvoyer)
     float loss; // Loss (à renvoyer)
 } TrainParameters;
+
+/*
+ * Partie entière supérieure de a/b
+*/
+int div_up(int a, int b);
 
 
 /*
