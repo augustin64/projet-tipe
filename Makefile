@@ -30,8 +30,8 @@ LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
 LD_NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
 
 # Compilation flag
-CFLAGS    = -Wall -Wextra -std=gnu99
-NVCCFLAGS =
+CFLAGS    = -Wall -Wextra -std=gnu99 -g
+NVCCFLAGS = -g
 # Remove warnings about unused variables, functions, ...
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
 # Compile with debug
@@ -69,7 +69,7 @@ $(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
 #
 # Build cnn
 #
-cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview;
+cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview $(BUILDDIR)/cnn-export;
 
 $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/cnn_train.o \
@@ -117,6 +117,9 @@ $(BUILDDIR)/cnn-main-cuda:
 endif
 
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
+
+$(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/utils.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
