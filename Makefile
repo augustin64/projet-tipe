@@ -2,7 +2,7 @@ BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./cache
 NVCC         := nvcc
-CUDA_INCLUDE := /opt/cuda/include # Default instalmlation path for ArchLinux, may be different
+CUDA_INCLUDE := /opt/cuda/include # Default installation path for ArchLinux, may be different
 
 NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 
@@ -20,10 +20,10 @@ CNN_OBJ_CUDA  = $(CNN_SRC:$(CNN_SRCDIR)/%.cu=$(BUILDDIR)/cnn_%.o)
 
 TEST_SRCDIR  := test
 
-TESTS_SRC     = $(wildcard test/*.c)
-TESTS_SRC_CU += $(wildcard test/*.cu)
+TESTS_SRC     = $(wildcard $(TEST_SRCDIR)/*.c)
+TESTS_SRC_CU += $(wildcard $(TEST_SRCDIR)/*.cu)
 
-TESTS_OBJ     = $(TESTS_SRC:test/%.c=$(BUILDDIR)/test-%) $(TESTS_SRC_CU:test/%.cu=$(BUILDDIR)/test-%)
+TESTS_OBJ     = $(TESTS_SRC:$(TEST_SRCDIR)/%.c=$(BUILDDIR)/$(TEST_SRCDIR)-%) $(TESTS_SRC_CU:$(TEST_SRCDIR)/%.cu=$(BUILDDIR)/$(TEST_SRCDIR)-%)
 
 # Linker only flags
 LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
@@ -165,22 +165,22 @@ prepare-tests:
 	@rm -f $(BUILDDIR)/test-*
 
 
-build/test-cnn_%: test/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
+build/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
-build/test-mnist_%: test/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
+build/test-mnist_%: $(TEST_SRCDIR)/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 ifdef NVCC_INSTALLED
-$(BUILDDIR)/test-cnn_%: test/cnn_%.cu \
+$(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.cu \
 		$(BUILDDIR)/cnn_cuda_%.o \
 		$(BUILDDIR)/cuda_utils.o \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.cuda.o
 	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
 else
-$(BUILDDIR)/test-cnn_%: test/cnn_%.cu
+$(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.cu
 	@echo "$(NVCC) not found, skipping"
 endif
 
