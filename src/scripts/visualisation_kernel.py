@@ -18,11 +18,14 @@ with open(fichier, 'r') as f:
 IMAGE_WIDTH = 5  # Manière très grossière de modifier le script visualisation.py
 IMAGE_HEIGHT = 5 # pour utiliser une de ses fonctions sans la réécrire
 
-os.makedirs(outut_dir, exist_ok=True)
+os.makedirs(output_dir, exist_ok=True)
 for key in data.keys():
     for i in range(len(data[key])):
         for j in range(len(data[key][i])):
             IMAGE_WIDTH = len(data[key][i][j])
             IMAGE_HEIGHT = len(data[key][i][j][0])
-            png.from_array([[min(int((j2+1)*100),255) for j2 in i2] for i2 in data[key][i][j]], 'L').save(f"{output_dir}/{key}-{i}-{j}.png")
+            png.from_array([
+                [max(0,min(int((j2+0.35)*255),255)) for j2 in i2] # Valeurs arbitraires à changer selon les valeurs du kernel
+                for i2 in data[key][i][j]], 'L').save(f"{output_dir}/{key}-{i}-{j}.png"
+            )
 
