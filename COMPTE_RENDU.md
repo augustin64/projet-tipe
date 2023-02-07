@@ -63,3 +63,11 @@ suivi de près par les tests unitaires correspondants [b12a03c](https://github.c
 Après un peu de débogage sur le réseau convolutif, on s'est rendu compte que le réseau simple ne fonctionnait pas bien avec des couches intermédiaires et du multithreading.  
 Le problème principal étant la découpe des batches étant la même à chaque époque.  
 Après implémentation d'un mélange de Knuth, tout est rentré dans l'ordre donnant des résultats encore plus satisfaisants pour les couches intermédiaires. (De l'ordre de 70% avec deux couches intermédiaires et utilisation du multithreading).
+
+<br/>
+<br/>
+<br/>
+
+### **25 Janvier 2023** Premiers résultats sur la seconde implémentation [220d0a7](https://github.com/julienChemillier/TIPE/commit/220d0a71be2a28f63ba1e1c7804e2e9fd909e12d)
+Premiers résultats sur le réseau `simple_one` qui suit la structure du premier réseau.  
+La backpropagation des poids ne fonctionne cependant pas sur les couches de convolution et de pooling.
