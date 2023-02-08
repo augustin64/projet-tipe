@@ -54,5 +54,4 @@ $\forall i,j: \space b_{i j} = \dfrac{a_{2i \space 2j} + a_{2i+1 \space 2j} + a_
 
 > Derivatives:  
 $\forall i,j: \space \dfrac{\partial E}{\partial a_{i \space j}} = \dfrac{1}{4} \dfrac{\partial E}{\partial b_{k \space l}} $  
-where k = i//2 and l = j//2
-
+where $k = \Big\lfloor \dfrac{i}{2} \Big\rfloor$ and $l = \Big\lfloor \dfrac{j}{2} \Big\rfloor$
