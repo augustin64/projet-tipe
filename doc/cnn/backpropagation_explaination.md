@@ -55,3 +55,18 @@ $\forall i,j: \space b_{i j} = \dfrac{a_{2i \space 2j} + a_{2i+1 \space 2j} + a_
 > Derivatives:  
 $\forall i,j: \space \dfrac{\partial E}{\partial a_{i \space j}} = \dfrac{1}{4} \dfrac{\partial E}{\partial b_{k \space l}} $  
 where $k = \Big\lfloor \dfrac{i}{2} \Big\rfloor$ and $l = \Big\lfloor \dfrac{j}{2} \Big\rfloor$
+---
+---
+
+## Backpropagation of a convolutionnal layer
+
+<img src="convolution_layer.png" width="300">
+
+
+$\forall i,j: c_{i \space j} = b_{i \space j} + \sum\limits_{0 \leqslant k, l \leqslant 1} \space k_{k \space l} c_{i+k, \space j+l}$  
+$ $  
+
+> Derivatives:  
+$\dfrac{\partial E}{\partial b_{i,j}} = \dfrac{\partial E}{\partial c_{i, j}}$  
+$\dfrac{\partial E}{\partial k_{i,j}} = \sum\limits_{p=0}^{2} \sum\limits_{l=0}^{2} \Big( \dfrac{\partial E}{\partial c_{k \space l}} a_{i+p, j+l}\Big)$  
+$\dfrac{\partial E}{\partial a_{i,j}} = \sum\limits_{k=max(0, k\_size-1)}^{min(k\_size, dim\_input-j)} \sum\limits_{l=max(0, k\ _size-1)}^{min(k\_size, dim\_input-k)} \dfrac{}{}$  
