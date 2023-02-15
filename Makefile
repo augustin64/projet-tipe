@@ -38,6 +38,7 @@ NVCCFLAGS = -g
 # -g
 # See memory leaks and Incorrect Read/Write
 # -fsanitize=address -lasan
+#! WARNING: test/cnn-neuron_io fails with this option enabled
 
 all: mnist cnn;
 #
