@@ -81,16 +81,20 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
-        float buffer[cnn->columns*(cnn->k_size*cnn->k_size*cnn->rows+output_dim*output_dim)];
-
+        // We need to split in small buffers to keep some free memory in the computer
         for (int i=0; i < cnn->columns; i++) {
+            indice_buffer = 0;
+            float buffer[output_dim*output_dim];
             for (int j=0; j < output_dim; j++) {
                 for (int k=0; k < output_dim; k++) {
                     bufferAdd(cnn->bias[i][j][k]);
                 }
             }
+            fwrite(buffer, sizeof(buffer), 1, ptr);
         }
         for (int i=0; i < cnn->rows; i++) {
+            indice_buffer = 0;
+            float buffer[cnn->columns*cnn->k_size*cnn->k_size];
             for (int j=0; j < cnn->columns; j++) {
                 for (int k=0; k < cnn->k_size; k++) {
                     for (int l=0; l < cnn->k_size; l++) {
@@ -98,8 +102,8 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
                     }
                 }
             }
+            fwrite(buffer, sizeof(buffer), 1, ptr);
         }
-        fwrite(buffer, sizeof(buffer), 1, ptr);
     } else if (type_couche == 1) { // Cas du NN
         Kernel_nn* nn = kernel->nn;
 
@@ -112,16 +116,20 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
-        float buffer[(1+nn->input_units)*nn->output_units];
+        float buffer[nn->output_units];
         for (int i=0; i < nn->output_units; i++) {
             bufferAdd(nn->bias[i]);
         }
+        fwrite(buffer, sizeof(buffer), 1, ptr);
+
         for (int i=0; i < nn->input_units; i++) {
+            indice_buffer = 0;
+            float buffer[nn->output_units];
             for (int j=0; j < nn->output_units; j++) {
                 bufferAdd(nn->weights[i][j]);
             }
+            fwrite(buffer, sizeof(buffer), 1, ptr);
         }
-        fwrite(buffer, sizeof(buffer), 1, ptr);
     } else if (type_couche == 2) { // Cas du Pooling Layer
         uint32_t pre_buffer[2];
         pre_buffer[0] = kernel->linearisation;

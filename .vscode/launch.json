@@ -175,6 +175,35 @@
       "preLaunchTask": "build-cnn"
     },
     {
+      "name": "cnn/main save-network",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/cnn-main",
+      "args": [
+        "train",
+        "--dataset",
+        "jpg",
+        "--datadir",
+        "data/50States10K/test",
+        "--epochs",
+        "0"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": false
+        }
+      ],
+      "preLaunchTask": "build-cnn"
+    },
+    {
       "name": "cnn/main dev-conv",
       "type": "cppdbg",
       "request": "launch",
