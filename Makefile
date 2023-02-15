@@ -96,19 +96,19 @@ ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_train.cuda.o \
 		$(BUILDDIR)/cnn_test_network.cuda.o \
-		$(BUILDDIR)/cnn_cnn.o \
+		$(BUILDDIR)/cnn_cnn.cuda.o \
 		$(BUILDDIR)/cnn_creation.cuda.o \
-		$(BUILDDIR)/cnn_initialisation.o \
-		$(BUILDDIR)/cnn_make.o \
+		$(BUILDDIR)/cnn_initialisation.cuda.o \
+		$(BUILDDIR)/cnn_cuda_make.o \
 		$(BUILDDIR)/cnn_neuron_io.cuda.o \
-		$(BUILDDIR)/cnn_function.o  \
+		$(BUILDDIR)/cnn_function.cuda.o  \
 		$(BUILDDIR)/cnn_utils.cuda.o \
-		$(BUILDDIR)/cnn_update.o \
+		$(BUILDDIR)/cnn_update.cuda.o \
 		$(BUILDDIR)/cnn_free.cuda.o \
 		$(BUILDDIR)/cnn_jpeg.cuda.o \
 		$(BUILDDIR)/cnn_cuda_convolution.o \
-		$(BUILDDIR)/cnn_backpropagation.o \
-		$(BUILDDIR)/colors.o \
+		$(BUILDDIR)/cnn_backpropagation.cuda.o \
+		$(BUILDDIR)/colors.cuda.o \
 		$(BUILDDIR)/mnist.cuda.o \
 		$(BUILDDIR)/cuda_utils.o
 	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
