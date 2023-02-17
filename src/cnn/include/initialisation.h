@@ -12,7 +12,7 @@
 /*
 * Initialise une matrice 1d dim de float en fonction du type d'initialisation
 */
-void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in, int n_out);
+void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in);
 
 /*
 * Initialise une matrice 2d dim1*dim2 de float en fonction du type d'initialisation

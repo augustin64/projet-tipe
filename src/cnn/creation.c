@@ -233,7 +233,7 @@ void add_dense(Network* network, int output_units, int activation) {
         }
     }
 
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
@@ -273,7 +273,7 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
             nn->d_weights[i][j] = 0.;
         }
     }
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units, output_units);
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units);
     initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
