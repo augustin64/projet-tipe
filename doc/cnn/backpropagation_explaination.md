@@ -25,7 +25,7 @@ $\dfrac{\partial E}{\partial b_i} = \dfrac{\partial E}{\partial a_i}$
 
 ## Backpropagation of a fully connected layer
 
-<img src="fully_connected.png" width="200">
+<img src="dense.png" width="200">
 
 Soit f la fonction d'activation de la première couche (qui transforme les $a_i$ en $l_i$) et g la fonction d'activation de la deuxième couche (qui transforme les $c_i$ en $d_i$).
 - $d_1 =g(c_1)$  

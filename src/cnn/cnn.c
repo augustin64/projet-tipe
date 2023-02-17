@@ -163,7 +163,7 @@ void backward_propagation(Network* network, int wanted_number) {
         } else if (k_i->nn) { // Full connection
             ptr d_f = get_function_activation(activation);
             if (k_i->linearisation == 0) { // Vecteur -> Vecteur
-                backward_fully_connected(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
+                backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
                 backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, d_f);
             }
