@@ -12,7 +12,7 @@
 void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in) {
     int n;
     if (initialisation == GLOROT) {
-        n = (n_in + n)/2; 
+        n = (n_in + dim)/2; 
 
     } else if (initialisation == HE) {
         n = n_in/2;
