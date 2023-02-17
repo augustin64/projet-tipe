@@ -70,14 +70,11 @@ void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output
 }
 #endif
 
-extern "C" {
-
+extern "C"
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {
     #ifndef __CUDACC__
     make_convolution_cpu(kernel, input, output, output_dim);
     #else
     make_convolution_device(kernel, input, output, output_dim);
     #endif
-}
-
 }

@@ -15,7 +15,7 @@ int i_div_up(int a, int b) { // Partie entière supérieure de a/b
 }
 
 #ifdef __CUDACC__
-extern "C" {
+extern "C"
 #endif
 bool check_cuda_compatibility() {
     #ifdef __CUDACC__
@@ -43,52 +43,37 @@ bool check_cuda_compatibility() {
     return false;
     #endif
 }
-#ifdef __CUDACC__
-}
-#endif
 
 
 #ifndef USE_CUDA
     #ifdef __CUDACC__
-    extern "C" {
+    extern "C"
     #endif
     void* nalloc(size_t sz) {
         void* ptr = malloc(sz);
         return ptr;
     }
-    #ifdef __CUDACC__
-    }
-    #endif
 
     #ifdef __CUDACC__
-    extern "C" {
+    extern "C"
     #endif
     void gree(void* ptr) {
         free(ptr);
     }
-    #ifdef __CUDACC__
-    }
-    #endif
 #else
     #ifdef __CUDACC__
-    extern "C" {
+    extern "C"
     #endif
     void* nalloc(size_t sz) {
         void* ptr;
         cudaMallocManaged(&ptr, sz, cudaMemAttachHost);
         return ptr;
     }
-    #ifdef __CUDACC__
-    }
-    #endif
 
     #ifdef __CUDACC__
-    extern "C" {
+    extern "C"
     #endif
     void gree(void* ptr) {
         cudaFree(ptr);
     }
-    #ifdef __CUDACC__
-    }
-    #endif
 #endif
