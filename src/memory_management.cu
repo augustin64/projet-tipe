@@ -23,7 +23,7 @@ int get_length(Memory* mem) {
     if (!mem) {
         return 0;
     }
-    return 1 + get_distinct_allocations(mem->next);
+    return 1 + get_length(mem->next);
 }
 
 
@@ -60,7 +60,7 @@ void* allocate_memory(size_t size, Memory* mem) {
         mem->nb_alloc++;
         return ptr;
     } else {
-        printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), size);
+        //printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), size);
         // Sinon on continue sur l'élément suivant de la liste
         if (!mem->next) {
             mem->next = create_memory_block(MEMORY_BLOCK < size ? size : MEMORY_BLOCK);
@@ -106,8 +106,8 @@ void* nalloc(size_t sz) {
             // We allocate a new memory block
             memory = create_memory_block(MEMORY_BLOCK < sz ? sz : MEMORY_BLOCK);
         }
-        printf("Distinct allocations: %d Blocks: %d\n", get_distinct_allocations(memory), get_length(memory));
-        printf("Requested memory of size %ld\n", sz);
+        //printf("Distinct allocations: %d Blocks: %d\n", get_distinct_allocations(memory), get_length(memory));
+        //printf("Requested memory of size %ld\n", sz);
         void* ptr = allocate_memory(sz, memory);
 
         pthread_mutex_unlock(&memory_lock);
