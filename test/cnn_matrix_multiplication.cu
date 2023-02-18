@@ -6,6 +6,7 @@
 #include <omp.h>
 
 #include "../src/cnn/include/matrix_multiplication.h"
+#include "../src/include/memory_management.h"
 #include "../src/include/colors.h"
 #include "../src/include/utils.h"
 

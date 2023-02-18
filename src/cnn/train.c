@@ -7,6 +7,7 @@
 #include <time.h>
 #include <omp.h>
 
+#include "../include/memory_management.h"
 #include "../mnist/include/mnist.h"
 #include "include/initialisation.h"
 #include "include/neuron_io.h"
@@ -131,7 +132,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         // Chargement des images du set de données MNIST
         int* parameters = read_mnist_images_parameters(images_file);
         nb_images_total = parameters[0];
-        gree(parameters);
+        free(parameters);
 
         images = read_mnist_images(images_file);
         labels = read_mnist_labels(labels_file);
@@ -199,7 +200,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     // thread dans l'hypothèse ou le multi-threading n'est pas utilisé.
     // Cela est utile à des fins de débogage notamment,
     // où l'utilisation de threads rend vite les choses plus compliquées qu'elles ne le sont.
-    TrainParameters* train_params = (TrainParameters*)nalloc(sizeof(TrainParameters));
+    TrainParameters* train_params = (TrainParameters*)malloc(sizeof(TrainParameters));
 
     train_params->network = network;
     train_params->dataset_type = dataset_type;

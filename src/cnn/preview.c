@@ -38,11 +38,11 @@ void preview_images(char* path, int limit) {
         if (!dataset->images[i]) {
             image = loadJpegImageFile(dataset->fileNames[i]);
             dataset->images[i] = image->lpData;
-            gree(image);
+            free(image);
         }
         print_image(dataset->images[i], dataset->height, dataset->width);
 
-        gree(dataset->images[i]);
+        free(dataset->images[i]);
     }
 }
 

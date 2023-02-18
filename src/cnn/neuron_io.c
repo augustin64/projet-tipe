@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "../include/memory_management.h"
 #include "../include/colors.h"
-#include "../include/utils.h"
 #include "include/function.h"
 #include "include/struct.h"
 

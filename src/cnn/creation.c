@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../include/memory_management.h"
 #include "include/initialisation.h"
 #include "include/function.h"
 #include "../include/utils.h"

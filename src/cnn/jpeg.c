@@ -53,9 +53,9 @@ imgRawImage* loadJpegImageFile(char* lpFilename) {
     #endif
 
     dwBufferBytes = imgWidth * imgHeight * 3; /* We only read RGB, not A */
-    lpData = (unsigned char*)nalloc(sizeof(unsigned char)*dwBufferBytes);
+    lpData = (unsigned char*)malloc(sizeof(unsigned char)*dwBufferBytes);
 
-    lpNewImage = (imgRawImage*)nalloc(sizeof(imgRawImage));
+    lpNewImage = (imgRawImage*)malloc(sizeof(imgRawImage));
     lpNewImage->numComponents = numComponents;
     lpNewImage->width = imgWidth;
     lpNewImage->height = imgHeight;
@@ -75,7 +75,7 @@ imgRawImage* loadJpegImageFile(char* lpFilename) {
 }
 
 jpegDataset* loadJpegDataset(char* folderPath) {
-    jpegDataset* dataset = (jpegDataset*)nalloc(sizeof(jpegDataset));
+    jpegDataset* dataset = (jpegDataset*)malloc(sizeof(jpegDataset));
     imgRawImage* image;
 
     // We start by counting the number of images and categories
@@ -83,8 +83,8 @@ jpegDataset* loadJpegDataset(char* folderPath) {
 	dataset->numImages = countFiles(folderPath);
 
 	dataset->images = NULL;
-	dataset->labels = (unsigned int*)nalloc(sizeof(unsigned int)*dataset->numImages);
-	dataset->fileNames = (char**)nalloc(sizeof(char*)*dataset->numImages);
+	dataset->labels = (unsigned int*)malloc(sizeof(unsigned int)*dataset->numImages);
+	dataset->fileNames = (char**)malloc(sizeof(char*)*dataset->numImages);
 
 	DIR* dirp;
     struct dirent* entry;
@@ -97,17 +97,17 @@ jpegDataset* loadJpegDataset(char* folderPath) {
         if (strcmp(entry->d_name, ".")&&strcmp(entry->d_name, "..")) {
             if (entry->d_type == DT_DIR) {
                 prev_index = index;
-                concatenated_path = nalloc(strlen(folderPath)+strlen(entry->d_name)+2);
+                concatenated_path = malloc(strlen(folderPath)+strlen(entry->d_name)+2);
                 sprintf(concatenated_path, "%s/%s", folderPath, entry->d_name);
                 addFilenamesToArray(concatenated_path, dataset->fileNames, &index);
                 for (int i=prev_index; i < index; i++) {
                     dataset->labels[i] = getLabel(entry->d_name);
                 }
-                gree(concatenated_path);
+                free(concatenated_path);
             }
         }
     }
-    dataset->images = (unsigned char**)nalloc(sizeof(unsigned char*)*dataset->numImages);
+    dataset->images = (unsigned char**)malloc(sizeof(unsigned char*)*dataset->numImages);
     for (int i=0; i < (int)dataset->numImages; i++) {
         dataset->images[i] = NULL;
         #ifdef STORE_IMAGES_TO_RAM
@@ -117,7 +117,7 @@ jpegDataset* loadJpegDataset(char* folderPath) {
         }
         image = loadJpegImageFile(dataset->fileNames[i]);
         dataset->images[i] = image->lpData;
-        gree(image);
+        free(image);
         #endif
     }
     #ifdef STORE_IMAGES_TO_RAM
@@ -130,8 +130,8 @@ jpegDataset* loadJpegDataset(char* folderPath) {
     dataset->height = image->height;
     dataset->numComponents = image->numComponents;
 
-    gree(image->lpData);
-    gree(image);
+    free(image->lpData);
+    free(image);
 
 	closedir(dirp);
 	return dataset;
@@ -185,7 +185,7 @@ void addFilenamesToArray(char* path, char** array, int* index) {
     dirp = opendir(path); /* There should be error handling after this */
     while ((entry = readdir(dirp)) != NULL) {
         if (entry->d_type == DT_REG) { /* If the entry is a regular file */
-            filename = (char*)nalloc(strlen(path)+strlen(entry->d_name)+2);
+            filename = (char*)malloc(strlen(path)+strlen(entry->d_name)+2);
             sprintf(filename, "%s/%s", path, entry->d_name);
             array[i] = filename;
             i++;
@@ -197,15 +197,15 @@ void addFilenamesToArray(char* path, char** array, int* index) {
 
 void free_dataset(jpegDataset* dataset) {
     for (int i=0; i < (int)dataset->numImages; i++) {
-        gree(dataset->fileNames[i]);
+        free(dataset->fileNames[i]);
         #ifdef STORE_IMAGES_TO_RAM
-        gree(dataset->images[i]);
+        free(dataset->images[i]);
         #endif
     }
-    gree(dataset->fileNames);
-    gree(dataset->labels);
-    gree(dataset->images);
-    gree(dataset);
+    free(dataset->fileNames);
+    free(dataset->labels);
+    free(dataset->images);
+    free(dataset);
 }
 
 unsigned int getLabel(char* string) {

@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../include/memory_management.h"
 #include "../mnist/include/mnist.h"
 #include "include/neuron_io.h"
-#include "../include/utils.h"
 #include "include/struct.h"
 #include "include/jpeg.h"
 #include "include/free.h"

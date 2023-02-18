@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../include/utils.h"
+#include "../include/memory_management.h"
 
 #include "include/free.h"
 
@@ -103,8 +103,9 @@ void free_dense_linearisation(Network* network, int pos) {
 
 void free_network_creation(Network* network) {
     free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
-    for (int i=0; i < network->max_size-1; i++)
+    for (int i=0; i < network->max_size-1; i++) {
         gree(network->kernel[i]);
+    }
     gree(network->width);
     gree(network->depth);
     gree(network->kernel);
