@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../include/memory_management.h"
 #include "../include/colors.h"
-#include "../include/utils.h"
 #include "include/struct.h"
 
 #define copyVar(var) network_cp->var = network->var
