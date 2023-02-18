@@ -43,37 +43,3 @@ bool check_cuda_compatibility() {
     return false;
     #endif
 }
-
-
-#ifndef USE_CUDA
-    #ifdef __CUDACC__
-    extern "C"
-    #endif
-    void* nalloc(size_t sz) {
-        void* ptr = malloc(sz);
-        return ptr;
-    }
-
-    #ifdef __CUDACC__
-    extern "C"
-    #endif
-    void gree(void* ptr) {
-        free(ptr);
-    }
-#else
-    #ifdef __CUDACC__
-    extern "C"
-    #endif
-    void* nalloc(size_t sz) {
-        void* ptr;
-        cudaMallocManaged(&ptr, sz, cudaMemAttachHost);
-        return ptr;
-    }
-
-    #ifdef __CUDACC__
-    extern "C"
-    #endif
-    void gree(void* ptr) {
-        cudaFree(ptr);
-    }
-#endif

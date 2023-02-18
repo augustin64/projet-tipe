@@ -38,14 +38,4 @@ extern "C"
 #endif
 bool check_cuda_compatibility();
 
-#ifdef __CUDACC__
-extern "C"
-#endif
-void* nalloc(size_t sz);
-
-#ifdef __CUDACC__
-extern "C"
-#endif
-void gree(void* ptr);
-
 #endif

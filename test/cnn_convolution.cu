@@ -6,6 +6,7 @@
 #include <time.h>
 #include <omp.h>
 
+#include "../src/include/memory_management.h"
 #include "../src/cnn/include/convolution.h"
 #include "../src/cnn/include/struct.h"
 #include "../src/include/colors.h"

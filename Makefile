@@ -30,7 +30,7 @@ LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
 LD_NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
 
 # Compilation flag
-CFLAGS    = -Wall -Wextra -std=gnu99 -g
+CFLAGS    = -Wall -Wextra -std=gnu99 -g -O3
 NVCCFLAGS = -g
 # Remove warnings about unused variables, functions, ...
 # -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable
@@ -87,6 +87,7 @@ $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/cnn_jpeg.o \
 		$(BUILDDIR)/cnn_convolution.o \
 		$(BUILDDIR)/cnn_backpropagation.o \
+		$(BUILDDIR)/memory_management.o \
 		$(BUILDDIR)/colors.o \
 		$(BUILDDIR)/mnist.o \
 		$(BUILDDIR)/utils.o
@@ -109,6 +110,7 @@ $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_cuda_convolution.o \
 		$(BUILDDIR)/cnn_backpropagation.cuda.o \
 		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/cuda_memory_management.o \
 		$(BUILDDIR)/mnist.cuda.o \
 		$(BUILDDIR)/cuda_utils.o
 	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
@@ -120,7 +122,7 @@ endif
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/utils.o
+$(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o $(BUILDDIR)/colors.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
@@ -166,19 +168,26 @@ prepare-tests:
 	@rm -f $(BUILDDIR)/test-*
 
 
-build/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o
+build/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
 build/test-mnist_%: $(TEST_SRCDIR)/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
+build/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
+
+$(BUILDDIR)/test_memory_management.o: $(SRCDIR)/memory_management.c $(SRCDIR)/include/memory_management.h
+	$(CC)  -c $< -o $@  $(CFLAGS) -DTEST_MEMORY_MANAGEMENT
+
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.cu \
 		$(BUILDDIR)/cnn_cuda_%.o \
 		$(BUILDDIR)/cuda_utils.o \
 		$(BUILDDIR)/colors.o \
-		$(BUILDDIR)/mnist.cuda.o
+		$(BUILDDIR)/mnist.cuda.o \
+		$(BUILDDIR)/cuda_memory_management.o
 	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
 else
 $(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.cu
