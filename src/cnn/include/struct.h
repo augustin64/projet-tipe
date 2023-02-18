@@ -39,7 +39,7 @@ typedef struct Network{
     int* depth; // depth[size]
     Kernel** kernel; // kernel[size], contient tous les kernels
     float**** input; // Tableau de toutes les couches du réseau input[size][couche->depth][couche->width][couche->width]
-    float**** input_z; // Même tableau que input mais ne contient paas la dernière fonction d'activation à chaque ligne
+    float**** input_z; // Même tableau que input mais ne contient pas la dernière fonction d'activation à chaque ligne
 } Network;
 
 #endif
