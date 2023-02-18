@@ -158,10 +158,10 @@ void backward_propagation(Network* network, int wanted_number) {
 
 
         if (k_i->cnn) { // Convolution
-            ptr d_f = get_function_activation(activation);
+            ptr d_f = get_function_activation(-activation);
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
         } else if (k_i->nn) { // Full connection
-            ptr d_f = get_function_activation(activation);
+            ptr d_f = get_function_activation(-activation);
             if (k_i->linearisation == 0) { // Vecteur -> Vecteur
                 backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
