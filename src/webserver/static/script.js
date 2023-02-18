@@ -208,7 +208,7 @@ function getPrediction() {
         if (data["status"] != 200) {
             document.getElementById("result").innerHTML = "500 Internal Server Error";
         } else {
-            addResults(document.getElementById("result_fc"), data["data"]["fully_connected"], RES_STANDARD);
+            addResults(document.getElementById("result_fc"), data["data"]["dense"], RES_STANDARD);
             addResults(document.getElementById("result_cnn"), data["data"]["cnn"], RES_CONV);
         }
     })

@@ -59,7 +59,7 @@ def recognize_mnist(image):
         return {
             "status": 200,
             "data": {
-                "fully_connected": json_data_fc,
+                "dense": json_data_fc,
                 "cnn": json_data_cnn
             }
         }
