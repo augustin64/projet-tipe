@@ -124,7 +124,7 @@ extern "C"
 void gree(void* ptr) {
     #if defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)
         pthread_mutex_lock(&memory_lock);
-        free_memory(ptr, memory);
+        memory = free_memory(ptr, memory);
         pthread_mutex_unlock(&memory_lock);
     #else
         free(ptr);
