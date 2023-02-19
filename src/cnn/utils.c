@@ -57,12 +57,12 @@ bool equals_networks(Network* network1, Network* network2) {
         } else if (!network1->kernel[i]->cnn) {
             // Type NN
             checkEquals(kernel[i]->nn->size_input, "kernel[i]->nn->size_input", i);
-            checkEquals(kernel[i]->nn->output_units, "kernel[i]->nn->output_units", i);
-            for (int j=0; j < network1->kernel[i]->nn->output_units; j++) {
+            checkEquals(kernel[i]->nn->size_output, "kernel[i]->nn->size_output", i);
+            for (int j=0; j < network1->kernel[i]->nn->size_output; j++) {
                 checkEquals(kernel[i]->nn->bias[j], "kernel[i]->nn->bias[j]", j);
             }
             for (int j=0; j < network1->kernel[i]->nn->size_input; j++) {
-                for (int k=0; k < network1->kernel[i]->nn->output_units; k++) {
+                for (int k=0; k < network1->kernel[i]->nn->size_output; k++) {
                     checkEquals(kernel[i]->nn->weights[j][k], "kernel[i]->nn->weights[j][k]", k);
                 }
             }
@@ -101,7 +101,7 @@ Network* copy_network(Network* network) {
     int size = network->size;
     // Paramètres des couches NN
     int size_input;
-    int output_units;
+    int size_output;
     // Paramètres des couches CNN
     int rows;
     int k_size;
@@ -138,17 +138,17 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->linearisation); // 0
 
             size_input = network->kernel[i]->nn->size_input;
-            output_units = network->kernel[i]->nn->output_units;
+            size_output = network->kernel[i]->nn->size_output;
 
             network_cp->kernel[i]->cnn = NULL;
             network_cp->kernel[i]->nn = (Kernel_nn*)nalloc(sizeof(Kernel_nn));
 
             copyVar(kernel[i]->nn->size_input);
-            copyVar(kernel[i]->nn->output_units);
+            copyVar(kernel[i]->nn->size_output);
 
-            network_cp->kernel[i]->nn->bias = (float*)nalloc(sizeof(float)*output_units);
-            network_cp->kernel[i]->nn->d_bias = (float*)nalloc(sizeof(float)*output_units);
-            for (int j=0; j < output_units; j++) {
+            network_cp->kernel[i]->nn->bias = (float*)nalloc(sizeof(float)*size_output);
+            network_cp->kernel[i]->nn->d_bias = (float*)nalloc(sizeof(float)*size_output);
+            for (int j=0; j < size_output; j++) {
                 copyVar(kernel[i]->nn->bias[j]);
                 network_cp->kernel[i]->nn->d_bias[j] = 0.;
             }
@@ -156,9 +156,9 @@ Network* copy_network(Network* network) {
             network_cp->kernel[i]->nn->weights = (float**)nalloc(sizeof(float*)*size_input);
             network_cp->kernel[i]->nn->d_weights = (float**)nalloc(sizeof(float*)*size_input);
             for (int j=0; j < size_input; j++) {
-                network_cp->kernel[i]->nn->weights[j] = (float*)nalloc(sizeof(float)*output_units);
-                network_cp->kernel[i]->nn->d_weights[j] = (float*)nalloc(sizeof(float)*output_units);
-                for (int k=0; k < output_units; k++) {
+                network_cp->kernel[i]->nn->weights[j] = (float*)nalloc(sizeof(float)*size_output);
+                network_cp->kernel[i]->nn->d_weights[j] = (float*)nalloc(sizeof(float)*size_output);
+                for (int k=0; k < size_output; k++) {
                     copyVar(kernel[i]->nn->weights[j][k]);
                     network_cp->kernel[i]->nn->d_weights[j][k] = 0.;
                 }
@@ -255,7 +255,7 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
     int size = network_src->size;
     // Paramètres des couches NN
     int size_input;
-    int output_units;
+    int size_output;
     // Paramètres des couches CNN
     int rows;
     int k_size;
@@ -268,13 +268,13 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
         if (!network_src->kernel[i]->cnn && network_src->kernel[i]->nn) { // Cas du NN
 
             size_input = network_src->kernel[i]->nn->size_input;
-            output_units = network_src->kernel[i]->nn->output_units;
+            size_output = network_src->kernel[i]->nn->size_output;
 
-            for (int j=0; j < output_units; j++) {
+            for (int j=0; j < size_output; j++) {
                 copyVarParams(kernel[i]->nn->bias[j]);
             }
             for (int j=0; j < size_input; j++) {
-                for (int k=0; k < output_units; k++) {
+                for (int k=0; k < size_output; k++) {
                     copyVarParams(kernel[i]->nn->weights[j][k]);
                 }
             }
@@ -316,7 +316,7 @@ int count_null_weights(Network* network) {
     int size = network->size;
     // Paramètres des couches NN
     int size_input;
-    int output_units;
+    int size_output;
     // Paramètres des couches CNN
     int rows;
     int k_size;
@@ -327,13 +327,13 @@ int count_null_weights(Network* network) {
         if (!network->kernel[i]->cnn && network->kernel[i]->nn) { // Cas du NN
 
             size_input = network->kernel[i]->nn->size_input;
-            output_units = network->kernel[i]->nn->output_units;
+            size_output = network->kernel[i]->nn->size_output;
 
-            for (int j=0; j < output_units; j++) {
+            for (int j=0; j < size_output; j++) {
                 null_bias += fabs(network->kernel[i]->nn->bias[j]) <= epsilon;
             }
             for (int j=0; j < size_input; j++) {
-                for (int k=0; k < output_units; k++) {
+                for (int k=0; k < size_output; k++) {
                     null_weights += fabs(network->kernel[i]->nn->weights[j][k]) <= epsilon;
                 }
             }

@@ -52,11 +52,11 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
 /*
 * Ajoute au réseau une couche dense et initialise les poids et les biais
 */
-void add_dense(Network* network, int output_units, int activation);
+void add_dense(Network* network, int size_output, int activation);
 
 /*
 * Ajoute au réseau une couche dense qui aplatit
 */
-void add_dense_linearisation(Network* network, int output_units, int activation);
+void add_dense_linearisation(Network* network, int size_output, int activation);
 
 #endif
