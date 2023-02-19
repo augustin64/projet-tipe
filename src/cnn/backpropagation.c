@@ -131,7 +131,7 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
                             tmp += input[h][l+j][m+k]*output[i][l][m];
                         }
                     }
-                    ker->d_w[h][i][j][k] += tmp;
+                    ker->d_weights[h][i][j][k] += tmp;
                 }
             }
         }
@@ -152,7 +152,7 @@ void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, flo
                     max_n = min(k_size, dim_input-k);
                     for (int m=min_m; m < max_m; m++) {
                         for (int n=min_n; n < max_n; n++) {
-                            tmp += output[l][j-k_size+m+1][k-k_size+n+1]*ker->w[i][l][m][n];
+                            tmp += output[l][j-k_size+m+1][k-k_size+n+1]*ker->weights[i][l][m][n];
                         }
                     }
                 }

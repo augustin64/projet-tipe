@@ -7,8 +7,8 @@ typedef struct Kernel_cnn {
     int columns; // Depth of the output
     float*** bias; // bias[columns][dim_output][dim_output]
     float*** d_bias; // d_bias[columns][dim_output][dim_output]
-    float**** w; // w[rows][columns][k_size][k_size]
-    float**** d_w; // d_w[rows][columns][k_size][k_size]
+    float**** weights; // weights[rows][columns][k_size][k_size]
+    float**** d_weights; // d_weights[rows][columns][k_size][k_size]
 } Kernel_cnn;
 
 typedef struct Kernel_nn {

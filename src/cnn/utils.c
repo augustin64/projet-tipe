@@ -83,7 +83,7 @@ bool equals_networks(Network* network1, Network* network2) {
                 for (int k=0; k < network1->kernel[i]->cnn->columns; k++) {
                     for (int l=0; l < network1->kernel[i]->cnn->k_size; l++) {
                         for (int m=0; m < network1->kernel[i]->cnn->k_size; m++) {
-                            checkEquals(kernel[i]->cnn->w[j][k][l][m], "kernel[i]->cnn->bias[j][k][l][m]", m);
+                            checkEquals(kernel[i]->cnn->weights[j][k][l][m], "kernel[i]->cnn->bias[j][k][l][m]", m);
                         }
                     }
                 }
@@ -197,20 +197,20 @@ Network* copy_network(Network* network) {
                 }
             }
 
-            network_cp->kernel[i]->cnn->w = (float****)nalloc(sizeof(float***)*rows);
-            network_cp->kernel[i]->cnn->d_w = (float****)nalloc(sizeof(float***)*rows);
+            network_cp->kernel[i]->cnn->weights = (float****)nalloc(sizeof(float***)*rows);
+            network_cp->kernel[i]->cnn->d_weights = (float****)nalloc(sizeof(float***)*rows);
             for (int j=0; j < rows; j++) {
-                network_cp->kernel[i]->cnn->w[j] = (float***)nalloc(sizeof(float**)*columns);
-                network_cp->kernel[i]->cnn->d_w[j] = (float***)nalloc(sizeof(float**)*columns);
+                network_cp->kernel[i]->cnn->weights[j] = (float***)nalloc(sizeof(float**)*columns);
+                network_cp->kernel[i]->cnn->d_weights[j] = (float***)nalloc(sizeof(float**)*columns);
                 for (int k=0; k < columns; k++) {
-                    network_cp->kernel[i]->cnn->w[j][k] = (float**)nalloc(sizeof(float*)*k_size);
-                    network_cp->kernel[i]->cnn->d_w[j][k] = (float**)nalloc(sizeof(float*)*k_size);
+                    network_cp->kernel[i]->cnn->weights[j][k] = (float**)nalloc(sizeof(float*)*k_size);
+                    network_cp->kernel[i]->cnn->d_weights[j][k] = (float**)nalloc(sizeof(float*)*k_size);
                     for (int l=0; l < k_size; l++) {
-                        network_cp->kernel[i]->cnn->w[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
-                        network_cp->kernel[i]->cnn->d_w[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
+                        network_cp->kernel[i]->cnn->weights[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
+                        network_cp->kernel[i]->cnn->d_weights[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
                         for (int m=0; m < k_size; m++) {
-                            copyVar(kernel[i]->cnn->w[j][k][l][m]);
-                            network_cp->kernel[i]->cnn->d_w[j][k][l][m] = 0.;
+                            copyVar(kernel[i]->cnn->weights[j][k][l][m]);
+                            network_cp->kernel[i]->cnn->d_weights[j][k][l][m] = 0.;
                         }
                     }
                 }
@@ -297,7 +297,7 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
                 for (int k=0; k < columns; k++) {
                     for (int l=0; l < k_size; l++) {
                         for (int m=0; m < k_size; m++) {
-                            copyVarParams(kernel[i]->cnn->w[j][k][l][m]);
+                            copyVarParams(kernel[i]->cnn->weights[j][k][l][m]);
                         }
                     }
                 }
@@ -356,7 +356,7 @@ int count_null_weights(Network* network) {
                 for (int k=0; k < columns; k++) {
                     for (int l=0; l < k_size; l++) {
                         for (int m=0; m < k_size; m++) {
-                            null_weights = fabs(network->kernel[i]->cnn->w[j][k][l][m]) <= epsilon;
+                            null_weights = fabs(network->kernel[i]->cnn->weights[j][k][l][m]) <= epsilon;
                         }
                     }
                 }

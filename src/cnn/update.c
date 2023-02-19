@@ -24,13 +24,13 @@ void update_weights(Network* network, Network* d_network) {
                 for (int b=0; b<output_depth; b++) {
                     for (int c=0; c<k_size; c++) {
                         for (int d=0; d<k_size; d++) {
-                            cnn->w[a][b][c][d] -= network->learning_rate * d_cnn->d_w[a][b][c][d];
-                            d_cnn->d_w[a][b][c][d] = 0;
+                            cnn->weights[a][b][c][d] -= network->learning_rate * d_cnn->d_weights[a][b][c][d];
+                            d_cnn->d_weights[a][b][c][d] = 0;
 
-                            if (cnn->w[a][b][c][d] > MAX_RESEAU)
-                                cnn->w[a][b][c][d] = MAX_RESEAU;
-                            else if (cnn->w[a][b][c][d] < -MAX_RESEAU)
-                                cnn->w[a][b][c][d] = -MAX_RESEAU;
+                            if (cnn->weights[a][b][c][d] > MAX_RESEAU)
+                                cnn->weights[a][b][c][d] = MAX_RESEAU;
+                            else if (cnn->weights[a][b][c][d] < -MAX_RESEAU)
+                                cnn->weights[a][b][c][d] = -MAX_RESEAU;
                         }
                     }
                 }
@@ -133,7 +133,7 @@ void reset_d_weights(Network* network) {
                 for (int b=0; b<output_depth; b++) {
                     for (int c=0; c<k_size; c++) {
                         for (int d=0; d<k_size; d++) {
-                            cnn->d_w[a][b][c][d] = 0;
+                            cnn->d_weights[a][b][c][d] = 0;
                         }
                     }
                 }

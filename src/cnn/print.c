@@ -34,7 +34,7 @@ void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth
         for (int j=0; j<depth_output; j++) {
             for (int k=0; k<k_size; k++) {
                 for (int l=0; l<k_size; l++) {
-                    printf("%.2f", ker->w[i][j][k][l]);
+                    printf("%.2f", ker->weights[i][j][k][l]);
                 }
                 print_space;
             }

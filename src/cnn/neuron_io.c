@@ -98,7 +98,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
             for (int j=0; j < cnn->columns; j++) {
                 for (int k=0; k < cnn->k_size; k++) {
                     for (int l=0; l < cnn->k_size; l++) {
-                        bufferAdd(cnn->w[i][j][k][l]);
+                        bufferAdd(cnn->weights[i][j][k][l]);
                     }
                 }
             }
@@ -259,21 +259,21 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             }
         }
 
-        cnn->w = (float****)nalloc(sizeof(float***)*cnn->rows);
-        cnn->d_w = (float****)nalloc(sizeof(float***)*cnn->rows);
+        cnn->weights = (float****)nalloc(sizeof(float***)*cnn->rows);
+        cnn->d_weights = (float****)nalloc(sizeof(float***)*cnn->rows);
         for (int i=0; i < cnn->rows; i++) {
-            cnn->w[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
-            cnn->d_w[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
+            cnn->weights[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
+            cnn->d_weights[i] = (float***)nalloc(sizeof(float**)*cnn->columns);
             for (int j=0; j < cnn->columns; j++) {
-                cnn->w[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
-                cnn->d_w[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
+                cnn->weights[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
+                cnn->d_weights[i][j] = (float**)nalloc(sizeof(float*)*cnn->k_size);
                 for (int k=0; k < cnn->k_size; k++) {
-                    cnn->w[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
-                    cnn->d_w[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
+                    cnn->weights[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
+                    cnn->d_weights[i][j][k] = (float*)nalloc(sizeof(float)*cnn->k_size);
                     for (int l=0; l < cnn->k_size; l++) {
                         fread(&tmp, sizeof(tmp), 1, ptr);
-                        cnn->w[i][j][k][l] = tmp;
-                        cnn->d_w[i][j][k][l] = 0.;
+                        cnn->weights[i][j][k][l] = tmp;
+                        cnn->d_weights[i][j][k][l] = 0.;
                     }
                 }
             }

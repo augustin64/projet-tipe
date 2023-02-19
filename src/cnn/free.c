@@ -52,17 +52,17 @@ void free_convolution(Network* network, int pos) {
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
-                gree(k_pos->w[i][j][k]);
-                gree(k_pos->d_w[i][j][k]);
+                gree(k_pos->weights[i][j][k]);
+                gree(k_pos->d_weights[i][j][k]);
             }
-            gree(k_pos->w[i][j]);
-            gree(k_pos->d_w[i][j]);
+            gree(k_pos->weights[i][j]);
+            gree(k_pos->d_weights[i][j]);
         }
-        gree(k_pos->w[i]);
-        gree(k_pos->d_w[i]);
+        gree(k_pos->weights[i]);
+        gree(k_pos->d_weights[i]);
     }
-    gree(k_pos->w);
-    gree(k_pos->d_w);
+    gree(k_pos->weights);
+    gree(k_pos->d_weights);
 
     gree(k_pos);
 }

@@ -48,7 +48,7 @@ def generate_data_mul():
         values.append(avg([mul_matrix((i+1)*100, depth, (i+1)*100) for j in range(10)]))
         print(f"Added M({(i+1)*100}x{depth}) x M({depth}x{(i+1)*100})")
 
-    with open("result_mul.json", "w") as file:
+    with open("result_mul.json", "weights") as file:
         json.dump(values, file, indent=4)
 
 
@@ -61,7 +61,7 @@ def generate_data_conv():
         values.append(avg([conv_matrix((i+1)*100, output_dim, rows, columns) for j in range(10)]))
         print(f"Added ({(i+1)*100}, output_dim, rows, columns)")
 
-    with open("result_conv.json", "w") as file:
+    with open("result_conv.json", "weights") as file:
         json.dump(values, file, indent=4)
 
 

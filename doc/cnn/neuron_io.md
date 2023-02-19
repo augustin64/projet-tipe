@@ -66,9 +66,9 @@ type | nom de la variable | commentaire
 float|bias[0][0][0]|biais
 float|...|
 float|bias[cnn->columns-1][cnn->k_size-1][cnn->k_size-1]|
-float|w[0][0][0][0]|poids
+float|weights[0][0][0][0]|poids
 float|...|
-float|w[cnn->rows][cnn->columns-1][cnn->k_size-1][cnn->k_size-1]|
+float|weights[cnn->rows][cnn->columns-1][cnn->k_size-1][cnn->k_size-1]|
 
 - Si la couche est de type nn, on ajoute les poids de manière croissante sur leurs indices:
 

@@ -32,7 +32,7 @@ void print_poids_ker_cnn(char* modele) {
                     for (int k=0; k < kernel_cnn->k_size; k++) {
                         printf("\t\t\t\t[");
                         for (int l=0; l < kernel_cnn->k_size; l++) {
-                            printf("%lf", kernel_cnn->w[i][j][k][l]);
+                            printf("%lf", kernel_cnn->weights[i][j][k][l]);
                             if (l != kernel_cnn->k_size-1) {
                                 printf(", ");
                             }
