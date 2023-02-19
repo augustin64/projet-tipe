@@ -161,25 +161,33 @@ run-tests: build-tests
 	$(foreach file, $(wildcard $(TEST_SRCDIR)/*.sh), $(file);)
 	@echo "$$(for file in build/test-*; do echo -e \\033[33m#####\\033[0m $$file \\033[33m#####\\033[0m; $$file || echo -e "\\033[1m\\033[31mErreur sur $$file\\033[0m"; done)"
 
-build-tests: prepare-tests $(TESTS_OBJ) $(BUILDDIR)/test-cnn_matrix_multiplication $(BUILDDIR)/test-cnn_convolution
+build-tests: prepare-tests $(TESTS_OBJ) $(BUILDDIR)/test-cnn_matrix_multiplication $(BUILDDIR)/test-cnn_convolution $(BUILDDIR)/test-cuda_memory_management
 
 
 prepare-tests:
 	@rm -f $(BUILDDIR)/test-*
 
 
-build/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o
+$(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 # mnist.o est déjà inclus en tant que mnist_mnist.o
-build/test-mnist_%: $(TEST_SRCDIR)/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
+$(BUILDDIR)/test-mnist_%: $(TEST_SRCDIR)/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-build/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
+$(BUILDDIR)/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/test_memory_management.o: $(SRCDIR)/memory_management.c $(SRCDIR)/include/memory_management.h
 	$(CC)  -c $< -o $@  $(CFLAGS) -DTEST_MEMORY_MANAGEMENT
+
+ifdef NVCC_INSTALLED
+$(BUILDDIR)/test-cuda_memory_management: $(TEST_SRCDIR)/memory_management.cu $(BUILDDIR)/colors.cuda.o $(BUILDDIR)/cuda_utils.o $(BUILDDIR)/cuda_memory_management.o
+	$(NVCC)  $(LD_NVCCFLAGS) $(NVCCFLAGS)  $^ -o $@
+else
+$(BUILDDIR)/test-cuda_memory_management:
+	@echo "$(NVCC) not found, skipping"
+endif
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.cu \

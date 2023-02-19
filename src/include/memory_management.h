@@ -19,12 +19,18 @@ typedef struct Memory {
 } Memory;
 
 // Renvoie le nombre d'allocations totales dans la mémoire
+#ifdef __CUDACC__
+extern "C"
+#endif
 int get_memory_distinct_allocations();
 
 // Fonction récursive correspondante
 int get_distinct_allocations(Memory* mem);
 
 // Renvoie le nombre d'éléments dans la liste chaînée représentant la mémoire
+#ifdef __CUDACC__
+extern "C"
+#endif
 int get_memory_blocks_number();
 
 // Renvoie la taille d'une liste chaînée
