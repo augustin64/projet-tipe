@@ -72,7 +72,7 @@ void* train_thread(void* parameters) {
             if (!param->dataset->images[index[i]]) {
                 image = loadJpegImageFile(param->dataset->fileNames[index[i]]);
                 param->dataset->images[index[i]] = image->lpData;
-                gree(image);
+                free(image);
             }
             write_image_in_network_260(param->dataset->images[index[i]], height, width, network->input[0]);
             forward_propagation(network);
@@ -83,7 +83,7 @@ void* train_thread(void* parameters) {
                 accuracy += 1.;
             }
 
-            gree(param->dataset->images[index[i]]);
+            free(param->dataset->images[index[i]]);
             param->dataset->images[index[i]] = NULL;
         }
     }
@@ -351,12 +351,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     if (dataset_type == 0) {
         for (int i=0; i < nb_images_total; i++) {
             for (int j=0; j < 28; j++) {
-                gree(images[i][j]);
+                free(images[i][j]);
             }
-            gree(images[i]);
+            free(images[i]);
         }
-        gree(images);
-        gree(labels);
+        free(images);
+        free(labels);
     } else {
         free_dataset(dataset);
     }

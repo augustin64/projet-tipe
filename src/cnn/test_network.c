@@ -30,7 +30,7 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
 
     width = mnist_parameters[1];
     height = mnist_parameters[2];
-    gree(mnist_parameters);
+    free(mnist_parameters);
 
     // Load image in the first layer of the Network
     for (int i=0; i < nb_elem; i++) {
@@ -47,11 +47,11 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
         }
 
         for (int j=0; j < height; j++) {
-            gree(images[i][j]);
+            free(images[i][j]);
         }
-        gree(images[i]);
+        free(images[i]);
     }
-    gree(images);
+    free(images);
     printf("%d Images. Taux de réussite: %.2f%%\n", nb_elem, 100*accuracy/(float)nb_elem);
 }
 
@@ -76,13 +76,13 @@ void test_network_jpg(Network* network, char* data_dir, bool preview_fails) {
             accuracy++;
         }
 
-        gree(dataset->images[i]);
+        free(dataset->images[i]);
     }
 
     printf("%d Images. Taux de réussite: %.2f%%\n", dataset->numImages, 100*accuracy/(float)dataset->numImages);
-    gree(dataset->images);
-    gree(dataset->labels);
-    gree(dataset);
+    free(dataset->images);
+    free(dataset->labels);
+    free(dataset);
 }
 
 
@@ -110,7 +110,7 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
 
     width = mnist_parameters[1];
     height = mnist_parameters[2];
-    gree(mnist_parameters);
+    free(mnist_parameters);
 
     if (! strcmp(out, "json")) {
         printf("{\n");
@@ -148,15 +148,15 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
         }
 
         for (int j=0; j < height; j++) {
-            gree(images[i][j]);
+            free(images[i][j]);
         }
-        gree(images[i]);
+        free(images[i]);
     }
     if (! strcmp(out, "json")) {
         printf("}\n");
     }
 
-    gree(images);
+    free(images);
 }
 
 void recognize_jpg(Network* network, char* input_file, char* out) {
@@ -195,8 +195,8 @@ void recognize_jpg(Network* network, char* input_file, char* out) {
         printf("}\n");
     }
 
-    gree(image->lpData);
-    gree(image);
+    free(image->lpData);
+    free(image);
 }
 
 void recognize(int dataset_type, char* modele, char* input_file, char* out) {
