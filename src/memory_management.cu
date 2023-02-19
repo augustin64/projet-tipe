@@ -100,7 +100,7 @@ Memory* free_memory(void* ptr, Memory* mem) {
 extern "C"
 #endif
 void* nalloc(size_t sz) {
-    #if defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)
+    #if defined(__CUDACC__) || defined(TEST_MEMORY_MANAGEMENT)
         pthread_mutex_lock(&memory_lock);
         if (!memory) {
             // We allocate a new memory block
@@ -122,7 +122,7 @@ void* nalloc(size_t sz) {
 extern "C"
 #endif
 void gree(void* ptr) {
-    #if defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)
+    #if defined(__CUDACC__) || defined(TEST_MEMORY_MANAGEMENT)
         pthread_mutex_lock(&memory_lock);
         memory = free_memory(ptr, memory);
         pthread_mutex_unlock(&memory_lock);
