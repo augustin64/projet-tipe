@@ -35,6 +35,22 @@ int get_memory_blocks_number() {
     return get_length(memory);
 }
 
+void print_memory_rec(Memory* mem) {
+    if (!mem) {
+        return;
+    }
+    printf("==== %u ====\n", mem->id);
+    printf("plage d'addresses: %p-%p\n", mem->start, (void*)((intptr_t)mem->start +mem->size));
+    printf("in-use: %ld/%ld\n", ((intptr_t)mem->cursor - (intptr_t)mem->start), mem->size);
+    printf("allocations: %d\n\n", mem->nb_alloc);
+    print_memory_rec(mem->next);
+}
+
+
+void print_memory() {
+    printf(BLUE "==== MEMORY ====\n" RESET);
+    print_memory_rec(memory);
+}
 
 Memory* create_memory_block(size_t size) {
     Memory* mem = (Memory*)malloc(sizeof(Memory));
@@ -47,6 +63,7 @@ Memory* create_memory_block(size_t size) {
     mem->size = size;
     mem->nb_alloc = 0;
     mem->next = NULL;
+    mem->id = rand() %100000;
     
     return mem;
 }
@@ -72,11 +89,13 @@ void* allocate_memory(size_t size, Memory* mem) {
 
 Memory* free_memory(void* ptr, Memory* mem) {
     if (!mem) {
-        printf("[ERREUR] Le pointeur %p a déjà été libéré ou n'a jamais été alloué\n", ptr);
+        printf_error((char*)"Le pointeur ");
+        printf("%p a déjà été libéré ou n'a jamais été alloué\n", ptr);
         return mem;
     }
-    if ((intptr_t)mem->start <= (intptr_t)ptr && (intptr_t)ptr <= (intptr_t)mem->start + (intptr_t)mem->size) {
+    if (mem->start <= ptr && ptr < (void*)((intptr_t)mem->start + mem->size)) {
         mem->nb_alloc--;
+        // printf(GREEN "%p <= %p < %p\n" RESET, mem->start, ptr, (void*)((intptr_t)mem->start + mem->size));
         if (mem->nb_alloc == 0) {
             Memory* mem_next = mem->next;
             #ifdef __CUDACC__

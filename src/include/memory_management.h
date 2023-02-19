@@ -15,6 +15,7 @@ typedef struct Memory {
    void* cursor; // Current cursor
    size_t size; // Taille de la mémoire allouée
    int nb_alloc; // Nombre d'allocations dans le bloc
+   unsigned int id; // Nombre aléatoire permettant d'identifier le bloc plus facilement lors du débogage
    struct Memory* next; // Élément suivant
 } Memory;
 
@@ -46,6 +47,16 @@ int get_memory_blocks_number();
 */
 int get_length(Memory* mem);
 
+
+/*
+* Appels récursifs de la fonction print_memory
+*/
+void print_memory_rec(Memory* mem);
+
+/*
+* Affiche les blocs actuels de la mémoire ainsi que leur utilisation
+*/
+void print_memory();
 
 
 /*
