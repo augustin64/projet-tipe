@@ -11,13 +11,13 @@
 #define copyVar(var) network_cp->var = network->var
 #define copyVarParams(var) network_dest->var = network_src->var
 
-#define checkEquals(var, name, indice)                                              \
-if (network1->var != network2->var) {                                               \
-    printf_error("network1->" name " et network2->" name " ne sont pas égaux\n");   \
-    if (indice != -1) {                                                             \
-        printf(BOLDBLUE"[ INFO_ ]" RESET " indice: %d\n", indice);                  \
-        }                                                                           \
-    return false;                                                                   \
+#define checkEquals(var, name, indice)                                                     \
+if (network1->var != network2->var) {                                                      \
+    printf_error((char*)"network1->" name " et network2->" name " ne sont pas égaux\n");   \
+    if (indice != -1) {                                                                    \
+        printf(BOLDBLUE "[ INFO_ ]" RESET " indice: %d\n", indice);                        \
+        }                                                                                  \
+    return false;                                                                          \
 }
 
 void swap(int* tab, int i, int j) {
@@ -364,5 +364,6 @@ int count_null_weights(Network* network) {
         }
     }
 
+    (void)null_bias;
     return null_weights;
 }
