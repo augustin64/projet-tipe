@@ -21,8 +21,43 @@
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Affiche le texte demandé, précédé d'un [ERROR] en rouge
+*/
 void printf_error(char* string);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Affiche le texte demandé, précédé d'un [WARNING] en orange
+*/
 void printf_warning(char* string);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Affiche le texte demandé, précédé d'un [INFO] en bleu
+*/
 void printf_info(char* string);
 
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Affiche un timing en heures minutes secondes millisecondes en limitant la précision aux deux unités les plus significatives
+*/
+void printf_time(float time);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Affiche une quantité de mémoire de manière humainement lisible
+*/
+void printf_memory(size_t size);
 #endif

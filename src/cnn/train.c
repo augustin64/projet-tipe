@@ -55,7 +55,7 @@ void* train_thread(void* parameters) {
             maxi = indice_max(network->input[network->size-1][0][0], 10);
             if (maxi == -1) {
                 printf("\n");
-                printf_error("Le réseau sature.\n");
+                printf_error((char*)"Le réseau sature.\n");
                 exit(1);
             }
             
@@ -224,7 +224,9 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
     elapsed_time = end_time - start_time;
     printf("Taux d'apprentissage initial: %lf\n", network->learning_rate);
-    printf("Initialisation: %0.2lf s\n\n", elapsed_time);
+    printf("Initialisation: ");
+    printf_time(elapsed_time);
+    printf("\n\n");
 
     for (int i=0; i < epochs; i++) {
 
@@ -314,7 +316,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 update_weights(network, network);
                 update_bias(network, network);
 
-                printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "YELLOW"%0.4f%%"RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.4f%%" RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
                 fflush(stdout);
             #endif
             // Il serait intéressant d'utiliser la perte calculée pour
@@ -324,9 +326,13 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         end_time = omp_get_wtime();
         elapsed_time = end_time - start_time;
         #ifdef USE_MULTITHREADING
-        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: %0.2f s\n", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: ", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf_time(elapsed_time);
+        printf("\n");
         #else
-        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: "GREEN"%0.4f%%"RESET" \tTemps: %0.2f s\n", i, epochs, nb_images_total, nb_images_total, accuracy*100, elapsed_time);
+        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: ", i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf_time(elapsed_time);
+        printf("\n");
         #endif
         write_network(out, network);
     }
@@ -363,5 +369,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
     end_time = omp_get_wtime();
     elapsed_time = end_time - algo_start;
-    printf("\nTemps total: %0.1f s\n", elapsed_time);
+    printf("\nTemps total: ");
+    printf_time(elapsed_time);
+    printf("\n");
 }

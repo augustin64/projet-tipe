@@ -6,8 +6,10 @@
     #endif
 #endif
 
-#include "include/utils.h"
+#include "include/memory_management.h"
 #include "include/colors.h"
+
+#include "include/utils.h"
 
 
 int i_div_up(int a, int b) { // Partie entière supérieure de a/b
@@ -32,11 +34,21 @@ bool check_cuda_compatibility() {
 
     for (int i=0; i < nDevices; i++) {
         cudaGetDeviceProperties(&prop, i);
-        printf(" - %s\n", prop.name);
+        printf(" - %s\n\t - Compute Capability: %d.%d\n\t - Memory available: ", prop.name, prop.major, prop.minor);
+        printf_memory(prop.totalGlobalMem);
+        printf("\n\t - Shared Memory per block: ");
+        printf_memory(prop.sharedMemPerBlock);
+        printf("\n\n");
     }
 
     cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: " BLUE "%s" RESET " (Compute capability: %d.%d)\n\n", prop.name, prop.major, prop.minor);
+    printf("Utilisation du GPU: " BLUE "%s" RESET "\n\n", prop.name);
+
+    if (prop.sharedMemPerBlock != MEMORY_BLOCK) {
+        printf_warning((char*)"La taille des blocs mémoire du GPU et celle utilisée dans le code diffèrent.\n");
+        printf("\tCela peut mener à une utilisation supplémentaire de VRAM.\n");
+        printf("\tChanger MEMORY_BLOCK à %ld dans src/include/memory_management.h\n", prop.sharedMemPerBlock);
+    }
     return true;
     #else
     printf("Pas d'utilisation du GPU\n\n");
