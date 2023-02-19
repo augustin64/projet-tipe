@@ -30,12 +30,12 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 */
 int i_div_up(int a, int b);
 
-/*
-* Vérification de la compatibilité CUDA
-*/
 #ifdef __CUDACC__
 extern "C"
 #endif
+/*
+* Vérification de la compatibilité CUDA
+*/
 bool check_cuda_compatibility();
 
 #endif
