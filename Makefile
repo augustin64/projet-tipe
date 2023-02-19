@@ -1,6 +1,6 @@
 BUILDDIR     := ./build
 SRCDIR       := ./src
-CACHE_DIR    := ./cache
+CACHE_DIR    := ./.cache
 NVCC         := nvcc
 CUDA_INCLUDE := /opt/cuda/include # Default installation path for ArchLinux, may be different
 
@@ -197,7 +197,7 @@ endif
 #
 # Utils
 #
-webserver: $(CACHE_DIR)/mnist-reseau.bin
+webserver: $(CACHE_DIR)/mnist-reseau-fully-connected.bin $(CACHE_DIR)/mnist-reseau-cnn.bin
 	FLASK_APP="src/webserver/app.py" flask run
 
 $(CACHE_DIR)/mnist-reseau-fully-connected.bin: $(BUILDDIR)/mnist-main
