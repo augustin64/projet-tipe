@@ -32,4 +32,9 @@ Network* copy_network(Network* network);
 * Copie les paramètres d'un réseau dans un réseau déjà alloué en mémoire
 */
 void copy_network_parameters(Network* network_src, Network* network_dest);
+
+/*
+* Compte le nombre de poids nuls dans un réseau
+*/
+int count_null_weights(Network* network);
 #endif

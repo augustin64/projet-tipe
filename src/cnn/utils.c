@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include "../include/memory_management.h"
 #include "../include/colors.h"
@@ -303,4 +304,65 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
             }
         }
     }
+}
+
+
+int count_null_weights(Network* network) {
+    float epsilon = 0.000001;
+
+    int null_weights = 0;
+    int null_bias = 0;
+
+    int size = network->size;
+    // Paramètres des couches NN
+    int input_units;
+    int output_units;
+    // Paramètres des couches CNN
+    int rows;
+    int k_size;
+    int columns;
+    int output_dim;
+
+    for (int i=0; i < size-1; i++) {
+        if (!network->kernel[i]->cnn && network->kernel[i]->nn) { // Cas du NN
+
+            input_units = network->kernel[i]->nn->input_units;
+            output_units = network->kernel[i]->nn->output_units;
+
+            for (int j=0; j < output_units; j++) {
+                null_bias += fabs(network->kernel[i]->nn->bias[j]) <= epsilon;
+            }
+            for (int j=0; j < input_units; j++) {
+                for (int k=0; k < output_units; k++) {
+                    null_weights += fabs(network->kernel[i]->nn->weights[j][k]) <= epsilon;
+                }
+            }
+        }
+        else if (network->kernel[i]->cnn && !network->kernel[i]->nn) { // Cas du CNN
+
+            rows = network->kernel[i]->cnn->rows;
+            k_size = network->kernel[i]->cnn->k_size;
+            columns = network->kernel[i]->cnn->columns;
+            output_dim = network->width[i+1];
+
+            for (int j=0; j < columns; j++) {
+                for (int k=0; k < output_dim; k++) {
+                    for (int l=0; l < output_dim; l++) {
+                        null_bias += fabs(network->kernel[i]->cnn->bias[j][k][l]) <= epsilon;
+                    }
+                }
+            }
+            for (int j=0; j < rows; j++) {
+                for (int k=0; k < columns; k++) {
+                    for (int l=0; l < k_size; l++) {
+                        for (int m=0; m < k_size; m++) {
+                            null_weights = fabs(network->kernel[i]->cnn->w[j][k][l][m]) <= epsilon;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return null_weights;
 }
