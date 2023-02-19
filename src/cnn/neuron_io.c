@@ -111,7 +111,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         uint32_t pre_buffer[4];
         pre_buffer[0] = kernel->activation;
         pre_buffer[1] = kernel->linearisation;
-        pre_buffer[2] = nn->input_units;
+        pre_buffer[2] = nn->size_input;
         pre_buffer[3] = nn->output_units;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
@@ -122,7 +122,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         }
         fwrite(buffer, sizeof(buffer), 1, ptr);
 
-        for (int i=0; i < nn->input_units; i++) {
+        for (int i=0; i < nn->size_input; i++) {
             indice_buffer = 0;
             float buffer[nn->output_units];
             for (int j=0; j < nn->output_units; j++) {
@@ -287,7 +287,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
 
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
-        kernel->nn->input_units = buffer[2];
+        kernel->nn->size_input = buffer[2];
         kernel->nn->output_units = buffer[3];
 
         // Lecture du corps
@@ -302,9 +302,9 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             nn->d_bias[i] = 0.;
         }
 
-        nn->weights = (float**)nalloc(sizeof(float*)*nn->input_units);
-        nn->d_weights = (float**)nalloc(sizeof(float*)*nn->input_units);
-        for (int i=0; i < nn->input_units; i++) {
+        nn->weights = (float**)nalloc(sizeof(float*)*nn->size_input);
+        nn->d_weights = (float**)nalloc(sizeof(float*)*nn->size_input);
+        for (int i=0; i < nn->size_input; i++) {
             nn->weights[i] = (float*)nalloc(sizeof(float)*nn->output_units);
             nn->d_weights[i] = (float*)nalloc(sizeof(float)*nn->output_units);
             for (int j=0; j < nn->output_units; j++) {

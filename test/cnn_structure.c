@@ -27,7 +27,7 @@ int main() {
             }
         } else if (!kernel->cnn) {
             printf("\n==== Couche %d de type "GREEN"NN"RESET" ====\n", i);
-            printf("input: %d\n", kernel->nn->input_units);
+            printf("input: %d\n", kernel->nn->size_input);
             printf("output: %d\n", kernel->nn->output_units);
         } else {
             printf("\n==== Couche %d de type "BLUE"CNN"RESET" ====\n", i);

@@ -70,7 +70,7 @@ void free_convolution(Network* network, int pos) {
 void free_dense(Network* network, int pos) {
     free_a_line_input_layer(network, pos+1);
     Kernel_nn* k_pos = network->kernel[pos]->nn;
-    int dim = k_pos->input_units;
+    int dim = k_pos->size_input;
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i]);
         gree(k_pos->d_weights[i]);
@@ -87,7 +87,7 @@ void free_dense(Network* network, int pos) {
 void free_dense_linearisation(Network* network, int pos) {
     free_a_line_input_layer(network, pos+1);
     Kernel_nn* k_pos = network->kernel[pos]->nn;
-    int dim = k_pos->input_units;
+    int dim = k_pos->size_input;
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i]);
         gree(k_pos->d_weights[i]);

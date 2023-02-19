@@ -44,7 +44,7 @@ type | nom de la variable | commentaire
 :---:|:---:|:---:
 uint32_t|activation|
 uint32_t|linearisation|
-uint32_t|input_units|
+uint32_t|size_input|
 uint32_t|output_units|
 
 #### Si la couche est de type pooling:
@@ -79,4 +79,4 @@ float|...|
 float|bias[nn->output_units-1]|biais
 float|weights[0][0]|poids
 float|...|
-float|weights[nn->input_units-1][nn->output_units-1]|
+float|weights[nn->size_input-1][nn->output_units-1]|

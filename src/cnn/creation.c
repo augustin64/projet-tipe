@@ -205,7 +205,7 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
 void add_dense(Network* network, int output_units, int activation) {
     int n = network->size;
     int k_pos = n-1;
-    int input_units = network->width[k_pos];
+    int size_input = network->width[k_pos];
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
@@ -216,7 +216,7 @@ void add_dense(Network* network, int output_units, int activation) {
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 0;
     network->kernel[k_pos]->pooling = 0;
-    nn->input_units = input_units;
+    nn->size_input = size_input;
     nn->output_units = output_units;
     nn->bias = (float*)nalloc(sizeof(float)*output_units);
     nn->d_bias = (float*)nalloc(sizeof(float)*output_units);
@@ -224,9 +224,9 @@ void add_dense(Network* network, int output_units, int activation) {
         nn->d_bias[i] = 0.;
     }
 
-    nn->weights = (float**)nalloc(sizeof(float*)*input_units);
-    nn->d_weights = (float**)nalloc(sizeof(float*)*input_units);
-    for (int i=0; i < input_units; i++) {
+    nn->weights = (float**)nalloc(sizeof(float*)*size_input);
+    nn->d_weights = (float**)nalloc(sizeof(float*)*size_input);
+    for (int i=0; i < size_input; i++) {
         nn->weights[i] = (float*)nalloc(sizeof(float)*output_units);
         nn->d_weights[i] = (float*)nalloc(sizeof(float)*output_units);
         for (int j=0; j < output_units; j++) {
@@ -234,19 +234,19 @@ void add_dense(Network* network, int output_units, int activation) {
         }
     }
 
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units);
-    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, size_input);
+    initialisation_2d_matrix(network->initialisation, nn->weights, size_input, output_units, size_input, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
     network->size++;
 }
 
 void add_dense_linearisation(Network* network, int output_units, int activation) {
-    // Can replace input_units by a research of this dim
+    // Can replace size_input by a research of this dim
 
     int n = network->size;
     int k_pos = n-1;
-    int input_units = network->depth[k_pos]*network->width[k_pos]*network->width[k_pos];
+    int size_input = network->depth[k_pos]*network->width[k_pos]*network->width[k_pos];
     if (network->max_size == n) {
         printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
@@ -257,7 +257,7 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     network->kernel[k_pos]->activation = activation;
     network->kernel[k_pos]->linearisation = 1;
     network->kernel[k_pos]->pooling = 0;
-    nn->input_units = input_units;
+    nn->size_input = size_input;
     nn->output_units = output_units;
 
     nn->bias = (float*)nalloc(sizeof(float)*output_units);
@@ -265,17 +265,17 @@ void add_dense_linearisation(Network* network, int output_units, int activation)
     for (int i=0; i < output_units; i++) {
         nn->d_bias[i] = 0.;
     }
-    nn->weights = (float**)nalloc(sizeof(float*)*input_units);
-    nn->d_weights = (float**)nalloc(sizeof(float*)*input_units);
-    for (int i=0; i < input_units; i++) {
+    nn->weights = (float**)nalloc(sizeof(float*)*size_input);
+    nn->d_weights = (float**)nalloc(sizeof(float*)*size_input);
+    for (int i=0; i < size_input; i++) {
         nn->weights[i] = (float*)nalloc(sizeof(float)*output_units);
         nn->d_weights[i] = (float*)nalloc(sizeof(float)*output_units);
         for (int j=0; j < output_units; j++) {
             nn->d_weights[i][j] = 0.;
         }
     }
-    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, input_units);
-    initialisation_2d_matrix(network->initialisation, nn->weights, input_units, output_units, input_units, output_units);
+    initialisation_1d_matrix(network->initialisation, nn->bias, output_units, size_input);
+    initialisation_2d_matrix(network->initialisation, nn->weights, size_input, output_units, size_input, output_units);
     create_a_line_input_layer(network, n, output_units);
     create_a_line_input_z_layer(network, n, output_units);
     network->size++;

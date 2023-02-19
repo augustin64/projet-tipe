@@ -12,12 +12,12 @@ typedef struct Kernel_cnn {
 } Kernel_cnn;
 
 typedef struct Kernel_nn {
-    int input_units; // Nombre d'éléments en entrée
+    int size_input; // Nombre d'éléments en entrée
     int output_units; // Nombre d'éléments en sortie
     float* bias; // bias[output_units]
     float* d_bias; // d_bias[output_units]
-    float** weights; // weight[input_units][output_units]
-    float** d_weights; // d_weights[input_units][output_units]
+    float** weights; // weight[size_input][output_units]
+    float** d_weights; // d_weights[size_input][output_units]
 } Kernel_nn;
 
 typedef struct Kernel {
