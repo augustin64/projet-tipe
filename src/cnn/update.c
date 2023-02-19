@@ -48,8 +48,8 @@ void update_weights(Network* network, Network* d_network) {
             } else { // Matrice -> vecteur
                 Kernel_nn* nn = k_i->nn;
                 Kernel_nn* d_nn = dk_i->nn;
-                int input_size = input_width*input_width*input_depth;
-                for (int a=0; a<input_size; a++) {
+                int size_input = input_width*input_width*input_depth;
+                for (int a=0; a<size_input; a++) {
                     for (int b=0; b<output_width; b++) {
                         nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
                         d_nn->d_weights[a][b] = 0;
@@ -148,8 +148,8 @@ void reset_d_weights(Network* network) {
                 }
             } else { // Matrice -> vecteur
                 Kernel_nn* nn = k_i_1->nn;
-                int input_size = input_width*input_width*input_depth;
-                for (int a=0; a<input_size; a++) {
+                int size_input = input_width*input_width*input_depth;
+                for (int a=0; a<size_input; a++) {
                     for (int b=0; b<output_width; b++) {
                         nn->d_weights[a][b] = 0;
                     }

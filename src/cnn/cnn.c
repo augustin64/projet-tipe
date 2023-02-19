@@ -52,16 +52,16 @@ void write_image_in_network_32(int** image, int height, int width, float** input
 }
 
 void write_image_in_network_260(unsigned char* image, int height, int width, float*** input) {
-    int input_size = 260;
-    int padding = (input_size - height)/2;
+    int size_input = 260;
+    int padding = (size_input - height)/2;
 
     for (int i=0; i < padding; i++) {
-        for (int j=0; j < input_size; j++) {
+        for (int j=0; j < size_input; j++) {
             for (int composante=0; composante < 3; composante++) {
                 input[composante][i][j] = 0.;
-                input[composante][input_size-1-i][j] = 0.;
+                input[composante][size_input-1-i][j] = 0.;
                 input[composante][j][i] = 0.;
-                input[composante][j][input_size-1-i] = 0.;
+                input[composante][j][size_input-1-i] = 0.;
             }
         }
     }
