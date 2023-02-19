@@ -37,6 +37,18 @@ float relu_derivative(float x) {
     return 0;
 }
 
+float leaky_relu(float x) {
+    if (x>0)
+        return x;
+    return x*LEAKER;
+}
+
+float leaky_relu_derivative(float x) {
+    if (x > 0)
+        return 1;
+    return LEAKER;
+}
+
 float tanh_(float x) {
     return tanh(x);
 }
@@ -92,6 +104,8 @@ void choose_apply_function_matrix(int activation, float*** input, int depth, int
         apply_softmax_input(input, depth, dim, dim);
     } else if (activation == TANH) {
         apply_function_input(tanh_, input, depth, dim, dim);
+    } else if (activation == LEAKY_RELU) {
+        apply_function_input(leaky_relu, input, depth, dim, dim);
     } else {
         printf("Erreur, fonction d'activation inconnue (choose_apply_function_matrix): %d\n", activation);
     }
@@ -106,6 +120,8 @@ void choose_apply_function_vector(int activation, float*** input, int dim) {
         apply_softmax_input(input, 1, 1, dim);
     } else if (activation == TANH) {
         apply_function_input(tanh_, input, 1, 1, dim);
+    } else if (activation == LEAKY_RELU) {
+        apply_function_input(leaky_relu, input, 1, 1, dim);
     } else {
         printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
     }
@@ -143,6 +159,12 @@ ptr get_function_activation(int activation) {
     }
     if (activation == -TANH) {
         return &tanh_derivative;
+    }
+    if (activation == LEAKY_RELU) {
+        return &leaky_relu;
+    }
+    if (activation == -LEAKY_RELU) {
+        return &leaky_relu_derivative;
     }
     printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
     return NULL;

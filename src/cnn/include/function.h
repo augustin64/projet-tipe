@@ -8,6 +8,9 @@
 #define SIGMOID 3
 #define RELU 4
 #define SOFTMAX 5
+#define LEAKY_RELU 6
+
+#define LEAKER 0.2
 
 
 typedef float (*ptr)(float);
@@ -29,6 +32,10 @@ float sigmoid_derivative(float x);
 float relu(float x);
 
 float relu_derivative(float x);
+
+float leaky_relu(float x);
+
+float leaky_relu_derivative(float x);
 
 float tanh_(float x);
 
