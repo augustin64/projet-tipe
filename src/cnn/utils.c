@@ -96,7 +96,7 @@ bool equals_networks(Network* network1, Network* network2) {
 
 
 Network* copy_network(Network* network) {
-    Network* network_cp = (Network*)nalloc(sizeof(Network));
+    Network* network_cp = (Network*)nalloc(1, sizeof(Network));
     // Paramètre du réseau
     int size = network->size;
     // Paramètres des couches NN
@@ -114,17 +114,17 @@ Network* copy_network(Network* network) {
     copyVar(max_size);
     copyVar(size);
 
-    network_cp->width = (int*)nalloc(sizeof(int)*size);
-    network_cp->depth = (int*)nalloc(sizeof(int)*size);
+    network_cp->width = (int*)nalloc(size, sizeof(int));
+    network_cp->depth = (int*)nalloc(size, sizeof(int));
 
     for (int i=0; i < size; i++) {
         copyVar(width[i]);
         copyVar(depth[i]);
     }
 
-    network_cp->kernel = (Kernel**)nalloc(sizeof(Kernel*)*(size-1));
+    network_cp->kernel = (Kernel**)nalloc(size-1, sizeof(Kernel*));
     for (int i=0; i < size-1; i++) {
-        network_cp->kernel[i] = (Kernel*)nalloc(sizeof(Kernel));
+        network_cp->kernel[i] = (Kernel*)nalloc(1, sizeof(Kernel));
         if (!network->kernel[i]->nn && !network->kernel[i]->cnn) { // Cas de la couche de linéarisation
             copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
@@ -141,23 +141,23 @@ Network* copy_network(Network* network) {
             size_output = network->kernel[i]->nn->size_output;
 
             network_cp->kernel[i]->cnn = NULL;
-            network_cp->kernel[i]->nn = (Kernel_nn*)nalloc(sizeof(Kernel_nn));
+            network_cp->kernel[i]->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
 
             copyVar(kernel[i]->nn->size_input);
             copyVar(kernel[i]->nn->size_output);
 
-            network_cp->kernel[i]->nn->bias = (float*)nalloc(sizeof(float)*size_output);
-            network_cp->kernel[i]->nn->d_bias = (float*)nalloc(sizeof(float)*size_output);
+            network_cp->kernel[i]->nn->bias = (float*)nalloc(size_output, sizeof(float));
+            network_cp->kernel[i]->nn->d_bias = (float*)nalloc(size_output, sizeof(float));
             for (int j=0; j < size_output; j++) {
                 copyVar(kernel[i]->nn->bias[j]);
                 network_cp->kernel[i]->nn->d_bias[j] = 0.;
             }
 
-            network_cp->kernel[i]->nn->weights = (float**)nalloc(sizeof(float*)*size_input);
-            network_cp->kernel[i]->nn->d_weights = (float**)nalloc(sizeof(float*)*size_input);
+            network_cp->kernel[i]->nn->weights = (float**)nalloc(size_input, sizeof(float*));
+            network_cp->kernel[i]->nn->d_weights = (float**)nalloc(size_input, sizeof(float*));
             for (int j=0; j < size_input; j++) {
-                network_cp->kernel[i]->nn->weights[j] = (float*)nalloc(sizeof(float)*size_output);
-                network_cp->kernel[i]->nn->d_weights[j] = (float*)nalloc(sizeof(float)*size_output);
+                network_cp->kernel[i]->nn->weights[j] = (float*)nalloc(size_output, sizeof(float));
+                network_cp->kernel[i]->nn->d_weights[j] = (float*)nalloc(size_output, sizeof(float));
                 for (int k=0; k < size_output; k++) {
                     copyVar(kernel[i]->nn->weights[j][k]);
                     network_cp->kernel[i]->nn->d_weights[j][k] = 0.;
@@ -176,20 +176,20 @@ Network* copy_network(Network* network) {
 
 
             network_cp->kernel[i]->nn = NULL;
-            network_cp->kernel[i]->cnn = (Kernel_cnn*)nalloc(sizeof(Kernel_cnn));
+            network_cp->kernel[i]->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
 
             copyVar(kernel[i]->cnn->rows);
             copyVar(kernel[i]->cnn->k_size);
             copyVar(kernel[i]->cnn->columns);
 
-            network_cp->kernel[i]->cnn->bias = (float***)nalloc(sizeof(float**)*columns);
-            network_cp->kernel[i]->cnn->d_bias = (float***)nalloc(sizeof(float**)*columns);
+            network_cp->kernel[i]->cnn->bias = (float***)nalloc(columns, sizeof(float**));
+            network_cp->kernel[i]->cnn->d_bias = (float***)nalloc(columns, sizeof(float**));
             for (int j=0; j < columns; j++) {
-                network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(sizeof(float*)*output_dim);
-                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(sizeof(float*)*output_dim);
+                network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(output_dim, sizeof(float*));
+                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(output_dim, sizeof(float*));
                 for (int k=0; k < output_dim; k++) {
-                    network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(sizeof(float)*output_dim);
-                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(sizeof(float)*output_dim);
+                    network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
+                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
                     for (int l=0; l < output_dim; l++) {
                         copyVar(kernel[i]->cnn->bias[j][k][l]);
                         network_cp->kernel[i]->cnn->d_bias[j][k][l] = 0.;
@@ -197,17 +197,17 @@ Network* copy_network(Network* network) {
                 }
             }
 
-            network_cp->kernel[i]->cnn->weights = (float****)nalloc(sizeof(float***)*rows);
-            network_cp->kernel[i]->cnn->d_weights = (float****)nalloc(sizeof(float***)*rows);
+            network_cp->kernel[i]->cnn->weights = (float****)nalloc(rows, sizeof(float***));
+            network_cp->kernel[i]->cnn->d_weights = (float****)nalloc(rows, sizeof(float***));
             for (int j=0; j < rows; j++) {
-                network_cp->kernel[i]->cnn->weights[j] = (float***)nalloc(sizeof(float**)*columns);
-                network_cp->kernel[i]->cnn->d_weights[j] = (float***)nalloc(sizeof(float**)*columns);
+                network_cp->kernel[i]->cnn->weights[j] = (float***)nalloc(columns, sizeof(float**));
+                network_cp->kernel[i]->cnn->d_weights[j] = (float***)nalloc(columns, sizeof(float**));
                 for (int k=0; k < columns; k++) {
-                    network_cp->kernel[i]->cnn->weights[j][k] = (float**)nalloc(sizeof(float*)*k_size);
-                    network_cp->kernel[i]->cnn->d_weights[j][k] = (float**)nalloc(sizeof(float*)*k_size);
+                    network_cp->kernel[i]->cnn->weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
+                    network_cp->kernel[i]->cnn->d_weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
                     for (int l=0; l < k_size; l++) {
-                        network_cp->kernel[i]->cnn->weights[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
-                        network_cp->kernel[i]->cnn->d_weights[j][k][l] = (float*)nalloc(sizeof(float)*k_size);
+                        network_cp->kernel[i]->cnn->weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
+                        network_cp->kernel[i]->cnn->d_weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
                         for (int m=0; m < k_size; m++) {
                             copyVar(kernel[i]->cnn->weights[j][k][l][m]);
                             network_cp->kernel[i]->cnn->d_weights[j][k][l][m] = 0.;
@@ -218,13 +218,13 @@ Network* copy_network(Network* network) {
         }
     }
 
-    network_cp->input = (float****)nalloc(sizeof(float***)*size);
+    network_cp->input = (float****)nalloc(size, sizeof(float***));
     for (int i=0; i < size; i++) { // input[size][couche->depth][couche->dim][couche->dim]
-        network_cp->input[i] = (float***)nalloc(sizeof(float**)*network->depth[i]);
+        network_cp->input[i] = (float***)nalloc(network->depth[i], sizeof(float**));
         for (int j=0; j < network->depth[i]; j++) {
-            network_cp->input[i][j] = (float**)nalloc(sizeof(float*)*network->width[i]);
+            network_cp->input[i][j] = (float**)nalloc(network->width[i], sizeof(float*));
             for (int k=0; k < network->width[i]; k++) {
-                network_cp->input[i][j][k] = (float*)nalloc(sizeof(float)*network->width[i]);
+                network_cp->input[i][j][k] = (float*)nalloc(network->width[i], sizeof(float));
                 for (int l=0; l < network->width[i]; l++) {
                     network_cp->input[i][j][k][l] = 0.;
                 }
@@ -232,13 +232,13 @@ Network* copy_network(Network* network) {
         }
     }
 
-    network_cp->input_z = (float****)nalloc(sizeof(float***)*size);
+    network_cp->input_z = (float****)nalloc(size, sizeof(float***));
     for (int i=0; i < size; i++) { // input_z[size][couche->depth][couche->dim][couche->dim]
-        network_cp->input_z[i] = (float***)nalloc(sizeof(float**)*network->depth[i]);
+        network_cp->input_z[i] = (float***)nalloc(network->depth[i], sizeof(float**));
         for (int j=0; j < network->depth[i]; j++) {
-            network_cp->input_z[i][j] = (float**)nalloc(sizeof(float*)*network->width[i]);
+            network_cp->input_z[i][j] = (float**)nalloc(network->width[i], sizeof(float*));
             for (int k=0; k < network->width[i]; k++) {
-                network_cp->input_z[i][j][k] = (float*)nalloc(sizeof(float)*network->width[i]);
+                network_cp->input_z[i][j][k] = (float*)nalloc(network->width[i], sizeof(float));
                 for (int l=0; l < network->width[i]; l++) {
                     network_cp->input_z[i][j][k][l] = 0.;
                 }

@@ -38,9 +38,9 @@ void print_matrix(float** mat, int n, int p) {
 
 
 float** create_matrix(int n, int p) {
-    float** matrix = (float**)nalloc(n*sizeof(float*));
+    float** matrix = (float**)nalloc(n, sizeof(float*));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float*)nalloc(sizeof(float)*p);
+        matrix[i] = (float*)nalloc(p, sizeof(float));
     }
 
     fill_matrix_random(matrix, n, p);
@@ -49,9 +49,9 @@ float** create_matrix(int n, int p) {
 
 
 float** create_empty_matrix(int n, int p) {
-    float** matrix = (float**)nalloc(n*sizeof(float*));
+    float** matrix = (float**)nalloc(n, sizeof(float*));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float*)nalloc(p*sizeof(float));
+        matrix[i] = (float*)nalloc(p, sizeof(float));
         for (int j=0; j < p; j++) {
             matrix[i][j] = 0.;
         }

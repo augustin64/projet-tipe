@@ -69,20 +69,34 @@ Memory* create_memory_block(size_t size) {
 }
 
 
-void* allocate_memory(size_t size, Memory* mem) {
+void* allocate_memory(int nb_elements, size_t size, Memory* mem) {
+    /*
+    * cursor_aligned pointe vers le premier emplacement qui pourrait être utilisé (de manière alignée).
+    * en effet, la mémoire nécessite d'être alignée avec CUDA:
+    * https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#device-memory-accesses
+    */
+   void* aligned_cursor = mem->cursor;
+    #ifdef __CUDACC__
+        // Cela devrait être faisable avec opérateurs binaires directement, mais on préfèrera quelque chose de lisible et vérifiable
+        if (((intptr_t)mem->cursor) %size != 0) {
+            if (size == 2 || size == 4 || size == 8 || size == 16)
+                aligned_cursor = (void*)(((intptr_t)mem->cursor) + (size - (((intptr_t)mem->cursor) %size)));
+        }
+    #endif
     // Si il y a suffisamment de mémoire disponible
-    if (mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start) >= size) {
-        void* ptr = mem->cursor;
-        mem->cursor = (void*)((intptr_t)mem->cursor + size); // On décale le curseur de la taille allouée
+    if (mem->size - ((intptr_t)aligned_cursor - (intptr_t)mem->start) >= nb_elements*size) {
+        void* ptr = aligned_cursor;
+        mem->cursor = (void*)((intptr_t)aligned_cursor + nb_elements*size); // On décale le curseur de la taille allouée
         mem->nb_alloc++;
         return ptr;
     } else {
-        //printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), size);
+        //printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), nb_elements*size);
         // Sinon on continue sur l'élément suivant de la liste
         if (!mem->next) {
-            mem->next = create_memory_block(MEMORY_BLOCK < size ? size : MEMORY_BLOCK);
+            //! WARNING: May cause Infinite allocations when trying to allocate more than MEMORY_BLOCK size at once that is not naturally aligned (CUDA only)
+            mem->next = create_memory_block(MEMORY_BLOCK < nb_elements*size ? nb_elements*size : MEMORY_BLOCK);
         }
-        return allocate_memory(size, mem->next);
+        return allocate_memory(nb_elements, size, mem->next);
     }
 }
 
@@ -118,21 +132,21 @@ Memory* free_memory(void* ptr, Memory* mem) {
 #ifdef __CUDACC__
 extern "C"
 #endif
-void* nalloc(size_t sz) {
+void* nalloc(int nb_elements, size_t size) {
     #if defined(__CUDACC__) || defined(TEST_MEMORY_MANAGEMENT)
         pthread_mutex_lock(&memory_lock);
         if (!memory) {
             // We allocate a new memory block
-            memory = create_memory_block(MEMORY_BLOCK < sz ? sz : MEMORY_BLOCK);
+            memory = create_memory_block(MEMORY_BLOCK < nb_elements*size ? nb_elements*size : MEMORY_BLOCK);
         }
         //printf("Distinct allocations: %d Blocks: %d\n", get_distinct_allocations(memory), get_length(memory));
         //printf("Requested memory of size %ld\n", sz);
-        void* ptr = allocate_memory(sz, memory);
+        void* ptr = allocate_memory(nb_elements, size, memory);
 
         pthread_mutex_unlock(&memory_lock);
         return ptr;
     #else
-        void* ptr = malloc(sz);
+        void* ptr = malloc(size*nb_elements);
         return ptr;
     #endif
 }

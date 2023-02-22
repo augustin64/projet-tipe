@@ -234,7 +234,7 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 * Dense linearised
 */
 #ifdef __CUDACC__
-__global__ void make_dense_linearised_kernel(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+__global__ void make_dense_linearised_kernel(float** weights, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < size_output
 
@@ -246,7 +246,7 @@ __global__ void make_dense_linearised_kernel(Kernel_nn* kernel, float*** input, 
     for (int i=0; i < depth_input; i++) {
         for (int j=0; j < dim_input; j++) {
             for (int k=0; k < dim_input; k++) {
-                f += input[i][j][k]*kernel->weights[k + j*dim_input + i*depth_input][idx];
+                f += input[i][j][k]*weights[k + j*dim_input + i*depth_input][idx];
             }
         }
     }
@@ -258,7 +258,7 @@ void make_dense_linearised_device(Kernel_nn* kernel, float*** input, float* outp
     dim3 gridSize(i_div_up(size_output, BLOCKSIZE_x*BLOCKSIZE_y), 1, 1);
     dim3 blockSize(BLOCKSIZE_x*BLOCKSIZE_y, 1, BLOCKSIZE_z);
 
-    make_dense_linearised_kernel<<<gridSize, blockSize>>>(kernel, input, output, depth_input, dim_input, size_output);
+    make_dense_linearised_kernel<<<gridSize, blockSize>>>(kernel->weights, input, output, depth_input, dim_input, size_output);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }

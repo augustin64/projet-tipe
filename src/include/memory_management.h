@@ -67,7 +67,7 @@ Memory* create_memory_block(size_t size);
 /*
 * Allouer un élément de taille size dans mem
 */
-void* allocate_memory(size_t size, Memory* mem);
+void* allocate_memory(int nb_elements, size_t size, Memory* mem);
 
 /*
 * Essayer de libérer le pointeur représenté par ptr dans mem
@@ -80,7 +80,7 @@ extern "C"
 /*
 * Alloue de la mémoire partagée CUDA si CUDA est activé
 */
-void* nalloc(size_t sz);
+void* nalloc(int nb_elements, size_t size);
 
 #ifdef __CUDACC__
 extern "C"

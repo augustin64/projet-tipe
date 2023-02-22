@@ -42,11 +42,11 @@ void print_matrix(float** mat, int n, int p) {
 
 
 float*** create_matrix(int n, int p, int q, float max_val) {
-    float*** matrix = (float***)nalloc(n*sizeof(float**));
+    float*** matrix = (float***)nalloc(n, sizeof(float**));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float**)nalloc(sizeof(float*)*p);
+        matrix[i] = (float**)nalloc(p, sizeof(float*));
         for (int j=0; j < p; j++) {
-            matrix[i][j] = (float*)nalloc(sizeof(float)*q);
+            matrix[i][j] = (float*)nalloc(q, sizeof(float));
         }
     }
 
@@ -56,11 +56,11 @@ float*** create_matrix(int n, int p, int q, float max_val) {
 
 
 float*** create_empty_matrix(int n, int p, int q) {
-    float*** matrix = (float***)nalloc(n*sizeof(float**));
+    float*** matrix = (float***)nalloc(n, sizeof(float**));
     for (int i=0; i < n; i++) {
-        matrix[i] = (float**)nalloc(sizeof(float*)*p);
+        matrix[i] = (float**)nalloc(p, sizeof(float*));
         for (int j=0; j < p; j++) {
-            matrix[i][j] = (float*)nalloc(sizeof(float)*q);
+            matrix[i][j] = (float*)nalloc(q, sizeof(float));
             for (int k=0; k < q; k++) {
                 matrix[i][j][k] = 0.;
             }
@@ -98,7 +98,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     int k_size = input_dim - output_dim +1;
 
     // Génération des données aléatoires
-    Kernel_cnn* kernel = (Kernel_cnn*)nalloc(sizeof(Kernel_cnn));
+    Kernel_cnn* kernel = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
     
     kernel->k_size = k_size;
     kernel->rows = rows;
@@ -109,8 +109,8 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
 
     // weights[rows][columns][k_size][k_size]
-    kernel->weights = (float****)nalloc(sizeof(float***)*kernel->rows);
-    kernel->d_weights = (float****)nalloc(sizeof(float***)*kernel->rows);
+    kernel->weights = (float****)nalloc(kernel->rows, sizeof(float***));
+    kernel->d_weights = (float****)nalloc(kernel->rows, sizeof(float***));
     for (int i=0; i < kernel->rows; i++) {
         kernel->weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 15.0f);
         kernel->d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);

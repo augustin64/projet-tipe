@@ -23,7 +23,7 @@ int main() {
     // We pollute a little bit the memory before the tests
     int* pointeurs[N];
     for (int i=1; i < N; i++) {
-        pointeurs[i] = (int*)nalloc(i*sizeof(int));
+        pointeurs[i] = (int*)nalloc(i, sizeof(int));
         for (int j=0; j < i; j++) {
             pointeurs[i][j] = i;
         }
@@ -32,7 +32,7 @@ int main() {
     // We test in a first place that one simple allocation works as expected
     mem_used = get_memory_distinct_allocations();
     blocks_used = get_memory_blocks_number();
-    void* ptr = nalloc(15);
+    void* ptr = nalloc(15, 1);
     if (! (get_memory_distinct_allocations() <= mem_used+1)) {
         printf("Plus d'un élément de mémoire alloué en une seule allocation\n");
         exit(1);
@@ -46,8 +46,8 @@ int main() {
 
     
     printf("Vérification de l'accès CUDA\n");
-    /* On lance des kernels detaille 1 ce qui est itératif synchrone
-    * Donc un peu contraire à CUDA mais l'objectif est de débugger faiclement */
+    /* On lance des kernels de taille 1 ce qui est à la fois itératif et synchrone
+    * Donc un peu contraire à CUDA mais l'objectif est de pouvoir débugger facilement */
     dim3 gridSize(1, 1, 1);
     dim3 blockSize(1, 1, 1);
 
@@ -62,8 +62,8 @@ int main() {
     printf("Allocation de deux demi-blocs\n");
     // We test that we do not use too much blocks
     blocks_used = get_memory_blocks_number();
-    void* ptr1 = nalloc(-1+MEMORY_BLOCK/2);
-    void* ptr2 = nalloc(-1+MEMORY_BLOCK/2);
+    void* ptr1 = nalloc(-1+MEMORY_BLOCK/2, 1);
+    void* ptr2 = nalloc(-1+MEMORY_BLOCK/2, 1);
     if (! (get_memory_blocks_number() <= blocks_used +1)) {
         printf("Trop de blocs ont été alloués par rapport à la mémoire nécessaire\n");
         exit(1);
