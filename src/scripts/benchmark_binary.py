@@ -61,7 +61,7 @@ def compare_binaries(binaries, tries=3, dataset="train"):
             results.append(train(binary, base_net, tries, dataset=dataset))
         except:
             print(f"========== Erreur sur {binary} ==========")
-            results.append(0)
+            results.append([0.]*tries)
 
     x = [i for i in range(tries)]
 
@@ -69,9 +69,8 @@ def compare_binaries(binaries, tries=3, dataset="train"):
     
     res = []
     for i in range(len(binaries)):
-        if results[i] != 0:
-            res.append(ax.plot(x, results[i])[0])
-            res[i].set_label(binaries[i])
+        res.append(ax.plot(x, results[i])[0])
+        res[i].set_label(binaries[i])
     
     ax.set_ylabel("Taux de réussite (%)")
     ax.set_xlabel("Nombre de batchs")
@@ -80,5 +79,5 @@ def compare_binaries(binaries, tries=3, dataset="train"):
 
     plt.ylim(0, 100)
     plt.show()
-    return results
+    return binaries, results
     
