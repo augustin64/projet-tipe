@@ -11,7 +11,7 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-void softmax_backward_mse(float* input, float* input_z, float* output, int size) {
+void softmax_backward_mse(float* input, float* output, int size) {
     /* Input et output ont la même taille */
 
     for (int i=0; i < size; i++){
@@ -19,7 +19,7 @@ void softmax_backward_mse(float* input, float* input_z, float* output, int size)
     }
 }
 
-void softmax_backward_cross_entropy(float* input, float* input_z, float* output, int size) {
+void softmax_backward_cross_entropy(float* input, float* output, int size) {
     /* Input et output ont la même taille */
 
     for (int i=0; i < size; i++){

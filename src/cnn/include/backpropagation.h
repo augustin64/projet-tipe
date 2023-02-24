@@ -17,13 +17,13 @@ int max(int a, int b);
 /*
 * Transfert les informations d'erreur de la sortie voulue à la sortie réelle
 */
-void softmax_backward_mse(float* input, float* input_z, float* output, int size);
+void softmax_backward_mse(float* input, float* output, int size);
 
 /*
 * Transfert les informations d'erreur de la sortie voulue à la sortie réelle
 * en considérant MSE (Mean Squared Error) comme fonction d'erreur
 */
-void softmax_backward_cross_entropy(float* input, float* input_z, float* output, int size);
+void softmax_backward_cross_entropy(float* input, float* output, int size);
 
 /*
 * Transfert les informations d'erreur à travers une couche d'average pooling
