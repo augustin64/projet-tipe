@@ -19,6 +19,8 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
     int maxi; // Catégorie reconnue
 
     int accuracy = 0; // Nombre d'images reconnues
+    float loss = 0.;
+    float* wanted_output;
 
     // Load image
     int* mnist_parameters = read_mnist_images_parameters(images_file);
@@ -46,13 +48,18 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
             accuracy++;
         }
 
+        // Compute loss
+        wanted_output = generate_wanted_output(labels[i], 10);
+        loss += compute_mean_squared_error(network->input[network->size-1][0][0], wanted_output, 10);
+        free(wanted_output);
+
         for (int j=0; j < height; j++) {
             free(images[i][j]);
         }
         free(images[i]);
     }
     free(images);
-    printf("%d Images. Taux de réussite: %.2f%%\n", nb_elem, 100*accuracy/(float)nb_elem);
+    printf("%d Images. Taux de réussite: %.2f%%\tLoss: %lf\n", nb_elem, 100*accuracy/(float)nb_elem, loss/nb_elem);
 }
 
 

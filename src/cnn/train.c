@@ -10,6 +10,7 @@
 #include "../include/memory_management.h"
 #include "../mnist/include/mnist.h"
 #include "include/initialisation.h"
+#include "include/test_network.h"
 #include "include/neuron_io.h"
 #include "../include/colors.h"
 #include "../include/utils.h"
@@ -326,15 +327,17 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         end_time = omp_get_wtime();
         elapsed_time = end_time - start_time;
         #ifdef USE_MULTITHREADING
-        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: ", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tLoss: %lf\tTemps: ", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, loss);
         printf_time(elapsed_time);
         printf("\n");
         #else
-        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tTemps: ", i, epochs, nb_images_total, nb_images_total, accuracy*100);
+        printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tLoss: %lf\tTemps: ", i, epochs, nb_images_total, nb_images_total, accuracy*100, loss);
         printf_time(elapsed_time);
         printf("\n");
         #endif
         write_network(out, network);
+        // If you want to test the network between each epoch, uncomment the following line:
+        //test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false);
     }
 
     // To generate a new neural and compare performances with scripts/benchmark_binary.py
