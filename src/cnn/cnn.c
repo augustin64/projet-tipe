@@ -142,7 +142,8 @@ void backward_propagation(Network* network, int wanted_number) {
     float*** output;
     Kernel* k_i;
 
-    softmax_backward(network->input[n-1][0][0], network->input_z[n-1][0][0], wanted_output, network->width[n-1]); // Backward sur la dernière colonne
+    // Backward sur la dernière couche
+    softmax_backward_cross_entropy(network->input[n-1][0][0], network->input_z[n-1][0][0], wanted_output, network->width[n-1]);
 
     for (int i=n-2; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
@@ -219,7 +220,7 @@ float compute_cross_entropy_loss(float* output, float* wanted_output, int len) {
             }
         }
     }
-    return loss;
+    return loss/len;
 }
 
 float* generate_wanted_output(int wanted_number, int size_output) {
