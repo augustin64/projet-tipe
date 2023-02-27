@@ -38,16 +38,14 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
         return;
     }
 
-    float m = FLT_MIN;
-    float temp;
+    float sum = 0;
 
     for (int a=0; a < size; a++) {
         for (int b=0; b < size; b++) {
-            temp = input[idx][size*idy +a][size*idz +b];
-            m = m > temp ? m : temp; // max(m, temp)
+            sum += input[idx][size*idy +a][size*idz +b];
         }
     }
-    output[idx][idy][idz] = m/(float)n;
+    output[idx][idy][idz] = sum/(float)n;
 }
 
 void make_average_pooling_device(float*** input, float*** output, int size, int output_depth, int output_dim) {
@@ -64,19 +62,19 @@ void make_average_pooling_device(float*** input, float*** output, int size, int 
 void make_average_pooling_cpu(float*** input, float*** output, int size, int output_depth, int output_dim) {
     // input[output_depth][output_dim+size-1][output_dim+size-1]
     // output[output_depth][output_dim][output_dim]
-    float m;
+    float sum;
     int n = size*size;
 
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_dim; j++) {
             for (int k=0; k < output_dim; k++) {
-                m = FLT_MIN;
+                sum = 0;
                 for (int a=0; a < size; a++) {
                     for (int b=0; b < size; b++) {
-                        m = max_flt(m, input[i][size*j +a][size*k +b]);
+                        sum += input[i][size*j +a][size*k +b];
                     }
                 }
-                output[i][j][k] = m/(float)n;
+                output[i][j][k] = sum/(float)n;
             }
         }
     }
