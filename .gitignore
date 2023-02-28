@@ -1,10 +1,29 @@
 **/a.out
 **/__pycache__
 
+## Program and test cache locations
+# for webserver and benchmark
 .cache
+binaries/*
+# for running tests
 .test-cache
-.vscode
 build/*
+# out.bin
 *.bin
+# src/cnn/export.c
+fichier.json
+test-img-vis-kernel/*
 
+## VSCode config
+.vscode
+
+## Patches
+**.orig
+**.rej
+patches/*
+
+## 50States10K dataset
+# Download it from https://drive.google.com/file/d/1Y8eqx1Uy8kuRP4BNmTCVvrNbCxx6RoiP/view
+# Edit and run src/scripts/generate_dataset.sh to generate train and test set
 data/50States10K
+data/50States10K.zip
