@@ -229,17 +229,17 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 
 
 /*
-* Dense linearised
+* Dense linearized
 */
 #ifdef __CUDACC__
-__global__ void make_dense_linearised_kernel(float** weights, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+__global__ void make_dense_linearized_kernel(float** weights, float* bias, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < size_output
 
     if (idx >= size_output) {
         return;
     }
-    float f = 0;
+    float f = bias[idx];
 
     for (int i=0; i < depth_input; i++) {
         for (int j=0; j < dim_input; j++) {
@@ -251,24 +251,24 @@ __global__ void make_dense_linearised_kernel(float** weights, float*** input, fl
     output[idx] = f;
 }
 
-void make_dense_linearised_device(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+void make_dense_linearized_device(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     // Make computation
     dim3 gridSize(i_div_up(size_output, BLOCKSIZE_x*BLOCKSIZE_y), 1, 1);
     dim3 blockSize(BLOCKSIZE_x*BLOCKSIZE_y, 1, BLOCKSIZE_z);
 
-    make_dense_linearised_kernel<<<gridSize, blockSize>>>(kernel->weights, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_kernel<<<gridSize, blockSize>>>(kernel->weights, kernel->bias, input, output, depth_input, dim_input, size_output);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void make_dense_linearised_cpu(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+void make_dense_linearized_cpu(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     // input[depth_input][dim_input][dim_input]
     // output[size_output]
     float f;
 
     for (int l=0; l < size_output; l++) {
-        f = 0;
+        f = kernel->bias[l];
         for (int i=0; i < depth_input; i++) {
             for (int j=0; j < dim_input; j++) {
                 for (int k=0; k < dim_input; k++) {
@@ -283,10 +283,10 @@ void make_dense_linearised_cpu(Kernel_nn* kernel, float*** input, float* output,
 #ifdef __CUDACC__
 extern "C"
 #endif
-void make_dense_linearised(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+void make_dense_linearized(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
     #ifndef __CUDACC__
-    make_dense_linearised_cpu(kernel, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_cpu(kernel, input, output, depth_input, dim_input, size_output);
     #else
-    make_dense_linearised_device(kernel, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_device(kernel, input, output, depth_input, dim_input, size_output);
     #endif
 }

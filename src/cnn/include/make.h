@@ -43,6 +43,6 @@ extern "C"
 /*
 * Effectue une full connection qui passe d'une matrice à un vecteur
 */
-void make_dense_linearised(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output);
+void make_dense_linearized(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output);
 
 #endif

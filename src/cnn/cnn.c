@@ -110,7 +110,7 @@ void forward_propagation(Network* network) {
             if (k_i->linearisation == 0) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
             } else { // Matrice -> Vecteur
-                make_dense_linearised(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
+                make_dense_linearized(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
             copy_input_to_input_z(output, output_a, 1, 1, output_width);
             choose_apply_function_vector(activation, output, output_width);
