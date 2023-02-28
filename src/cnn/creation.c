@@ -3,6 +3,7 @@
 
 #include "../include/memory_management.h"
 #include "include/initialisation.h"
+#include "../include/colors.h"
 #include "include/function.h"
 #include "../include/utils.h"
 
@@ -10,7 +11,7 @@
 
 Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_dim, int input_depth) {
     if (dropout < 0 || dropout > 100) {
-        printf("Erreur, la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
+        printf_error("la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
     Network* network = (Network*)nalloc(1, sizeof(Network));
     network->learning_rate = learning_rate;
@@ -102,11 +103,11 @@ void add_2d_average_pooling(Network* network, int dim_output) {
     int k_pos = n-1;
     int dim_input = network->width[k_pos];
     if (network->max_size == n) {
-        printf("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
+        printf_error("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
         return;
     }
     if (dim_input%dim_output != 0) {
-        printf("Erreur de dimension dans l'average pooling\n");
+        printf_error("Dimension de l'average pooling incorrecte\n");
         return;
     }
     network->kernel[k_pos]->cnn = NULL;
@@ -124,11 +125,11 @@ void add_2d_max_pooling(Network* network, int dim_output) {
     int k_pos = n-1;
     int dim_input = network->width[k_pos];
     if (network->max_size == n) {
-        printf("Impossible de rajouter une couche de max pooling, le réseau est déjà plein\n");
+        printf_error("Impossible de rajouter une couche de max pooling, le réseau est déjà plein\n");
         return;
     }
     if (dim_input%dim_output != 0) {
-        printf("Erreur de dimension dans le max pooling\n");
+        printf_error("Dimension du max pooling incorrecte\n");
         return;
     }
     network->kernel[k_pos]->cnn = NULL;
@@ -145,7 +146,7 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     int n = network->size;
     int k_pos = n-1;
     if (network->max_size == n) {
-        printf("Impossible de rajouter une couche de convolution, le réseau est déjà plein \n");
+        printf_error("Impossible de rajouter une couche de convolution, le réseau est déjà plein \n");
         return;
     }
     int depth_input = network->depth[k_pos];
@@ -207,7 +208,7 @@ void add_dense(Network* network, int size_output, int activation) {
     int k_pos = n-1;
     int size_input = network->width[k_pos];
     if (network->max_size == n) {
-        printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
+        printf_error("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
     }
     network->kernel[k_pos]->cnn = NULL;
@@ -248,7 +249,7 @@ void add_dense_linearisation(Network* network, int size_output, int activation) 
     int k_pos = n-1;
     int size_input = network->depth[k_pos]*network->width[k_pos]*network->width[k_pos];
     if (network->max_size == n) {
-        printf("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
+        printf_error("Impossible de rajouter une couche dense, le réseau est déjà plein\n");
         return;
     }
     network->kernel[k_pos]->cnn = NULL;

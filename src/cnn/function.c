@@ -2,6 +2,8 @@
 #include <math.h>
 #include <float.h>
 
+#include "../include/colors.h"
+
 #include "include/function.h"
 
 
@@ -107,7 +109,8 @@ void choose_apply_function_matrix(int activation, float*** input, int depth, int
     } else if (activation == LEAKY_RELU) {
         apply_function_input(leaky_relu, input, depth, dim, dim);
     } else {
-        printf("Erreur, fonction d'activation inconnue (choose_apply_function_matrix): %d\n", activation);
+        printf_error("fonction d'activation inconnue (apply_function_to_matrix): ");
+        printf("%d\n", activation);
     }
 }
 
@@ -123,7 +126,8 @@ void choose_apply_function_vector(int activation, float*** input, int dim) {
     } else if (activation == LEAKY_RELU) {
         apply_function_input(leaky_relu, input, 1, 1, dim);
     } else {
-        printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
+        printf_error("fonction d'activation inconnue (apply_function_to_vector): ");
+        printf("%d\n", activation);
     }
 }
 
@@ -147,11 +151,11 @@ ptr get_function_activation(int activation) {
         return &sigmoid_derivative;
     }
     if (activation == SOFTMAX) {
-        printf("Erreur, impossible de renvoyer la fonction softmax\n");
+        printf_error("impossible de renvoyer la fonction softmax\n");
         return NULL;
     }
     if (activation == -SOFTMAX) {
-        printf("Erreur, impossible de renvoyer la dérivée de la fonction softmax\n");
+        printf_error("impossible de renvoyer la dérivée de la fonction softmax\n");
         return NULL;
     }
     if (activation == TANH) {
@@ -166,6 +170,7 @@ ptr get_function_activation(int activation) {
     if (activation == -LEAKY_RELU) {
         return &leaky_relu_derivative;
     }
-    printf("Erreur, fonction d'activation inconnue (choose_apply_function_vector): %d\n", activation);
+    printf_error("fonction d'activation inconnue (get_activation_function): ");
+    printf("%d\n", activation);
     return NULL;
 }

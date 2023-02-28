@@ -4,6 +4,7 @@
 
 #include "include/free.h"
 #include "include/struct.h"
+#include "../include/colors.h"
 #include "include/neuron_io.h"
 
 
@@ -67,7 +68,7 @@ void print_poids_ker_cnn(char* modele) {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        printf("Pas d'action spécifiée\n");
+        printf_error("Pas d'action spécifiée\n");
         help(argv[0]);
         return 1;
     }
@@ -79,18 +80,20 @@ int main(int argc, char* argv[]) {
                 modele = argv[i+1];
                 i += 2;
             } else {
-                printf("Option choisie inconnue: %s\n", argv[i]);
+                printf_warning("Option choisie inconnue: ");
+                printf("%s\n", argv[i]);
                 i++;
             }
         }
         if (!modele) {
-            printf("Pas de modèle à utiliser spécifié.\n");
+            printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
         print_poids_ker_cnn(modele);
         return 0;
     }
-    printf("Option choisie non reconnue: %s\n", argv[1]);
+    printf_error("Option choisie non reconnue: ");
+    printf("%s\n", argv[1]);
     help(argv[0]);
     return 1;
 }

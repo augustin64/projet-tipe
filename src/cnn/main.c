@@ -45,7 +45,7 @@ void help(char* call) {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        printf("Pas d'action spécifiée\n");
+        printf_error("Pas d'action spécifiée\n");
         help(argv[0]);
         return 1;
     }
@@ -87,30 +87,31 @@ int main(int argc, char* argv[]) {
                 recover = argv[i+1];
                 i += 2;
             } else {
-                printf("Option choisie inconnue: %s\n", argv[i]);
+                printf_warning("Option choisie inconnue: ");
+                printf("%s\n", argv[i]);
                 i++;
             }
         }
         if ((dataset!=NULL) && !strcmp(dataset, "mnist")) {
             dataset_type = 0;
             if (!images_file) {
-                printf("Pas de fichier d'images spécifié\n");
+                printf_error("Pas de fichier d'images spécifié\n");
                 return 1;
             }
             if (!labels_file) {
-                printf("Pas de fichier de labels spécifié\n");
+                printf_error("Pas de fichier de labels spécifié\n");
                 return 1;
             }
         }
         else if ((dataset!=NULL) && !strcmp(dataset, "jpg")) {
             dataset_type = 1;
             if (!data_dir) {
-                printf("Pas de dossier de données spécifié.\n");
+                printf_error("Pas de dossier de données spécifié.\n");
                 return 1;
             }
         }
         else {
-            printf("Pas de type de dataset spécifié.\n");
+            printf_error("Pas de type de dataset spécifié.\n");
             return 1;
         }
         if (!out) {
@@ -155,35 +156,36 @@ int main(int argc, char* argv[]) {
                 i++;
             }
             else {
-                printf("Option choisie inconnue: %s\n", argv[i]);
+                printf_warning("Option choisie inconnue: ");
+                printf("%s\n", argv[i]);
                 i++;
             }
         }
         if ((dataset!=NULL) && !strcmp(dataset, "mnist")) {
             dataset_type = 0;
             if (!images_file) {
-                printf("Pas de fichier d'images spécifié\n");
+                printf_error("Pas de fichier d'images spécifié\n");
                 return 1;
             }
             if (!labels_file) {
-                printf("Pas de fichier de labels spécifié\n");
+                printf_error("Pas de fichier de labels spécifié\n");
                 return 1;
             }
         }
         else if ((dataset!=NULL) && !strcmp(dataset, "jpg")) {
             dataset_type = 1;
             if (!data_dir) {
-                printf("Pas de dossier de données spécifié.\n");
+                printf_error("Pas de dossier de données spécifié.\n");
                 return 1;
             }
         }
         else {
-            printf("Pas de type de dataset spécifié.\n");
+            printf_error("Pas de type de dataset spécifié.\n");
             return 1;
         }
 
         if (!modele) {
-            printf("Pas de modèle à utiliser spécifié.\n");
+            printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
         test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails);
@@ -213,7 +215,8 @@ int main(int argc, char* argv[]) {
                 input_file = argv[i+1];
                 i += 2;
             } else {
-                printf("Option choisie inconnue: %s\n", argv[i]);
+                printf_warning("Option choisie inconnue: ");
+                printf("%s\n", argv[i]);
                 i++;
             }
         }
@@ -223,24 +226,25 @@ int main(int argc, char* argv[]) {
             dataset_type = 1;
         }
         else {
-            printf("Pas de type de dataset spécifié.\n");
+            printf_error("Pas de type de dataset spécifié.\n");
             return 1;
         }
         if (!input_file) {
-            printf("Pas de fichier d'entrée spécifié, rien à faire.\n");
+            printf_error("Pas de fichier d'entrée spécifié, rien à faire.\n");
             return 1;
         }
         if (!out) {
             out = "text";
         }
         if (!modele) {
-            printf("Pas de modèle à utiliser spécifié.\n");
+            printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
         recognize(dataset_type, modele, input_file, out);
         return 0;
     }
-    printf("Option choisie non reconnue: %s\n", argv[1]);
+    printf_error("Option choisie non reconnue: ");
+    printf("%s\n", argv[1]);
     help(argv[0]);
     return 1;
 }

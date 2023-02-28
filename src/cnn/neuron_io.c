@@ -153,7 +153,7 @@ Network* read_network(char* filename) {
 
     fread(&magic, sizeof(uint32_t), 1, ptr);
     if (magic != MAGIC_NUMBER) {
-        printf("Incorrect magic number !\n");
+        printf_error("Incorrect magic number !\n");
         exit(1);
     }
 
