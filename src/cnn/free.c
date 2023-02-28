@@ -120,9 +120,9 @@ void free_network(Network* network) {
         if (network->kernel[i]->cnn != NULL) { // Convolution
             free_convolution(network, i);
         } else if (network->kernel[i]->nn != NULL) {
-            if (network->kernel[i]->linearisation == 0) { // Dense non linearised
+            if (network->kernel[i]->linearisation == 0) { // Dense non linearized
                 free_dense(network, i);
-            } else { // Dense lineariation
+            } else { // Dense linearisation
                 free_dense_linearisation(network, i);
             }
         } else { // Pooling
