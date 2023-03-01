@@ -121,9 +121,9 @@ void forward_propagation(Network* network) {
                 return;
             } else { // Pooling sur une matrice
                 if (pooling==1) {
-                    make_average_pooling(input, output, activation, output_depth, output_width);
+                    make_average_pooling(input, output, input_width/output_width, output_depth, output_width);
                 } else if (pooling==2) {
-                    make_max_pooling(input, output, activation, output_depth, output_width);
+                    make_max_pooling(input, output, input_width/output_width, output_depth, output_width);
                 } else {
                     printf("Erreur dans la reconnaissance de la couche de pooling: %d,%d \n", pooling, i);
                 }
