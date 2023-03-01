@@ -3,7 +3,13 @@
 #ifndef DEF_UPDATE_H
 #define DEF_UPDATE_H
 
-#define MAX_RESEAU 100000000
+/*
+* Des valeurs trop grandes dans le réseau risqueraient de provoquer des overflows notamment.
+* On utilise donc la méthode gradient_clipping,
+* qui consiste à majorer tous les biais et poids par un hyper-paramètre choisi précédemment.
+* https://arxiv.org/pdf/1905.11881.pdf
+*/
+#define CLIP_VALUE 300
 
 /*
 * Met à jours les poids à partir de données obtenus après plusieurs backpropagations
