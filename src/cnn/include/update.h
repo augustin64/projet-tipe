@@ -12,6 +12,12 @@
 #define CLIP_VALUE 300
 
 /*
+* Réduit la valeur de a si abs(a) > CLIP_VALUE
+* Renvoie la valeur modifiée càd `signe(a)*min(abs(a), CLIP_VALUE)`
+*/
+float clip(float a);
+
+/*
 * Met à jours les poids à partir de données obtenus après plusieurs backpropagations
 * Puis met à 0 tous les d_weights
 */
