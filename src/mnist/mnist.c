@@ -15,7 +15,7 @@ int** read_image(unsigned int width, unsigned int height, FILE* ptr) {
     
     size_t line_size = sizeof(int) * width;
 
-    (void)fread(buffer, sizeof(buffer), 1, ptr);
+    (void) !fread(buffer, sizeof(buffer), 1, ptr);
 
     for (int i=0; i < (int)height; i++) {
         int* line = (int*)malloc(line_size);
@@ -39,7 +39,7 @@ int* read_mnist_images_parameters(char* filename) {
     unsigned int height;
     unsigned int width;
 
-    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&magic_number, sizeof(uint32_t), 1, ptr);
     magic_number = swap_endian(magic_number);
 
     if (magic_number != 2051) {
@@ -47,13 +47,13 @@ int* read_mnist_images_parameters(char* filename) {
         exit(1);
     }
 
-    (void)fread(&number_of_images, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&number_of_images, sizeof(uint32_t), 1, ptr);
     tab[0] = swap_endian(number_of_images);
 
-    (void)fread(&height, sizeof(unsigned int), 1, ptr);
+    (void) !fread(&height, sizeof(unsigned int), 1, ptr);
     tab[1] = swap_endian(height);
 
-    (void)fread(&width, sizeof(unsigned int), 1, ptr);
+    (void) !fread(&width, sizeof(unsigned int), 1, ptr);
     tab[2] = swap_endian(width);
 
     return tab;
@@ -68,7 +68,7 @@ uint32_t read_mnist_labels_nb_images(char* filename) {
     uint32_t magic_number;
     uint32_t number_of_images;
 
-    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&magic_number, sizeof(uint32_t), 1, ptr);
     magic_number = swap_endian(magic_number);
 
     if (magic_number != 2049) {
@@ -76,7 +76,7 @@ uint32_t read_mnist_labels_nb_images(char* filename) {
         exit(1);
     }
 
-    (void)fread(&number_of_images, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&number_of_images, sizeof(uint32_t), 1, ptr);
     number_of_images = swap_endian(number_of_images);
 
     return number_of_images;
@@ -93,7 +93,7 @@ int*** read_mnist_images(char* filename) {
     unsigned int height;
     unsigned int width;
 
-    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&magic_number, sizeof(uint32_t), 1, ptr);
     magic_number = swap_endian(magic_number);
 
     if (magic_number != 2051) {
@@ -101,13 +101,13 @@ int*** read_mnist_images(char* filename) {
         exit(1);
     }
 
-    (void)fread(&number_of_images, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&number_of_images, sizeof(uint32_t), 1, ptr);
     number_of_images = swap_endian(number_of_images);
 
-    (void)fread(&height, sizeof(unsigned int), 1, ptr);
+    (void) !fread(&height, sizeof(unsigned int), 1, ptr);
     height = swap_endian(height);
 
-    (void)fread(&width, sizeof(unsigned int), 1, ptr);
+    (void) !fread(&width, sizeof(unsigned int), 1, ptr);
     width = swap_endian(width);
 
     int*** tab = (int***)malloc(sizeof(int**)*number_of_images);
@@ -127,7 +127,7 @@ unsigned int* read_mnist_labels(char* filename) {
     uint32_t magic_number;
     uint32_t number_of_items;
 
-    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&magic_number, sizeof(uint32_t), 1, ptr);
     magic_number = swap_endian(magic_number);
 
     if (magic_number != 2049) {
@@ -135,11 +135,11 @@ unsigned int* read_mnist_labels(char* filename) {
         exit(1);
     }
 
-    (void)fread(&number_of_items, sizeof(uint32_t), 1, ptr);
+    (void) !fread(&number_of_items, sizeof(uint32_t), 1, ptr);
     number_of_items = swap_endian(number_of_items);
 
     unsigned char buffer[number_of_items];
-    (void)fread(buffer, sizeof(unsigned char), number_of_items, ptr);
+    (void) !fread(buffer, sizeof(unsigned char), number_of_items, ptr);
 
     unsigned int* labels = (unsigned int*)malloc(sizeof(unsigned int)*number_of_items);
 
