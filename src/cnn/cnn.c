@@ -76,24 +76,28 @@ void write_image_in_network_260(unsigned char* image, int height, int width, flo
 }
 
 void forward_propagation(Network* network) {
-    int activation, pooling, input_depth, input_width, output_depth, output_width;
-    int n = network->size;
-    float*** input;
-    float*** output;
-    float*** output_a;
-    Kernel* k_i;
+    int n = network->size; // Nombre de couches du réseau, il contient n-1 kernels
+
     for (int i=0; i < n-1; i++) {
-        // Transférer les informations de 'input' à 'output'
-        k_i = network->kernel[i];
-        output_a = network->input_z[i+1];
-        input = network->input[i];
-        input_depth = network->depth[i];
-        input_width = network->width[i];
-        output = network->input[i+1];
-        output_depth = network->depth[i+1];
-        output_width = network->width[i+1];
-        activation = k_i->activation;
-        pooling = k_i->pooling;
+        /*
+        * On procède kernel par kernel:
+        * On considère à chaque fois une couche d'entrée, une couche de sortie et le kernel qui contient les informations
+        * pour passer d'une couche à l'autre
+        */
+        Kernel* k_i = network->kernel[i];
+
+
+        float*** input = network->input[i]; // Couche d'entrée
+        int input_depth = network->depth[i]; // Dimensions de la couche d'entrée
+        int input_width = network->width[i];
+
+        float*** output_z = network->input_z[i+1]; // Couche de sortie avant que la fonction d'activation ne lui soit appliquée
+        float*** output = network->input[i+1]; // Couche de sortie
+        int output_depth = network->depth[i+1]; // Dimensions de la couche de sortie
+        int output_width = network->width[i+1];
+
+        int activation = k_i->activation;
+        int pooling = k_i->pooling;
 
         if (k_i->nn) {
             drop_neurones(input, 1, 1, input_width, network->dropout);
@@ -101,10 +105,14 @@ void forward_propagation(Network* network) {
             drop_neurones(input, input_depth, input_width, input_width, network->dropout);
         }
 
+        /*
+        * Pour chaque couche excepté le pooling, on propage les valeurs de la couche précédente,
+        * On copie les valeurs de output dans output_z, puis on applique la fonction d'activation à output_z
+        */
         if (k_i->cnn) { // Convolution
             make_convolution(k_i->cnn, input, output, output_width);
-            copy_input_to_input_z(output, output_a, output_depth, output_width, output_width);
-            choose_apply_function_matrix(activation, output, output_depth, output_width);
+            copy_input_to_input_z(output, output_z, output_depth, output_width, output_width);
+            apply_function_to_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
             if (k_i->linearisation == 0) { // Vecteur -> Vecteur
@@ -112,57 +120,64 @@ void forward_propagation(Network* network) {
             } else { // Matrice -> Vecteur
                 make_dense_linearized(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
-            copy_input_to_input_z(output, output_a, 1, 1, output_width);
-            choose_apply_function_vector(activation, output, output_width);
+            copy_input_to_input_z(output, output_z, 1, 1, output_width);
+            apply_function_to_vector(activation, output, output_width);
         }
         else { // Pooling
-            if (n-2==i) {
-                printf("Le réseau ne peut pas finir par une pooling layer\n");
+            if (i == n-2) {
+                printf_error("Le réseau ne peut pas finir par un pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
-                if (pooling==1) {
+                if (pooling == 1) {
                     make_average_pooling(input, output, input_width/output_width, output_depth, output_width);
-                } else if (pooling==2) {
+                } else if (pooling == 2) {
                     make_max_pooling(input, output, input_width/output_width, output_depth, output_width);
                 } else {
-                    printf("Erreur dans la reconnaissance de la couche de pooling: %d,%d \n", pooling, i);
+                    printf_error("Impossible de reconnaître le type de couche de pooling: ");
+                    printf("identifiant: %d, position: %d\n", pooling, i);
                 }
             }
-            copy_input_to_input_z(output, output_a, output_depth, output_width, output_width);
+            copy_input_to_input_z(output, output_z, output_depth, output_width, output_width);
         }
     }
 }
 
 void backward_propagation(Network* network, int wanted_number) {
-    float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]);
-    int n = network->size;
-    int activation, input_depth, input_width, output_depth, output_width;
-    float*** input;
-    float*** input_z;
-    float*** output;
-    Kernel* k_i;
+    int n = network->size; // Nombre de couches du réseau
 
-    // Backward sur la dernière couche
+    // Backward sur la dernière couche qui utilise toujours SOFTMAX
+    float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]); // Sortie désirée, permet d'initialiser une erreur
     softmax_backward_cross_entropy(network->input[n-1][0][0], wanted_output, network->width[n-1]);
+    free(wanted_output);
 
+    /*
+    * On propage à chaque étape:
+    * - les dérivées de l'erreur par rapport aux poids et biais, que l'on ajoute à ceux existants dans kernel->_->d_bias/d_weights
+    * - les dérivées de l'erreur par rapport à chaque case de input, qui servent uniquement à la propagation des informations.
+    * Ainsi, on écrase les valeurs contenues dans input, mais on utilise celles restantes dans input_z qui indiquent les valeurs avant
+    * la composition par la fonction d'activation pour pouvoir continuer à remonter.
+    */
     for (int i=n-2; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
-        k_i = network->kernel[i];
-        input = network->input[i];
-        input_z = network->input_z[i];
-        input_depth = network->depth[i];
-        input_width = network->width[i];
-        output = network->input[i+1];
-        output_depth = network->depth[i+1];
-        output_width = network->width[i+1];
-        activation = i==0?SIGMOID:network->kernel[i-1]->activation;
+        Kernel* k_i = network->kernel[i];
+
+        float*** input = network->input[i];
+        float*** input_z = network->input_z[i];
+        int input_depth = network->depth[i];
+        int input_width = network->width[i];
+
+        float*** output = network->input[i+1];
+        int output_depth = network->depth[i+1];
+        int output_width = network->width[i+1];
+
+        int activation = i==0?SIGMOID:network->kernel[i-1]->activation;
 
 
         if (k_i->cnn) { // Convolution
-            ptr d_f = get_function_activation(-activation);
+            ptr d_f = get_activation_function(-activation);
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
         } else if (k_i->nn) { // Full connection
-            ptr d_f = get_function_activation(-activation);
+            ptr d_f = get_activation_function(-activation);
             if (k_i->linearisation == 0) { // Vecteur -> Vecteur
                 backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
@@ -172,13 +187,12 @@ void backward_propagation(Network* network, int wanted_number) {
             backward_2d_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
         }
     }
-    free(wanted_output);
 }
 
 void drop_neurones(float*** input, int depth, int dim1, int dim2, int dropout) {
-    for (int i=0; i<depth; i++) {
-        for (int j=0; j<dim1; j++) {
-            for (int k=0; k<dim2; k++) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < dim1; j++) {
+            for (int k=0; k < dim2; k++) {
                 if (will_be_drop(dropout))
                     input[i][j][k] = 0;
             }
@@ -186,19 +200,22 @@ void drop_neurones(float*** input, int depth, int dim1, int dim2, int dropout) {
     }
 }
 
-void copy_input_to_input_z(float*** output, float*** output_a, int output_depth, int output_rows, int output_columns) {
+void copy_input_to_input_z(float*** output, float*** output_z, int output_depth, int output_rows, int output_columns) {
     for (int i=0; i<output_depth; i++) {
         for (int j=0; j<output_rows; j++) {
             for (int k=0; k<output_columns; k++) {
-                output_a[i][j][k] = output[i][j][k];
+                output_z[i][j][k] = output[i][j][k];
             }
         }
     }
 }
 
 float compute_mean_squared_error(float* output, float* wanted_output, int len) {
-    if (len==0) {
-        printf("Erreur MSE: la longueur de la sortie est de 0 -> division par 0 impossible\n");
+    /*
+    * $E = \frac{ \sum_{i=0}^n (output_i - desired output_i)^2 }{n}$ 
+    */
+    if (len == 0) {
+        printf_error("MSE: division par 0\n");
         return 0.;
     }
     float loss=0.;

@@ -35,14 +35,16 @@ void forward_propagation(Network* network);
 void backward_propagation(Network* network, int wanted_number);
 
 /*
-* Met à 0 chaque valeur de l'input avec une probabilité de dropout %
+* Implémente le dropout durant l'apprentissage en suivant le papier de recherche suivant:
+* https://www.jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf
+* Cela se fait en mettant à 0 chaque valeur de l'input avec une probabilité de dropout%
 */
 void drop_neurones(float*** input, int depth, int dim1, int dim2, int dropout);
 
 /*
-* Copie les données de output dans output_a (Sachant que les deux matrices ont les mêmes dimensions)
+* Copie les données de output dans output_z (Sachant que les deux matrices ont les mêmes dimensions)
 */
-void copy_input_to_input_z(float*** output, float*** output_a, int output_depth, int output_rows, int output_columns);
+void copy_input_to_input_z(float*** output, float*** output_z, int output_depth, int output_rows, int output_columns);
 
 /*
 * Renvoie l'erreur du réseau neuronal pour une sortie (RMS)
