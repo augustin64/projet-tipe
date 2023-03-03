@@ -42,7 +42,7 @@ int main() {
         printf("depth: %d\n", network->depth[i]);
         printf("activation: %d\n", kernel->activation);
     }
-    printf(GREEN "\nOK\n" RESET);
+    printf("\n" GREEN "OK\n" RESET);
 
     printf("Libération de la mémoire\n");
     free_network(network);
