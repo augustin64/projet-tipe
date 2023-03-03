@@ -151,19 +151,19 @@ Network* read_network(char* filename) {
     uint32_t dropout;
     uint32_t tmp;
 
-    fread(&magic, sizeof(uint32_t), 1, ptr);
+    (void)fread(&magic, sizeof(uint32_t), 1, ptr);
     if (magic != MAGIC_NUMBER) {
         printf_error("Incorrect magic number !\n");
         exit(1);
     }
 
     // Lecture des constantes du réseau
-    fread(&size, sizeof(uint32_t), 1, ptr);
+    (void)fread(&size, sizeof(uint32_t), 1, ptr);
     network->size = size;
     network->max_size = size;
-    fread(&initialisation, sizeof(uint32_t), 1, ptr);
+    (void)fread(&initialisation, sizeof(uint32_t), 1, ptr);
     network->initialisation = initialisation;
-    fread(&dropout, sizeof(uint32_t), 1, ptr);
+    (void)fread(&dropout, sizeof(uint32_t), 1, ptr);
     network->dropout = dropout;
 
     // Lecture de la taille de l'entrée des différentes matrices
@@ -171,9 +171,9 @@ Network* read_network(char* filename) {
     network->depth = (int*)nalloc(size, sizeof(int));
 
     for (int i=0; i < (int)size; i++) {
-        fread(&tmp, sizeof(uint32_t), 1, ptr);
+        (void)fread(&tmp, sizeof(uint32_t), 1, ptr);
         network->width[i] = tmp;
-        fread(&tmp, sizeof(uint32_t), 1, ptr);
+        (void)fread(&tmp, sizeof(uint32_t), 1, ptr);
         network->depth[i] = tmp;
     }
 
@@ -181,7 +181,7 @@ Network* read_network(char* filename) {
     uint32_t type_couche[size-1];
 
     for (int i=0; i < (int)size-1; i++) {
-        fread(&tmp, sizeof(tmp), 1, ptr);
+        (void)fread(&tmp, sizeof(tmp), 1, ptr);
         type_couche[i] = tmp;
     }
 
@@ -231,7 +231,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         kernel->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
         kernel->nn = NULL;
         uint32_t buffer[5];
-        fread(&buffer, sizeof(buffer), 1, ptr);
+        (void)fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
@@ -252,7 +252,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
                 cnn->bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
                 cnn->d_bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
                 for (int k=0; k < output_dim; k++) {
-                    fread(&tmp, sizeof(tmp), 1, ptr);
+                    (void)fread(&tmp, sizeof(tmp), 1, ptr);
                     cnn->bias[i][j][k] = tmp;
                     cnn->d_bias[i][j][k] = 0.;
                 }
@@ -271,7 +271,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
                     cnn->weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     cnn->d_weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     for (int l=0; l < cnn->k_size; l++) {
-                        fread(&tmp, sizeof(tmp), 1, ptr);
+                        (void)fread(&tmp, sizeof(tmp), 1, ptr);
                         cnn->weights[i][j][k][l] = tmp;
                         cnn->d_weights[i][j][k][l] = 0.;
                     }
@@ -283,7 +283,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         kernel->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
         kernel->cnn = NULL;
         uint32_t buffer[4];
-        fread(&buffer, sizeof(buffer), 1, ptr);
+        (void)fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
@@ -297,7 +297,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         nn->bias = (float*)nalloc(nn->size_output, sizeof(float));
         nn->d_bias = (float*)nalloc(nn->size_output, sizeof(float));
         for (int i=0; i < nn->size_output; i++) {
-            fread(&tmp, sizeof(tmp), 1, ptr);
+            (void)fread(&tmp, sizeof(tmp), 1, ptr);
             nn->bias[i] = tmp;
             nn->d_bias[i] = 0.;
         }
@@ -308,15 +308,15 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             nn->weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             nn->d_weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             for (int j=0; j < nn->size_output; j++) {
-                fread(&tmp, sizeof(tmp), 1, ptr);
+                (void)fread(&tmp, sizeof(tmp), 1, ptr);
                 nn->weights[i][j] = tmp;
                 nn->d_weights[i][j] = 0.;
             }
         }
     } else if (type_couche == 2) { // Cas du Pooling Layer
         uint32_t pooling, linearisation;
-        fread(&linearisation, sizeof(linearisation), 1, ptr);
-        fread(&pooling, sizeof(pooling), 1, ptr);
+        (void)fread(&linearisation, sizeof(linearisation), 1, ptr);
+        (void)fread(&pooling, sizeof(pooling), 1, ptr);
 
         kernel->cnn = NULL;
         kernel->nn = NULL;

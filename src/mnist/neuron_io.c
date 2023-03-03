@@ -15,8 +15,8 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
     float bias;
     float tmp;
 
-    fread(&activation, sizeof(float), 1, ptr);
-    fread(&bias, sizeof(float), 1, ptr);
+    (void)fread(&activation, sizeof(float), 1, ptr);
+    (void)fread(&bias, sizeof(float), 1, ptr);
 
     neuron->bias = bias;
 
@@ -30,7 +30,7 @@ Neuron* read_neuron(uint32_t nb_weights, FILE *ptr) {
         neuron->weights = (float*)malloc(sizeof(float)*nb_weights);
 
         for (int i=0; i < (int)nb_weights; i++) {
-            fread(&tmp, sizeof(float), 1, ptr);
+            (void)fread(&tmp, sizeof(float), 1, ptr);
             neuron->weights[i] = tmp;
             neuron->back_weights[i] = 0.0;
             neuron->last_back_weights[i] = 0.0;
@@ -60,13 +60,13 @@ Network* read_network(char* filename) {
     uint32_t nb_layers;
     uint32_t tmp;
 
-    fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
     if (magic_number != MAGIC_NUMBER) {
         printf("Incorrect magic number !\n");
         exit(1);
     }
 
-    fread(&nb_layers, sizeof(uint32_t), 1, ptr);
+    (void)fread(&nb_layers, sizeof(uint32_t), 1, ptr);
     network->nb_layers = nb_layers;
 
 
@@ -77,7 +77,7 @@ Network* read_network(char* filename) {
 
     for (int i=0; i < (int)nb_layers; i++) {
         layers[i] = (Layer*)malloc(sizeof(Layer));
-        fread(&tmp, sizeof(tmp), 1, ptr);
+        (void)fread(&tmp, sizeof(tmp), 1, ptr);
         layers[i]->nb_neurons = tmp;
         nb_neurons_layer[i] = tmp;
     }
@@ -137,8 +137,8 @@ Neuron* read_delta_neuron(uint32_t nb_weights, FILE *ptr) {
     float back_bias;
     float tmp;
 
-    fread(&activation, sizeof(float), 1, ptr);
-    fread(&back_bias, sizeof(float), 1, ptr);
+    (void)fread(&activation, sizeof(float), 1, ptr);
+    (void)fread(&back_bias, sizeof(float), 1, ptr);
 
     neuron->bias = 0.0;
 
@@ -151,7 +151,7 @@ Neuron* read_delta_neuron(uint32_t nb_weights, FILE *ptr) {
     neuron->weights = (float*)malloc(sizeof(float)*nb_weights);
 
     for (int i=0; i < (int)nb_weights; i++) {
-        fread(&tmp, sizeof(float), 1, ptr);
+        (void)fread(&tmp, sizeof(float), 1, ptr);
         neuron->weights[i] = 0.0;
         neuron->back_weights[i] = tmp;
         neuron->last_back_weights[i] = 0.0;
@@ -179,13 +179,13 @@ Network* read_delta_network(char* filename) {
     uint32_t nb_layers;
     uint32_t tmp;
 
-    fread(&magic_number, sizeof(uint32_t), 1, ptr);
+    (void)fread(&magic_number, sizeof(uint32_t), 1, ptr);
     if (magic_number != DELTA_MAGIC_NUMBER) {
         printf("Incorrect magic number !\n");
         exit(1);
     }
 
-    fread(&nb_layers, sizeof(uint32_t), 1, ptr);
+    (void)fread(&nb_layers, sizeof(uint32_t), 1, ptr);
     network->nb_layers = nb_layers;
 
 
@@ -196,7 +196,7 @@ Network* read_delta_network(char* filename) {
 
     for (int i=0; i < (int)nb_layers; i++) {
         layers[i] = (Layer*)malloc(sizeof(Layer));
-        fread(&tmp, sizeof(tmp), 1, ptr);
+        (void)fread(&tmp, sizeof(tmp), 1, ptr);
         layers[i]->nb_neurons = tmp;
         nb_neurons_layer[i] = tmp;
     }
