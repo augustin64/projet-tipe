@@ -11,6 +11,7 @@ float max_float(float a, float b) {
     return a < b ? b:a;
 }
 
+
 float identity(float x) {
     return x;
 }
@@ -19,6 +20,7 @@ float identity_derivative(float x) {
     (void)x;
     return 1;
 }
+
 
 float sigmoid(float x) {
     return 1/(1 + exp(-x));
@@ -29,6 +31,7 @@ float sigmoid_derivative(float x) {
     return tmp/((1+tmp)*(1+tmp));
 }
 
+
 float relu(float x) {
     return max_float(0, x);
 }
@@ -38,6 +41,7 @@ float relu_derivative(float x) {
         return 1;
     return 0;
 }
+
 
 float leaky_relu(float x) {
     if (x>0)
@@ -51,6 +55,7 @@ float leaky_relu_derivative(float x) {
     return LEAKER;
 }
 
+
 float tanh_(float x) {
     return tanh(x);
 }
@@ -59,6 +64,7 @@ float tanh_derivative(float x) {
     float a = tanh(x);
     return 1 - a*a;
 }
+
 
 void apply_softmax_input(float ***input, int depth, int rows, int columns) {
     float m = FLT_MIN;
@@ -87,6 +93,7 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns) {
     }
 }
 
+
 void apply_function_input(float (*f)(float), float*** input, int depth, int rows, int columns) {
     for (int i=0; i < depth; i++) {
         for (int j=0; j < rows; j++) {
@@ -97,59 +104,54 @@ void apply_function_input(float (*f)(float), float*** input, int depth, int rows
     }
 }
 
-void choose_apply_function_matrix(int activation, float*** input, int depth, int dim) {
-    if (activation == RELU) {
-        apply_function_input(relu, input, depth, dim, dim);
-    } else if (activation == SIGMOID) {
-        apply_function_input(sigmoid, input, depth, dim, dim);
-    } else if (activation == SOFTMAX) {
-        apply_softmax_input(input, depth, dim, dim);
-    } else if (activation == TANH) {
-        apply_function_input(tanh_, input, depth, dim, dim);
-    } else if (activation == LEAKY_RELU) {
-        apply_function_input(leaky_relu, input, depth, dim, dim);
-    } else {
-        printf_error("fonction d'activation inconnue (apply_function_to_matrix): ");
-        printf("%d\n", activation);
+void apply_function_to_matrix(int activation, float*** input, int depth, int dim) {
+    if (activation == SOFTMAX) {
+        return apply_softmax_input(input, depth, dim, dim);
     }
+    if (activation > 1) { // Exclude negative values (derivative) and 1 (identity)
+        ptr f = get_activation_function(activation);
+        return apply_function_input(f, input, depth, dim, dim);
+    }
+    printf_error("fonction d'activation inconnue (apply_function_to_matrix): ");
+    printf("%d\n", activation);
 }
 
-void choose_apply_function_vector(int activation, float*** input, int dim) {
-    if (activation == RELU) {
-        apply_function_input(relu, input, 1, 1, dim);
-    } else if (activation == SIGMOID) {
-        apply_function_input(sigmoid, input, 1, 1, dim);
-    } else if (activation == SOFTMAX) {
-        apply_softmax_input(input, 1, 1, dim);
-    } else if (activation == TANH) {
-        apply_function_input(tanh_, input, 1, 1, dim);
-    } else if (activation == LEAKY_RELU) {
-        apply_function_input(leaky_relu, input, 1, 1, dim);
-    } else {
-        printf_error("fonction d'activation inconnue (apply_function_to_vector): ");
-        printf("%d\n", activation);
+
+void apply_function_to_vector(int activation, float*** input, int dim) {
+    if (activation == SOFTMAX) {
+        return apply_softmax_input(input, 1, 1, dim);
     }
+    if (activation > 1) { // Exclude negative values (derivative) and 1 (identity)
+        ptr f = get_activation_function(activation);
+        return apply_function_input(f, input, 1, 1, dim);
+    }
+    printf_error("fonction d'activation inconnue (apply_function_to_vector): ");
+    printf("%d\n", activation);
 }
 
-ptr get_function_activation(int activation) {
+
+ptr get_activation_function(int activation) {
     if (activation == RELU) {
         return &relu;
     }
     if (activation == -RELU) {
         return &relu_derivative;
     }
-    if (activation == -IDENTITY) {
-        return &identity_derivative;
-    }
+
     if (activation == IDENTITY) {
         return &identity;
     }
+    if (activation == -IDENTITY) {
+        return &identity_derivative;
+    }
+
     if (activation == SIGMOID) {
         return &sigmoid;
     }
     if (activation == -SIGMOID) {
         return &sigmoid_derivative;
     }
+
     if (activation == SOFTMAX) {
         printf_error("impossible de renvoyer la fonction softmax\n");
         return NULL;
@@ -158,12 +160,14 @@ ptr get_function_activation(int activation) {
         printf_error("impossible de renvoyer la dérivée de la fonction softmax\n");
         return NULL;
     }
+
     if (activation == TANH) {
         return &tanh_;
     }
     if (activation == -TANH) {
         return &tanh_derivative;
     }
+
     if (activation == LEAKY_RELU) {
         return &leaky_relu;
     }

@@ -52,18 +52,18 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns);
 void apply_function_input(float (*f)(float), float*** input, int depth, int rows, int columns);
 
 /*
-* Redirige vers la fonction à appliquer sur une matrice
+* Applique une fonction d'activation (repérée par son identifiant) à une matrice
 */
-void choose_apply_function_matrix(int activation, float*** input, int depth, int dim);
+void apply_function_to_matrix(int activation, float*** input, int depth, int dim);
 
 /*
-* Redirige vers la fonction à appliquer sur un vecteur
+* Applique une fonction d'activation (repérée par son identifiant) à un vecteur
 */
-void choose_apply_function_vector(int activation, float*** input, int dim);
+void apply_function_to_vector(int activation, float*** input, int dim);
 
 /*
 * Renvoie la fonction d'activation correspondant à son identifiant (activation)
 */
-ptr get_function_activation(int activation);
+ptr get_activation_function(int activation);
 
 #endif
