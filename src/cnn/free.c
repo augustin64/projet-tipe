@@ -27,7 +27,7 @@ void free_a_line_input_layer(Network* network, int pos) {
     gree(network->input_z[pos]);
 }
 
-void free_2d_pooling(Network* network, int pos) {
+void free_pooling(Network* network, int pos) {
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
 }
 
@@ -120,13 +120,13 @@ void free_network(Network* network) {
         if (network->kernel[i]->cnn != NULL) { // Convolution
             free_convolution(network, i);
         } else if (network->kernel[i]->nn != NULL) {
-            if (network->kernel[i]->linearisation == 0) { // Dense non linearized
+            if (network->kernel[i]->linearisation == DOESNT_LINEARISE) { // Dense non linearized
                 free_dense(network, i);
             } else { // Dense linearisation
                 free_dense_linearisation(network, i);
             }
         } else { // Pooling
-            free_2d_pooling(network, i);
+            free_pooling(network, i);
         }
     }
     free_network_creation(network);

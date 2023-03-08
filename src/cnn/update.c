@@ -43,7 +43,7 @@ void update_weights(Network* network, Network* d_network) {
                 }
             }
         } else if (k_i->nn) { // Full connection
-            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
+            if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 Kernel_nn* nn = k_i->nn;
                 Kernel_nn* d_nn = dk_i->nn;
 
@@ -139,7 +139,7 @@ void reset_d_weights(Network* network) {
                 }
             }
         } else if (k_i->nn) { // Full connection
-            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
+            if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 Kernel_nn* nn = k_i_1->nn;
 
                 for (int a=0; a < input_width; a++) {

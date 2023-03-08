@@ -50,7 +50,7 @@ void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth
 void print_pooling(int size, int pooling) {
     print_bar;
     purple;
-    if (pooling == 1) {
+    if (pooling == AVG_POOLING) {
         printf("-------Average Pooling %dx%d-------\n", size ,size);
     } else {
         printf("-------Max Pooling %dx%d-------\n", size ,size);

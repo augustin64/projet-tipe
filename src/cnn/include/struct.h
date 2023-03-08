@@ -1,6 +1,13 @@
 #ifndef DEF_STRUCT_H
 #define DEF_STRUCT_H
 
+#define NO_POOLING 0
+#define AVG_POOLING 1
+#define MAX_POOLING 2
+
+#define DOESNT_LINEARISE 0
+#define DO_LINEARISE 1
+
 typedef struct Kernel_cnn {
     // Noyau ayant une couche matricielle en sortie
     int k_size; // k_size = dim_input - dim_output + 1

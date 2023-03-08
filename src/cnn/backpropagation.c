@@ -27,7 +27,7 @@ void softmax_backward_cross_entropy(float* input, float* output, int size) {
     }
 }
 
-void backward_2d_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
     /* Input et output ont la même profondeur (depth) */
 
     //int size = output_width - input_width +1;

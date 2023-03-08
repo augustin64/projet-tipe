@@ -115,7 +115,7 @@ void forward_propagation(Network* network) {
             apply_function_to_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
-            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
+            if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
             } else { // Matrice -> Vecteur
                 make_dense_linearized(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
@@ -128,9 +128,9 @@ void forward_propagation(Network* network) {
                 printf_error("Le réseau ne peut pas finir par un pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
-                if (pooling == 1) {
+                if (pooling == AVG_POOLING) {
                     make_average_pooling(input, output, input_width/output_width, output_depth, output_width);
-                } else if (pooling == 2) {
+                } else if (pooling == MAX_POOLING) {
                     make_max_pooling(input, output, input_width/output_width, output_depth, output_width);
                 } else {
                     printf_error("Impossible de reconnaître le type de couche de pooling: ");
@@ -178,13 +178,17 @@ void backward_propagation(Network* network, int wanted_number) {
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
         } else if (k_i->nn) { // Full connection
             ptr d_f = get_activation_function(-activation);
-            if (k_i->linearisation == 0) { // Vecteur -> Vecteur
+            if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
             } else { // Matrice -> vecteur
                 backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, d_f);
             }
         } else { // Pooling
-            backward_2d_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
+            if (k_i->pooling == AVG_POOLING) {
+                backward_average_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
+            } else {
+                printf_error("La backpropagation de ce pooling n'est pas encore implémentée\n");
+            }
         }
     }
 }

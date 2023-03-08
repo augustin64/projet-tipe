@@ -20,7 +20,7 @@ int main() {
     for (int i=0; i < network->size-1; i++) {
         kernel = network->kernel[i];
         if ((!kernel->cnn)&&(!kernel->nn)) {
-            if (kernel->pooling == 1) {
+            if (kernel->pooling == AVG_POOLING) {
                 printf("\n==== Couche %d de type "YELLOW"Average Pooling"RESET" ====\n", i);
             } else {
                 printf("\n==== Couche %d de type "YELLOW"Max Pooling"RESET" ====\n", i);

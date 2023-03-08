@@ -12,6 +12,10 @@
 
 #define MAGIC_NUMBER 1012
 
+#define CNN 0
+#define NN 1
+#define POOLING 2
+
 #define bufferAdd(val) {buffer[indice_buffer] = val; indice_buffer++;}
 
 void write_network(char* filename, Network* network) {
@@ -226,7 +230,7 @@ Network* read_network(char* filename) {
 
 Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
     Kernel* kernel = (Kernel*)nalloc(1, sizeof(Kernel));
-    if (type_couche == 0) { // Cas du CNN
+    if (type_couche == CNN) { // Cas du CNN
         // Lecture du "Pré-corps"
         kernel->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
         kernel->nn = NULL;
@@ -278,7 +282,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
                 }
             }
         }
-    } else if (type_couche == 1) { // Cas du NN
+    } else if (type_couche == NN) { // Cas du NN
         // Lecture du "Pré-corps"
         kernel->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
         kernel->cnn = NULL;
@@ -313,7 +317,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
                 nn->d_weights[i][j] = 0.;
             }
         }
-    } else if (type_couche == 2) { // Cas du Pooling Layer
+    } else if (type_couche == POOLING) { // Cas du Pooling Layer
         uint32_t pooling, linearisation;
         (void) !fread(&linearisation, sizeof(linearisation), 1, ptr);
         (void) !fread(&pooling, sizeof(pooling), 1, ptr);

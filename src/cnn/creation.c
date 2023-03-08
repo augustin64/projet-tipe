@@ -11,7 +11,7 @@
 
 Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_dim, int input_depth) {
     if (dropout < 0 || dropout > 100) {
-        printf_error("la probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
+        printf_error("La probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
     Network* network = (Network*)nalloc(1, sizeof(Network));
     network->learning_rate = learning_rate;
@@ -27,7 +27,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     for (int i=0; i < max_size-1; i++) {
         network->kernel[i] = (Kernel*)nalloc(1, sizeof(Kernel));
     }
-    network->kernel[0]->linearisation = 0;
+    network->kernel[0]->linearisation = DOESNT_LINEARISE;
     network->width[0] = input_dim;
     network->depth[0] = input_depth;
     network->kernel[0]->nn = NULL;
@@ -41,9 +41,9 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
     Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth);
     network->kernel[0]->activation = activation;
     add_convolution(network, 6, 28, activation);
-    add_2d_average_pooling(network, 14);
+    add_average_pooling(network, 14);
     add_convolution(network, 16, 10, activation);
-    add_2d_average_pooling(network, 5);
+    add_average_pooling(network, 5);
     add_dense_linearisation(network, 120, activation);
     add_dense(network, 84, activation);
     add_dense(network, 10, SOFTMAX);
@@ -98,7 +98,7 @@ void create_a_line_input_z_layer(Network* network, int pos, int dim) {
     network->depth[pos] = 1;
 }
 
-void add_2d_average_pooling(Network* network, int dim_output) {
+void add_average_pooling(Network* network, int dim_output) {
     int n = network->size;
     int k_pos = n-1;
     int dim_input = network->width[k_pos];
@@ -113,14 +113,14 @@ void add_2d_average_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
-    network->kernel[k_pos]->linearisation = 0;
-    network->kernel[k_pos]->pooling = 1;
+    network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
+    network->kernel[k_pos]->pooling = AVG_POOLING;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
     network->size++;
 }
 
-void add_2d_max_pooling(Network* network, int dim_output) {
+void add_max_pooling(Network* network, int dim_output) {
     int n = network->size;
     int k_pos = n-1;
     int dim_input = network->width[k_pos];
@@ -135,8 +135,8 @@ void add_2d_max_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
-    network->kernel[k_pos]->linearisation = 0;
-    network->kernel[k_pos]->pooling = 2;
+    network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
+    network->kernel[k_pos]->pooling = MAX_POOLING;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
     network->size++;
@@ -156,8 +156,8 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
     int kernel_size = dim_input - dim_output +1;
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->activation = activation;
-    network->kernel[k_pos]->linearisation = 0;
-    network->kernel[k_pos]->pooling = 0;
+    network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
+    network->kernel[k_pos]->pooling = NO_POOLING;
     network->kernel[k_pos]->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
     Kernel_cnn* cnn = network->kernel[k_pos]->cnn;
 
@@ -215,8 +215,8 @@ void add_dense(Network* network, int size_output, int activation) {
     network->kernel[k_pos]->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
-    network->kernel[k_pos]->linearisation = 0;
-    network->kernel[k_pos]->pooling = 0;
+    network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
+    network->kernel[k_pos]->pooling = NO_POOLING;
     nn->size_input = size_input;
     nn->size_output = size_output;
     nn->bias = (float*)nalloc(size_output, sizeof(float));
@@ -235,7 +235,7 @@ void add_dense(Network* network, int size_output, int activation) {
         }
     }
 
-    initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input);
+    initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input, size_output);
     initialisation_2d_matrix(network->initialisation, nn->weights, size_input, size_output, size_input, size_output);
     create_a_line_input_layer(network, n, size_output);
     create_a_line_input_z_layer(network, n, size_output);
@@ -256,8 +256,8 @@ void add_dense_linearisation(Network* network, int size_output, int activation) 
     network->kernel[k_pos]->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
     Kernel_nn* nn = network->kernel[k_pos]->nn;
     network->kernel[k_pos]->activation = activation;
-    network->kernel[k_pos]->linearisation = 1;
-    network->kernel[k_pos]->pooling = 0;
+    network->kernel[k_pos]->linearisation = DO_LINEARISE;
+    network->kernel[k_pos]->pooling = NO_POOLING;
     nn->size_input = size_input;
     nn->size_output = size_output;
 
@@ -275,7 +275,7 @@ void add_dense_linearisation(Network* network, int size_output, int activation) 
             nn->d_weights[i][j] = 0.;
         }
     }
-    initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input);
+    initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input, size_output);
     initialisation_2d_matrix(network->initialisation, nn->weights, size_input, size_output, size_input, size_output);
     create_a_line_input_layer(network, n, size_output);
     create_a_line_input_z_layer(network, n, size_output);

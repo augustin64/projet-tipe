@@ -29,7 +29,7 @@ void softmax_backward_cross_entropy(float* input, float* output, int size);
 * Transfert les informations d'erreur à travers une couche d'average pooling
 * en considérant cross_entropy comme fonction d'erreur
 */
-void backward_2d_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
+void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
 
 /*
 * Transfert les informations d'erreur à travers une couche fully connected
