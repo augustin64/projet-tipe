@@ -16,11 +16,6 @@
 typedef float (*ptr)(float);
 typedef ptr (*pm)();
 
-/*
-* Fonction max pour les floats
-*/
-float max_float(float a, float b);
-
 float identity(float x);
 
 float identity_derivative(float x);

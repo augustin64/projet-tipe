@@ -5,12 +5,7 @@
 #include "../include/colors.h"
 
 #include "include/function.h"
-
-
-float max_float(float a, float b) {
-    return a < b ? b:a;
-}
-
+#define BOUND_RELU 15
 
 float identity(float x) {
     return x;
@@ -33,7 +28,7 @@ float sigmoid_derivative(float x) {
 
 
 float relu(float x) {
-    return max_float(0, x);
+    return fmaxf(0, fminf(x, BOUND_RELU));
 }
 
 float relu_derivative(float x) {
@@ -45,7 +40,7 @@ float relu_derivative(float x) {
 
 float leaky_relu(float x) {
     if (x>0)
-        return x;
+        return fminf(x, BOUND_RELU);
     return x*LEAKER;
 }
 
@@ -72,7 +67,7 @@ void apply_softmax_input(float ***input, int depth, int rows, int columns) {
     for (int i=0; i < depth; i++) {
         for (int j=0; j < rows; j++) {
             for (int k=0; k < columns; k++) {
-                m = max_float(m, input[i][j][k]);
+                m = fmaxf(m, input[i][j][k]);
             }
         }
     }

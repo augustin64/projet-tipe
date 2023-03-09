@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <float.h>
+#include <math.h>
 
 #include "include/convolution.h"
 #include "../include/colors.h"
@@ -10,17 +11,6 @@
 #define BLOCKSIZE_x 16
 #define BLOCKSIZE_y 8
 #define BLOCKSIZE_z 8
-
-float max_flt(float a, float b) {
-    // Return the max between the two floats
-    if (a > b) {
-        return a;
-    }
-    return b;
-}
-
-
-
 
 
 /* 
@@ -142,7 +132,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
                 m = FLT_MIN;
                 for (int a=0; a < size; a++) {
                     for (int b=0; b < size; b++) {
-                        m = max_flt(m, input[i][size*j +a][size*k +b]);
+                        m = fmaxf(m, input[i][size*j +a][size*k +b]);
                     }
                 }
                 output[i][j][k] = m;

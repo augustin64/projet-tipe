@@ -55,10 +55,6 @@ float** create_empty_matrix(int n, int p) {
     return matrix;
 }
 
-float max_float(float a, float b) {
-    return a > b ? a : b;
-}
-
 
 bool check_matrices_equality(float** m1, float** m2, int n, int p) {
     float err_max = 0.;
@@ -71,7 +67,7 @@ bool check_matrices_equality(float** m1, float** m2, int n, int p) {
                 //return false;
             }
             err_percent = 2*fabs(m1[i][j] - m2[i][j])/fabs(m1[i][j] + m2[i][j]);
-            err_max = max_float(err_max, err_percent);
+            err_max = fmaxf(err_max, err_percent);
             err_moy += err_percent;
         }
     }

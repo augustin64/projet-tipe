@@ -8,6 +8,7 @@
 #define ZERO 0
 #define GLOROT 1
 #define XAVIER 1 // Xavier et Glorot initialisations sont indentiques
+#define NORMALIZED_GLOROT 2
 #define NORMALIZED_XAVIER 2
 #define HE 3
 
