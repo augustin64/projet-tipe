@@ -3,16 +3,24 @@
 
 // Génère un flottant entre 0 et 1
 #define RAND_FLT() ((float)rand())/((float)RAND_MAX)
+#define TWOPI 6.2831853071795864769252867665
 
 #define ZERO 0
 #define GLOROT 1
-#define XAVIER 1 // Xavier and Glorot initialisations are the same
-#define HE 2
+#define XAVIER 1 // Xavier et Glorot initialisations sont indentiques
+#define NORMALIZED_XAVIER 2
+#define HE 3
+
+/*
+* Renvoie un flottant à partir de la loi normale [x;y].
+* La fonction repose sur la méthode de Box-Muller
+*/
+float randn();
 
 /*
 * Initialise une matrice 1d dim de float en fonction du type d'initialisation
 */
-void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in);
+void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in, int n_out);
 
 /*
 * Initialise une matrice 2d dim1*dim2 de float en fonction du type d'initialisation
