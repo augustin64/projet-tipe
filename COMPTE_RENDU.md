@@ -71,3 +71,12 @@ Après implémentation d'un mélange de Knuth, tout est rentré dans l'ordre don
 ### **25 Janvier 2023** Premiers résultats sur la seconde implémentation [220d0a7](https://github.com/julienChemillier/TIPE/commit/220d0a71be2a28f63ba1e1c7804e2e9fd909e12d)
 Premiers résultats sur le réseau `simple_one` qui suit la structure du premier réseau.  
 La backpropagation des poids ne fonctionne cependant pas sur les couches de convolution et de pooling.
+
+<br/>
+<br/>
+<br/>
+
+### **18 Février 2023** Amélioration des résultats sur la seconde implémentation [a461e07](https://github.com/julienChemillier/TIPE/commit/a461e0756a6ef1bd1e9fe587f84de7f406f1fd12)
+Améliorations significative des résultats sur le réseau `simple_one` atteignant:
+-92% avec une linéarisation et une dense (1x32x32, 80, 10)
+La backpropagation ne fonctionne pas encore sur la convolution.
