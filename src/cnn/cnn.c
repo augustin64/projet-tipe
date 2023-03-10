@@ -18,7 +18,7 @@
 
 int indice_max(float* tab, int n) {
     int indice = -1;
-    float maxi = FLT_MIN;
+    float maxi = -FLT_MAX;
 
     for (int i=0; i < n; i++) {
         if (tab[i] > maxi) {
@@ -187,7 +187,7 @@ void backward_propagation(Network* network, int wanted_number) {
             if (k_i->pooling == AVG_POOLING) {
                 backward_average_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
             } else {
-                printf_error("La backpropagation de ce pooling n'est pas encore implémentée\n");
+                backward_max_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
             }
         }
     }

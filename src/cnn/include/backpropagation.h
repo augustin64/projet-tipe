@@ -32,6 +32,12 @@ void softmax_backward_cross_entropy(float* input, float* output, int size);
 void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
 
 /*
+* Transfert les informations d'erreur à travers une couche de max pooling
+* en considérant cross_entropy comme fonction d'erreur
+*/
+void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
+
+/*
 * Transfert les informations d'erreur à travers une couche fully connected
 */
 void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, ptr d_function, int is_first);

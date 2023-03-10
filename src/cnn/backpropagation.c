@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <float.h>
 #include <math.h>
 
 #include "include/backpropagation.h"
@@ -30,7 +32,6 @@ void softmax_backward_cross_entropy(float* input, float* output, int size) {
 void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
     /* Input et output ont la même profondeur (depth) */
 
-    //int size = output_width - input_width +1;
     int size = input_width/output_width; // Taille du pooling
     int n = size*size; // Nombre d'éléments dans le pooling
 
@@ -47,6 +48,35 @@ void backward_average_pooling(float*** input, float*** output, int input_width, 
                         input[i][size*j +a][size*k +b] += output[i][j][k]/n;
                     }
                 }
+            }
+        }
+    }
+}
+
+void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
+    int size = input_width/output_width;
+
+    float m; // Maximum
+    int a_max, b_max; // Indices du maximum
+
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < output_width; j++) {
+            for (int k=0; k < output_width; k++) {
+                m = -FLT_MAX;
+                a_max = -1;
+                b_max = -1;
+
+                for (int a=0; a < size; a++) {
+                    for (int b=0; b < size; b++) {
+                        if (input[i][size*j +a][size*k +b] > m) {
+                            m = input[i][size*j +a][size*k +b];
+                            a_max = a;
+                            b_max = b;
+                            input[i][size*j +a][size*k +b] = 0;
+                        }
+                    }
+                }
+                input[i][size*j +a_max][size*k +b_max] = output[i][j][k];
             }
         }
     }
