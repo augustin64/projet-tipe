@@ -99,7 +99,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
         return;
     }
 
-    float m = FLT_MIN;
+    float m = -FLT_MAX;
     float temp;
 
     for (int a=0; a < size; a++) {
@@ -129,7 +129,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
             for (int k=0; k < output_width; k++) {
-                m = FLT_MIN;
+                m = -FLT_MAX;
                 for (int a=0; a < size; a++) {
                     for (int b=0; b < size; b++) {
                         m = fmaxf(m, input[i][size*j +a][size*k +b]);

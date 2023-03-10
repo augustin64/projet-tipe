@@ -62,7 +62,7 @@ float tanh_derivative(float x) {
 
 
 void apply_softmax_input(float ***input, int depth, int rows, int columns) {
-    float m = FLT_MIN;
+    float m = -FLT_MAX;
     float sum=0;
     for (int i=0; i < depth; i++) {
         for (int j=0; j < rows; j++) {
