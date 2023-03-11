@@ -72,11 +72,11 @@ void backward_max_pooling(float*** input, float*** output, int input_width, int 
                             m = input[i][size*j +a][size*k +b];
                             a_max = a;
                             b_max = b;
-                            input[i][size*j +a][size*k +b] = 0;
                         }
+                        input[i][size*j +a][size*k +b] = 0;
                     }
                 }
-                input[i][size*j +a_max][size*k +b_max] = output[i][j][k];
+                input[i][size*j +a_max][size*k +b_max] = output[i][j][k]/(size*size);
             }
         }
     }
@@ -146,10 +146,11 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
 
 void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, ptr d_function, int is_first) {
     // Bias
+    int n = dim_output*dim_output;
     for (int i=0; i < depth_output; i++) {
         for (int j=0; j < dim_output; j++) {
             for (int k=0; k < dim_output; k++) {
-                ker->d_bias[i][j][k] += output[i][j][k];
+                ker->d_bias[i] += output[i][j][k]/n;
             }
         }
     }
