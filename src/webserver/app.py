@@ -1,11 +1,21 @@
 #!/usr/bin/python3
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import subprocess
+import secrets
 import json
+
+import guess
 
 MAGIC_NUMBER = 2051
 
 app = Flask(__name__)
+
+app.register_blueprint(guess.bp)
+
+
+app.config['SECRET_KEY'] = secrets.token_hex()
+app.config['SESSION_TYPE'] = 'memchached'
+
 
 @app.route("/")
 def index():

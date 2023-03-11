@@ -1,4 +1,4 @@
-body {
+body, #guess-body {
     flex-direction: row;
     display: flex;
     overflow: hidden;

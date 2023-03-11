@@ -22,6 +22,9 @@ test-img-vis-kernel/*
 **.rej
 patches/*
 
+## Webserver:Guess
+human_guess.csv
+
 ## 50States10K dataset
 # Download it from https://drive.google.com/file/d/1Y8eqx1Uy8kuRP4BNmTCVvrNbCxx6RoiP/view
 # Edit and run src/scripts/generate_dataset.sh to generate train and test set

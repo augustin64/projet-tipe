@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guessing Game</title>
+    <link href="{{ url_for('static',filename='guess.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div id="guess-body">
+        <div id="left-div">
+            <img src="/guess/image.png" id="guess-image" alt="Image to guess">
+            {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+            {% endfor %}
+            {% if session["essayes"] != 0 %}
+            <div id="accuracy">
+                Nombre d'images réussies : {{ session["reussis"] }}/{{ session["essayes"] }}<br/>
+                Taux de réussite: {{ '%0.2f'| format(session["reussis"] / session["essayes"] *100) }}%
+            </div>
+            {% endif %}
+        </div>
+        <form method="post" id="guess-form">
+            <h2>Choose the correct label:</h2>
+            <div id="labels">
+                <ol>
+                {% for i in CHOICES %}
+                    <li><label><input type="radio" name="guess" value="{{ i }}"> {{ i }}</label></li>
+                {% endfor %}
+                </ol>
+            </div>
+            <input type="submit" id="guess-button" value="Guess">
+        </form>
+        <img src="/static/usa_map.png" id="us-map">
+    </div>
+</body>
+</html>
