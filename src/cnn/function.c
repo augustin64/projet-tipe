@@ -103,7 +103,7 @@ void apply_function_to_matrix(int activation, float*** input, int depth, int dim
     if (activation == SOFTMAX) {
         return apply_softmax_input(input, depth, dim, dim);
     }
-    if (activation > 1) { // Exclude negative values (derivative) and 1 (identity)
+    if (activation >= 1) { // Exclude negative values (derivative)
         ptr f = get_activation_function(activation);
         return apply_function_input(f, input, depth, dim, dim);
     }
@@ -116,7 +116,7 @@ void apply_function_to_vector(int activation, float*** input, int dim) {
     if (activation == SOFTMAX) {
         return apply_softmax_input(input, 1, 1, dim);
     }
-    if (activation > 1) { // Exclude negative values (derivative) and 1 (identity)
+    if (activation >= 1) { // Exclude negative values (derivative)
         ptr f = get_activation_function(activation);
         return apply_function_input(f, input, 1, 1, dim);
     }
