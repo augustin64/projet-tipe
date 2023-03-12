@@ -181,22 +181,14 @@ void add_convolution(Network* network, int depth_output, int dim_output, int act
             }
         }
     }
-    cnn->bias = (float***)nalloc(depth_output, sizeof(float**));
-    cnn->d_bias = (float***)nalloc(depth_output, sizeof(float**));
+    cnn->bias = (float*)nalloc(depth_output, sizeof(float));
+    cnn->d_bias = (float*)nalloc(depth_output, sizeof(float));
     for (int i=0; i < depth_output; i++) {
-        cnn->bias[i] = (float**)nalloc(bias_size, sizeof(float*));
-        cnn->d_bias[i] = (float**)nalloc(bias_size, sizeof(float*));
-        for (int j=0; j < bias_size; j++) {
-            cnn->bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-            cnn->d_bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-            for (int k=0; k < bias_size; k++) {
-                cnn->d_bias[i][j][k] = 0.;
-            }
-        }
+        cnn->d_bias[i] = 0;
     }
-    int n_in = network->width[n-1]*network->width[n-1]*network->depth[n-1];
+    int n_in = kernel_size*kernel_size;
     int n_out = network->width[n]*network->width[n]*network->depth[n];
-    initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, dim_output, dim_output, n_in, n_out);
+    initialisation_1d_matrix(network->initialisation, cnn->bias, depth_output, n_in, n_out);
     initialisation_4d_matrix(network->initialisation, cnn->weights, depth_input, depth_output, kernel_size, kernel_size, n_in, n_out);
     create_a_cube_input_layer(network, n, depth_output, bias_size);
     create_a_cube_input_z_layer(network, n, depth_output, bias_size);
@@ -234,7 +226,7 @@ void add_dense(Network* network, int size_output, int activation) {
             nn->d_weights[i][j] = 0.;
         }
     }
-
+    
     initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input, size_output);
     initialisation_2d_matrix(network->initialisation, nn->weights, size_input, size_output, size_input, size_output);
     create_a_line_input_layer(network, n, size_output);

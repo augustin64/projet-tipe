@@ -91,7 +91,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
             float buffer[output_dim*output_dim];
             for (int j=0; j < output_dim; j++) {
                 for (int k=0; k < output_dim; k++) {
-                    bufferAdd(cnn->bias[i][j][k]);
+                    bufferAdd(cnn->bias[i]);
                 }
             }
             fwrite(buffer, sizeof(buffer), 1, ptr);
@@ -247,18 +247,14 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         Kernel_cnn* cnn = kernel->cnn;
         float tmp;
 
-        cnn->bias = (float***)nalloc(cnn->columns, sizeof(float**));
-        cnn->d_bias = (float***)nalloc(cnn->columns, sizeof(float**));
+        cnn->bias = (float*)nalloc(cnn->columns, sizeof(float));
+        cnn->d_bias = (float*)nalloc(cnn->columns, sizeof(float));
         for (int i=0; i < cnn->columns; i++) {
-            cnn->bias[i] = (float**)nalloc(output_dim, sizeof(float*));
-            cnn->d_bias[i] = (float**)nalloc(output_dim, sizeof(float*));
             for (int j=0; j < output_dim; j++) {
-                cnn->bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
-                cnn->d_bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
                 for (int k=0; k < output_dim; k++) {
                     (void) !fread(&tmp, sizeof(tmp), 1, ptr);
-                    cnn->bias[i][j][k] = tmp;
-                    cnn->d_bias[i][j][k] = 0.;
+                    cnn->bias[i] = tmp;
+                    cnn->d_bias[i] = 0.;
                 }
             }
         }

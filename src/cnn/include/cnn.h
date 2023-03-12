@@ -25,7 +25,8 @@ void write_image_in_network_32(int** image, int height, int width, float** input
 void write_image_in_network_260(unsigned char* image, int height, int width, float*** input);
 
 /*
-* Propage en avant le cnn
+* Propage en avant le cnn. Le dropout est actif que si le réseau est en phase d'apprentissage.
+* 
 */
 void forward_propagation(Network* network);
 

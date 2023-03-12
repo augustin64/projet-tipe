@@ -20,7 +20,7 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
     for (int i=0; i < kernel->columns; i++) { // filtre
         for (int j=0; j < output_dim; j++) { // ligne de sortie
             for (int k=0; k < output_dim; k++) { // colonne de sortie
-                f = kernel->bias[i][j][k];
+                f = kernel->bias[i];
                 for (int a=0; a < kernel->rows; a++) { // Canal de couleur
                     for (int b=0; b < kernel->k_size; b++) { // ligne du filtre
                         for (int c=0; c < kernel->k_size; c++) { // colonne du filtre
@@ -46,7 +46,7 @@ __global__ void make_convolution_kernel(Kernel_cnn* kernel, float*** input, floa
         return;
     }
 
-    float f = kernel->bias[idx][idy][idz];
+    float f = kernel->bias[idx];
 
     for (int a=0; a < kernel->rows; a++) {
         for (int b=0; b < kernel->k_size; b++) {

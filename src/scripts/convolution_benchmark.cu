@@ -111,9 +111,13 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     kernel->rows = rows;
     kernel->columns = columns;
 
-    // bias[kernel->columns][dim_output][dim_output]
-    kernel->bias = create_matrix(kernel->columns, output_dim, output_dim, 15.0f);
-    kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    // bias[kernel->columns]
+    kernel->bias = (float*)malloc(kernel->columns, sizeof(float));
+    kernel->d_bias = (float*)malloc(kernel->columns, sizeof(float));
+    for (int i=0; i<kernel->columns; i++) {
+        kernel->bias[i] = random_float(0.0f, 15.0f);
+        kernel->d_bias[i] = random_float(0.0f, 1.5f);
+    }
 
     // weights[rows][columns][k_size][k_size]
     kernel->weights = (float****)malloc(sizeof(float***)*kernel->rows);
@@ -156,8 +160,8 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     }
     //printf(GREEN "OK\n" RESET);
 
-    free_matrix(kernel->bias, kernel->columns, output_dim);
-    free_matrix(kernel->d_bias, kernel->columns, output_dim);
+    free(kernel->bias);
+    free(kernel->d_bias);
 
     for (int i=0; i < kernel->rows; i++) {
         free_matrix(kernel->weights[i], kernel->columns, kernel->k_size);

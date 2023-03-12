@@ -146,10 +146,11 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
 
 void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, ptr d_function, int is_first) {
     // Bias
+    int n = dim_output*dim_output;
     for (int i=0; i < depth_output; i++) {
         for (int j=0; j < dim_output; j++) {
             for (int k=0; k < dim_output; k++) {
-                ker->d_bias[i][j][k] += output[i][j][k];
+                ker->d_bias[i] += output[i][j][k]/n;
             }
         }
     }
