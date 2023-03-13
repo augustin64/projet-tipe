@@ -9,7 +9,7 @@
 
 #include "include/creation.h"
 
-Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_dim, int input_depth) {
+Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     if (dropout < 0 || dropout > 100) {
         printf_error("La probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
@@ -28,6 +28,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
         network->kernel[i] = (Kernel*)nalloc(1, sizeof(Kernel));
     }
     network->kernel[0]->linearisation = DOESNT_LINEARISE;
+    network->kernel[0]->activation = activation;
     network->width[0] = input_dim;
     network->depth[0] = input_depth;
     network->kernel[0]->nn = NULL;
@@ -38,8 +39,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
 }
 
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(8, learning_rate, dropout, initialisation, input_dim, input_depth);
-    network->kernel[0]->activation = activation;
+    Network* network = create_network(8, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
     add_convolution(network, 6, 28, activation);
     add_average_pooling(network, 14);
     add_convolution(network, 16, 10, activation);
@@ -51,8 +51,7 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
 }
 
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(3, learning_rate, dropout, initialisation, input_dim, input_depth);
-    network->kernel[0]->activation = activation;
+    Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
     add_dense_linearisation(network, 80, activation);
     add_dense(network, 10, SOFTMAX);
     return network;
