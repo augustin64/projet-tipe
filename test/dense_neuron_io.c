@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/mnist/include/neuron_io.h"
-#include "../src/mnist/include/neural_network.h"
+#include "../src/dense/include/neuron_io.h"
+#include "../src/dense/include/neural_network.h"
 #include "../src/include/colors.h"
 
 

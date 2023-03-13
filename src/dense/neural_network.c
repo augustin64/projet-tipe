@@ -7,18 +7,9 @@
 #include <time.h>
 
 #include "include/neuron.h"
+#include "include/neural_network.h"
 
-// Définit le taux d'apprentissage du réseau neuronal, donc la rapidité d'adaptation du modèle (compris entre 0 et 1)
-// Cette valeur peut évoluer au fur et à mesure des époques (linéaire c'est mieux)
-#define LEARNING_RATE 0.1
-// Retourne un nombre aléatoire entre 0 et 1
-#define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
-//Coefficient leaking ReLU
-#define COEFF_LEAKY_RELU 0.2
-#define MAX_RESEAU 100000
 
-#define PRINT_POIDS false
-#define PRINT_BIAIS false
 
 #ifndef __CUDACC__
 // The functions and macros below are already defined when using NVCC
@@ -29,6 +20,10 @@ float max(float a, float b){
 }
 
 #endif
+
+bool drop(float prob) {
+    return (rand() % 100) > 100*prob;
+}
 
 float sigmoid(float x){
     return 1/(1 + exp(-x));
@@ -104,12 +99,12 @@ void deletion_of_network(Network* network) {
 
 
 
-void forward_propagation(Network* network) {
+void forward_propagation(Network* network, bool is_training) {
     Layer* layer; // Couche actuelle
     Layer* pre_layer; // Couche précédente
     Neuron* neuron;
     float sum;
-    float max_z;
+    float max_z = INT_MIN;
 
     for (int i=1; i < network->nb_layers; i++) { // La première couche contient déjà des valeurs
         sum = 0;
@@ -126,7 +121,18 @@ void forward_propagation(Network* network) {
             }
 
             if (i < network->nb_layers-1) {
-                neuron->z = leaky_ReLU(neuron->z);  
+                if (!is_training) {
+                    if (j == 0) {
+                        neuron->z = ENTRY_DROPOUT*leaky_ReLU(neuron->z);
+                    } else {
+                        neuron->z = DROPOUT*leaky_ReLU(neuron->z);
+                    }
+                } else if (!drop(DROPOUT)) {
+                    neuron->z = leaky_ReLU(neuron->z);
+                } else {
+                    neuron->z = 0.;
+                }
+                
             } else { // Softmax seulement pour la dernière couche
                 max_z = max(max_z, neuron->z);
             }
@@ -190,12 +196,16 @@ void backward_propagation(Network* network, int* desired_output) {
                 changes += (neuron->weights[k]*neuron->last_back_weights[k])/neurons_nb;
             }
             changes = changes*leaky_ReLU_derivative(neuron->z);
-            neuron->back_bias += changes;
-            neuron->last_back_bias = changes;
+            if (neuron->z != 0) {
+                neuron->back_bias += changes;
+                neuron->last_back_bias = changes;
+            }
             for (int l=0; l < network->layers[i]->nb_neurons; l++){
                 neuron2 = network->layers[i]->neurons[l];
-                neuron2->back_weights[j] += neuron2->weights[j]*changes;
-                neuron2->last_back_weights[j] = neuron2->weights[j]*changes;
+                if (neuron->z != 0) {
+                    neuron2->back_weights[j] += neuron2->weights[j]*changes;
+                    neuron2->last_back_weights[j] = neuron2->weights[j]*changes;
+                }
             }
         }
     }
