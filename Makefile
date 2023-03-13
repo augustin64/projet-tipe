@@ -1,7 +1,7 @@
 BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./.cache
-NVCC         := nvcc-no
+NVCC         := nvcc
 CUDA_INCLUDE := /opt/cuda/include # Default installation path for ArchLinux, may be different
 
 NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
