@@ -4,12 +4,29 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "neuron.h"
 
 #ifndef DEF_NEURAL_NETWORK_H
 #define DEF_NEURAL_NETWORK_H
 
+#define LEARNING_RATE 0.1
+// Retourne un nombre aléatoire entre 0 et 1
+#define RAND_DOUBLE() ((double)rand())/((double)RAND_MAX)
+//Coefficient leaking ReLU
+#define COEFF_LEAKY_RELU 0.2
+#define MAX_RESEAU 100000
+
+#define PRINT_POIDS false
+#define PRINT_BIAIS false
+
+// Mettre à 1 pour désactiver
+#define DROPOUT 0.7
+#define ENTRY_DROPOUT 0.85
+
+
+bool drop(float prob);
 
 /*
 * Fonction max pour les floats
@@ -41,7 +58,7 @@ void deletion_of_network(Network* network);
 * les données on été insérées dans la première couche. Le résultat
 * de la propagation se trouve dans la dernière couche
 */
-void forward_propagation(Network* network);
+void forward_propagation(Network* network, bool is_training);
 
 /*
 * Renvoie la liste des sorties voulues à partir du nombre voulu

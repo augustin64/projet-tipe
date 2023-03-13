@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../src/mnist/include/mnist.h"
+#include "../src/include/mnist.h"
 #include "../src/include/colors.h"
 
 

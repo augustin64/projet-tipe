@@ -8,7 +8,7 @@
 #include <omp.h>
 
 #include "../include/memory_management.h"
-#include "../mnist/include/mnist.h"
+#include "../include/mnist.h"
 #include "include/initialisation.h"
 #include "include/test_network.h"
 #include "include/neuron_io.h"
@@ -107,6 +107,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     float loss;
     float batch_loss; // May be redundant with loss, but gives more informations
     float accuracy;
+    float batch_accuracy;
     float current_accuracy;
 
 
@@ -257,6 +258,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
         for (int j=0; j < batches_epoques; j++) {
             batch_loss = 0.;
+            batch_accuracy = 0.;
             #ifdef USE_MULTITHREADING
                 if (j == batches_epoques-1) {
                     nb_remaining_images = nb_images_total_remaining;
@@ -293,6 +295,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                         accuracy += train_parameters[k]->accuracy / (float) nb_images_total;
                         loss += train_parameters[k]->loss/nb_images_total;
                         batch_loss += train_parameters[k]->loss/BATCHES;
+                        batch_accuracy += train_parameters[k]->accuracy / (float) BATCHES; // C'est faux pour le dernier batch mais on ne l'affiche pas pour lui (enfin très rapidement)
                     }
                 }
 
@@ -304,7 +307,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                     }
                 }
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
-                printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.2f%%" RESET, nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.2f%%" RESET " \tBatch Accuracy: " YELLOW "%0.2f%%" RESET, nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100, batch_accuracy*100);
                 fflush(stdout);
             #else
                 (void)nb_images_total_remaining; // Juste pour enlever un warning
@@ -320,13 +323,14 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
                 accuracy += train_params->accuracy / (float) nb_images_total;
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
+                batch_accuracy += train_params->accuracy / (float)BATCHES;
                 loss += train_params->loss/nb_images_total;
                 batch_loss += train_params->loss/BATCHES;
 
                 update_weights(network, network);
                 update_bias(network, network);
 
-                printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.4f%%" RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100);
+                printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.4f%%" RESET "\tBatch Accuracy: " YELLOW "%0.2f%%" RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100, batch_accuracy*100);
                 fflush(stdout);
             #endif
         }

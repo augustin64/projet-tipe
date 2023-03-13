@@ -1,19 +1,19 @@
 BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./.cache
-NVCC         := nvcc
+NVCC         := nvcc-no
 CUDA_INCLUDE := /opt/cuda/include # Default installation path for ArchLinux, may be different
 
 NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 
-MNIST_SRCDIR := $(SRCDIR)/mnist
+DENSE_SRCDIR := $(SRCDIR)/dense
 CNN_SRCDIR   := $(SRCDIR)/cnn
 
-MNIST_SRC    := $(wildcard $(MNIST_SRCDIR)/*.c)
+MNIST_SRC    := $(wildcard $(DENSE_SRCDIR)/*.c)
 CNN_SRC      := $(wildcard $(CNN_SRCDIR)/*.c)
 CNN_SRC_CUDA := $(wildcard $(CNN_SRCDIR)/*.cu)
 
-MNIST_OBJ     = $(filter-out $(BUILDDIR)/mnist_main.o $(BUILDDIR)/mnist_utils.o $(BUILDDIR)/mnist_preview.o, $(MNIST_SRC:$(MNIST_SRCDIR)/%.c=$(BUILDDIR)/mnist_%.o))
+MNIST_OBJ     = $(filter-out $(BUILDDIR)/dense_main.o $(BUILDDIR)/dense_utils.o $(BUILDDIR)/dense_preview.o, $(MNIST_SRC:$(DENSE_SRCDIR)/%.c=$(BUILDDIR)/dense_%.o))
 CNN_OBJ       = $(filter-out $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_preview.o $(BUILDDIR)/cnn_export.o, $(CNN_SRC:$(CNN_SRCDIR)/%.c=$(BUILDDIR)/cnn_%.o))
 CNN_OBJ_CUDA  = $(CNN_SRC:$(CNN_SRCDIR)/%.cu=$(BUILDDIR)/cnn_%.o)
 
@@ -40,30 +40,23 @@ NVCCFLAGS = -g
 # -fsanitize=address -lasan
 #! WARNING: test/cnn-neuron_io fails with this option enabled
 
-all: mnist cnn;
+all: dense cnn;
 #
-# Build mnist
+# Build dense
 #
 # Executables
-mnist: $(BUILDDIR)/mnist-main $(BUILDDIR)/mnist-utils $(BUILDDIR)/mnist-preview;
+dense: $(BUILDDIR)/dense-main $(BUILDDIR)/dense-utils $(BUILDDIR)/dense-preview;
 
-$(BUILDDIR)/mnist-main: $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o
-	$(CC)  $(MNIST_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist_neural_network.o -o $(BUILDDIR)/mnist-main  $(CFLAGS) $(LD_CFLAGS)
-
-$(BUILDDIR)/mnist-utils: $(MNIST_SRCDIR)/utils.c $(BUILDDIR)/mnist_neural_network.o $(BUILDDIR)/mnist_neuron_io.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/dense-main: $(DENSE_SRCDIR)/main.c $(BUILDDIR)/mnist.o $(BUILDDIR)/dense_neuron_io.o $(BUILDDIR)/dense_neural_network.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/mnist-preview: $(MNIST_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
+$(BUILDDIR)/dense-utils: $(DENSE_SRCDIR)/utils.c $(BUILDDIR)/dense_neural_network.o $(BUILDDIR)/dense_neuron_io.o $(BUILDDIR)/mnist.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-# .o files
-$(BUILDDIR)/mnist.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
-	$(CC)  -c $< -o $@  $(CFLAGS)
+$(BUILDDIR)/dense-preview: $(DENSE_SRCDIR)/preview.c $(BUILDDIR)/mnist.o
+	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/mnist.cuda.o: $(MNIST_SRCDIR)/mnist.c $(MNIST_SRCDIR)/include/mnist.h
-	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I$(CUDA_INCLUDE)
-
-$(BUILDDIR)/mnist_%.o: $(MNIST_SRCDIR)/%.c $(MNIST_SRCDIR)/include/%.h
+$(BUILDDIR)/dense_%.o: $(DENSE_SRCDIR)/%.c $(DENSE_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
 
@@ -171,8 +164,7 @@ prepare-tests:
 $(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-# mnist.o est déjà inclus en tant que mnist_mnist.o
-$(BUILDDIR)/test-mnist_%: $(TEST_SRCDIR)/mnist_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o
+$(BUILDDIR)/test-dense_%: $(TEST_SRCDIR)/dense_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
@@ -208,9 +200,9 @@ endif
 webserver: $(CACHE_DIR)/mnist-reseau-fully-connected.bin $(CACHE_DIR)/mnist-reseau-cnn.bin
 	FLASK_APP="src/webserver/app.py" flask run
 
-$(CACHE_DIR)/mnist-reseau-fully-connected.bin: $(BUILDDIR)/mnist-main
+$(CACHE_DIR)/mnist-reseau-fully-connected.bin: $(BUILDDIR)/dense-main
 	@mkdir -p $(CACHE_DIR)
-	$(BUILDDIR)/mnist-main train \
+	$(BUILDDIR)/dense-main train \
 		--images "data/mnist/train-images-idx3-ubyte" \
 		--labels "data/mnist/train-labels-idx1-ubyte" \
 		--out "$(CACHE_DIR)/mnist-reseau-fully-connected.bin"

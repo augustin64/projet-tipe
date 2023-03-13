@@ -7,7 +7,7 @@
 #include <sys/sysinfo.h>
 
 #include "include/main.h"
-#include "include/mnist.h"
+#include "../include/mnist.h"
 #include "../include/colors.h"
 #include "include/neuron_io.h"
 #include "include/neural_network.h"
@@ -47,7 +47,7 @@ void print_image(unsigned int width, unsigned int height, int** image, float* pr
 
 int indice_max(float* tab, int n) {
     int indice = -1;
-    float maxi = FLT_MIN;
+    float maxi = -FLT_MAX;
     
     for (int i=0; i < n; i++) {
         if (tab[i] > maxi) {
@@ -87,7 +87,11 @@ void help(char* call) {
 void write_image_in_network(int** image, Network* network, int height, int width) {
     for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
-            network->layers[0]->neurons[i*height+j]->z = (float)image[i][j] / 255.0f;
+            if (!drop(ENTRY_DROPOUT)) {
+                network->layers[0]->neurons[i*height+j]->z = (float)image[i][j] / 255.0f;
+            } else {
+                network->layers[0]->neurons[i*height+j]->z = 0;
+            }
         }
     }
 }
@@ -113,7 +117,7 @@ void* train_thread(void* parameters) {
     for (int i=start; i < start+nb_images; i++) {
         write_image_in_network(images[shuffle[i]], network, height, width);
         desired_output = desired_output_creation(network, labels[shuffle[i]]);
-        forward_propagation(network);
+        forward_propagation(network, true);
         backward_propagation(network, desired_output);
 
         for (int k=0; k < nb_neurons_last_layer; k++) {
@@ -138,7 +142,7 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
 
     //int* repartition = malloc(sizeof(int)*layers);
     int nb_neurons_last_layer = 10;
-    int repartition[3] = {neurons, 42, nb_neurons_last_layer};
+    int repartition[2] = {neurons, nb_neurons_last_layer};
 
     float accuracy;
     float current_accuracy;
@@ -239,6 +243,8 @@ void train(int epochs, int layers, int neurons, char* recovery, char* image_file
         write_network(out, network);
         if (delta != NULL)
             write_delta_network(delta, delta_network);
+
+        test(out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", false);
     }
     write_network(out, network);
     if (delta != NULL) {
@@ -293,7 +299,7 @@ float** recognize(char* modele, char* entree) {
         results[i] = (float*)malloc(sizeof(float)*last_layer->nb_neurons);
 
         write_image_in_network(images[i], network, height, width);
-        forward_propagation(network);
+        forward_propagation(network, false);
 
         for (int j=0; j < last_layer->nb_neurons; j++) {
             results[i][j] = last_layer->neurons[j]->z;
@@ -388,7 +394,7 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "train")) {
         int epochs = EPOCHS;
-        int layers = 3;
+        int layers = 2;
         int neurons = 784;
         int nb_images = -1;
         int start = 0;
