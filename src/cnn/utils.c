@@ -33,7 +33,6 @@ void knuth_shuffle(int* tab, int n) {
 }
 
 bool equals_networks(Network* network1, Network* network2) {
-    int output_dim;
     checkEquals(size, "size", -1);
     checkEquals(initialisation, "initialisation", -1);
     checkEquals(dropout, "dropout", -1);
@@ -68,16 +67,11 @@ bool equals_networks(Network* network1, Network* network2) {
             }
         } else {
             // Type CNN
-            output_dim = network1->width[i+1];
             checkEquals(kernel[i]->cnn->k_size, "kernel[i]->k_size", i);
             checkEquals(kernel[i]->cnn->rows, "kernel[i]->rows", i);
             checkEquals(kernel[i]->cnn->columns, "kernel[i]->columns", i);
             for (int j=0; j < network1->kernel[i]->cnn->columns; j++) {
-                for (int k=0; k < output_dim; k++) {
-                    for (int l=0; l < output_dim; l++) {
-                        checkEquals(kernel[i]->cnn->bias[j], "kernel[i]->cnn->bias[j][k][l]", j);
-                    }
-                }
+                checkEquals(kernel[i]->cnn->bias[j], "kernel[i]->cnn->bias[j]", j);
             }
             for (int j=0; j < network1->kernel[i]->cnn->rows; j++) {
                 for (int k=0; k < network1->kernel[i]->cnn->columns; k++) {
@@ -106,7 +100,6 @@ Network* copy_network(Network* network) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
 
     copyVar(dropout);
     copyVar(learning_rate);
@@ -172,8 +165,6 @@ Network* copy_network(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
-            output_dim = network->width[i+1];
-
 
             network_cp->kernel[i]->nn = NULL;
             network_cp->kernel[i]->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
@@ -252,7 +243,6 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
 
     copyVarParams(learning_rate);
 
@@ -276,7 +266,6 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
             rows = network_src->kernel[i]->cnn->rows;
             k_size = network_src->kernel[i]->cnn->k_size;
             columns = network_src->kernel[i]->cnn->columns;
-            output_dim = network_src->width[i+1];
 
             for (int j=0; j < columns; j++) {
                 copyVarParams(kernel[i]->cnn->bias[j]);
@@ -309,7 +298,6 @@ int count_null_weights(Network* network) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
 
     for (int i=0; i < size-1; i++) {
         if (!network->kernel[i]->cnn && network->kernel[i]->nn) { // Cas du NN
@@ -331,7 +319,6 @@ int count_null_weights(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
-            output_dim = network->width[i+1];
 
             for (int j=0; j < columns; j++) {
                 null_bias += fabs(network->kernel[i]->cnn->bias[j]) <= epsilon;
