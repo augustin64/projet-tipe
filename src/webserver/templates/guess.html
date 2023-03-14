@@ -5,6 +5,7 @@
     <link href="{{ url_for('static',filename='guess.css') }}" rel="stylesheet">
 </head>
 <body>
+    <div id="header-infos">uuid: {{ session["uuid"] }} | <a href="/guess/stats">Statistiques</a></div>
     <div id="guess-body">
         <div id="left-div">
             <img src="/guess/image.png" id="guess-image" alt="Image to guess">

@@ -2,6 +2,8 @@ import os
 import random
 import uuid
 import datetime
+import csv
+import time
 
 from flask import (Blueprint, Flask, flash, make_response, redirect,
                    render_template, request, send_from_directory, session,
@@ -17,9 +19,23 @@ RESULTS_FILE = 'human_guess.csv'
 HINT = False # Show answer in console
 
 
+# Keep function data in cache for a certain amount of time
+def time_cache(expiry_time=600):
+    def decorator(fn):
+        def decorated_fn(**args):
+            if "cache" not in fn.__dict__.keys():
+                fn.__dict__["cache"] = {"data": None, "update": time.time()}
+            if fn.__dict__["cache"]["data"] is None or fn.__dict__["cache"]["update"] < time.time() - expiry_time:
+                fn.__dict__["cache"]["data"] = fn(**args)
+                fn.__dict__["cache"]["update"] = time.time()
+            return fn.__dict__["cache"]["data"]
+        return decorated_fn
+    return decorator
+
+
 if not os.path.exists(RESULTS_FILE):
     with open(RESULTS_FILE, "w") as f:
-        f.write("label,guess,corresponding,filename,uuid,datetime")
+        f.write("label,guess,corresponding,filename,uuid,datetime\n")
 
 
 def ensure_cookies(session):
@@ -79,3 +95,36 @@ def get_media():
     else:
         real_filename = (session["image_filename"].split("/")[0], session["image_filename"].split("/")[1])
         return send_from_directory(os.path.join(IMAGE_DIR, real_filename[0]), real_filename[1])
+
+
+@bp.route("/stats")
+@time_cache(expiry_time=30) # 30 seconds cache
+def statistiques():
+    with open(RESULTS_FILE, 'r') as f:
+        data = list(csv.DictReader(f))
+
+        
+        success = len([row for row in data if row["corresponding"]=="True"])
+        total = len(list(data))
+        users = {
+            "0000-0000-0000-0000": {
+                "essais": 1,
+                "success": 0,
+            }
+        }
+        for row in data:
+            if row["uuid"] not in users.keys():
+                users[row["uuid"]] = {
+                    "essais": 0,
+                    "success": 0,
+                }
+            users[row["uuid"]]["essais"] += 1
+            if row["corresponding"] == "True":
+                users[row["uuid"]]["success"] += 1
+
+        max_uuid = "0000-0000-0000-0000"
+        for user in users.keys():
+            if users[user]["success"]/users[user]["essais"] >= users[max_uuid]["success"]/users[max_uuid]["essais"]:
+                max_uuid = user
+
+        return render_template("stats.html", success=success, total=total, users=len(users), max_uuid=max_uuid, max_score=users[max_uuid]["success"]/users[max_uuid]["essais"])

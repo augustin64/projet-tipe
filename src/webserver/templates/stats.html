@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stats</title>
+</head>
+<body>
+    Taux de réussite moyen: {{ '%0.2f'| format(success / total *100) }}%<br/>
+    Images essayées au total: {{ total }}<br/>
+    Nombre d'utilisateurs: {{ users }}<br/>
+    <br/>
+    Meilleur score: {{ '%0.2f'| format(max_score *100) }}<br/>
+    Meilleur utilisateur: {{ max_uuid }}<br/>
+</body>
+</html>
