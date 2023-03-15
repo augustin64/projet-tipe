@@ -3,24 +3,22 @@
 ## Compilation
 
 ```bash
-make mnist-main
+make dense-main
 ```
 
 ## Options à la compilation
 
-- La définition de la taille des batches se fait dans l'un des [`#define`](/src/mnist/main.c#L15)
-- Le multi-threading est activé par défaut, réduisible à un seul thread actif en remplaçant [`get_nprocs()`](/src/mnist/main.c#L144) par 1
-- L'ajustement du nombre de couches, bien qu'étant une option en ligne de commande, ne définit pas les valeurs pour chaque couche. On préférera donc modifier directement ces valeurs dans le code [ici](/src/mnist/main.c#L140) et [ici](/src/mnist/main.c#L378)
+- La définition de la taille des batches se fait dans l'un des [`#define`](/src/dense/main.c#L15)
+- Le multi-threading est activé par défaut, réduisible à un seul thread actif en remplaçant [`get_nprocs()`](/src/dense/main.c#L144) par 1
+- L'ajustement du nombre de couches, bien qu'étant une option en ligne de commande, ne définit pas les valeurs pour chaque couche. On préférera donc modifier directement ces valeurs dans le code [ici](/src/dense/main.c#L140) et [ici](/src/dense/main.c#L378)
 
 ## Utilisation
 ```bash
-Usage: build/mnist-main ( train | recognize | test ) [OPTIONS]
+Usage: build/dense-main ( train | recognize | test ) [OPTIONS]
 
 OPTIONS:
 	train:
 		--epochs  | -e [int]	Nombre d'époques (itérations sur tout le set de données).
-		--couches  | -c [int]	Nombres de couches.
-		--neurones | -n [int]	Nombre de neurones sur la première couche.
 		--recover | -r [FILENAME]	Récupérer depuis un modèle existant.
 		--images  | -i [FILENAME]	Fichier contenant les images.
 		--labels  | -l [FILENAME]	Fichier contenant les labels.
@@ -45,7 +43,7 @@ Entraînement du réseau de neurones
 
 Exemple:
 ```bash
-build/mnist-main train \
+build/dense-main train \
     -e 15 \
     -i data/mnist/train-images-idx3-ubyte \
     -l data/mnist/train-labels-idx1-ubyte \
@@ -61,7 +59,7 @@ Le plus simple pour dessiner à la main est d'utiliser le [serveur web](/doc/web
 
 Exemple:
 ```bash
-build/mnist-main recognize \
+build/dense-main recognize \
     -m reseau.bin \
     -i .cache/image-idx3-ubyte \
     -o json
@@ -71,7 +69,7 @@ build/mnist-main recognize \
 
 Exemple:
 ```bash
-build/mnist-main test \
+build/dense-main test \
     -i data/mnist/t10k-images-idx3-ubyte \
     -l data/mnist/t10k-labels-idx1-ubyte \
     -m reseau.bin
