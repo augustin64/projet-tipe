@@ -49,7 +49,7 @@ void* train_thread(void* parameters);
 * nb_images_to_process: nombre d'images sur lesquelles entraîner le réseau  (-1 si non utilisé)
 * start: index auquel démarrer si nb_images_to_process est utilisé (0 si non utilisé)
 */
-void train(int epochs, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start);
+void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start);
 
 /*
 * Échange deux éléments d'un tableau

@@ -63,8 +63,6 @@ void help(char* call) {
     printf("OPTIONS:\n");
     printf("\ttrain:\n");
     printf("\t\t--epochs  | -e [int]\tNombre d'époques (itérations sur tout le set de données).\n");
-    printf("\t\t--couches  | -c [int]\tNombres de couches.\n");
-    printf("\t\t--neurones | -n [int]\tNombre de neurones sur la première couche.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
@@ -135,12 +133,14 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int epochs, int layers, int neurons, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start) {
+void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start) {
     // Entraînement du réseau sur le set de données MNIST
     Network* network;
     Network* delta_network;
 
     //int* repartition = malloc(sizeof(int)*layers);
+    int layers = 2;
+    int neurons = 784;
     int nb_neurons_last_layer = 10;
     int repartition[2] = {neurons, nb_neurons_last_layer};
 
@@ -394,8 +394,6 @@ int main(int argc, char* argv[]) {
     }
     if (! strcmp(argv[1], "train")) {
         int epochs = EPOCHS;
-        int layers = 2;
-        int neurons = 784;
         int nb_images = -1;
         int start = 0;
         char* images = NULL;
@@ -408,13 +406,6 @@ int main(int argc, char* argv[]) {
             // Utiliser un switch serait sans doute plus élégant
             if ((! strcmp(argv[i], "--epochs"))||(! strcmp(argv[i], "-e"))) {
                 epochs = strtol(argv[i+1], NULL, 10);
-                i += 2;
-            } else
-                if ((! strcmp(argv[i], "--couches"))||(! strcmp(argv[i], "-c"))) {
-                layers = strtol(argv[i+1], NULL, 10);
-                i += 2;
-            } else if ((! strcmp(argv[i], "--neurones"))||(! strcmp(argv[i], "-n"))) {
-                neurons = strtol(argv[i+1], NULL, 10);
                 i += 2;
             } else if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
                 images = argv[i+1];
@@ -455,7 +446,7 @@ int main(int argc, char* argv[]) {
             out = "out.bin";
         }
         // Entraînement en sourçant neural_network.c
-        train(epochs, layers, neurons, recovery, images, labels, out, delta, nb_images, start);
+        train(epochs, recovery, images, labels, out, delta, nb_images, start);
         return 0;
     }
     if (! strcmp(argv[1], "recognize")) {
