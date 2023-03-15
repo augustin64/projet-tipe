@@ -1,6 +1,6 @@
 # Compte rendu
 
-### **22 Avril 2022** MNIST, premiers résultats. [b30bedd](https://github.com/julienChemillier/TIPE/commit/b30bedd375e23ec7c2e5b10acf397a10885d8b5e)
+### **22 Avril 2022** MNIST, premiers résultats sur le réseau dense. [b30bedd](https://github.com/julienChemillier/TIPE/commit/b30bedd375e23ec7c2e5b10acf397a10885d8b5e)
 Le réseau minimise la fonction d'erreur (différence entre sortie voulue et obtenue).  
 Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieux qu'aléatoire.  
 Chaque image renvoie les mêmes poids sur la dernière couche.  

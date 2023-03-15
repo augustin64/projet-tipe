@@ -15,7 +15,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int acti
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
 
 /*
-* Renvoie un réseau sans convolution, similaire à celui utilisé dans src/mnist
+* Renvoie un réseau sans convolution, similaire à celui utilisé dans src/dense
 */
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
 

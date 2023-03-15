@@ -9,11 +9,11 @@ NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 DENSE_SRCDIR := $(SRCDIR)/dense
 CNN_SRCDIR   := $(SRCDIR)/cnn
 
-MNIST_SRC    := $(wildcard $(DENSE_SRCDIR)/*.c)
+DENSE_SRC    := $(wildcard $(DENSE_SRCDIR)/*.c)
 CNN_SRC      := $(wildcard $(CNN_SRCDIR)/*.c)
 CNN_SRC_CUDA := $(wildcard $(CNN_SRCDIR)/*.cu)
 
-MNIST_OBJ     = $(filter-out $(BUILDDIR)/dense_main.o $(BUILDDIR)/dense_utils.o $(BUILDDIR)/dense_preview.o, $(MNIST_SRC:$(DENSE_SRCDIR)/%.c=$(BUILDDIR)/dense_%.o))
+DENSE_OBJ     = $(filter-out $(BUILDDIR)/dense_main.o $(BUILDDIR)/dense_utils.o $(BUILDDIR)/dense_preview.o, $(DENSE_SRC:$(DENSE_SRCDIR)/%.c=$(BUILDDIR)/dense_%.o))
 CNN_OBJ       = $(filter-out $(BUILDDIR)/cnn_main.o $(BUILDDIR)/cnn_preview.o $(BUILDDIR)/cnn_export.o, $(CNN_SRC:$(CNN_SRCDIR)/%.c=$(BUILDDIR)/cnn_%.o))
 CNN_OBJ_CUDA  = $(CNN_SRC:$(CNN_SRCDIR)/%.cu=$(BUILDDIR)/cnn_%.o)
 
@@ -164,7 +164,7 @@ prepare-tests:
 $(BUILDDIR)/test-cnn_%: $(TEST_SRCDIR)/cnn_%.c $(CNN_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/test-dense_%: $(TEST_SRCDIR)/dense_%.c $(MNIST_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
+$(BUILDDIR)/test-dense_%: $(TEST_SRCDIR)/dense_%.c $(DENSE_OBJ) $(BUILDDIR)/colors.o $(BUILDDIR)/mnist.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
