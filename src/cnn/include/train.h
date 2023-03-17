@@ -5,9 +5,9 @@
 #define DEF_TRAIN_H
 
 #define EPOCHS 10
-#define BATCHES 500
+#define BATCHES 32
 #define USE_MULTITHREADING
-#define LEARNING_RATE 0.05
+#define LEARNING_RATE 3e-4
 
 
 /*
