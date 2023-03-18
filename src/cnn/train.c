@@ -348,7 +348,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         #endif
         write_network(out, network);
         // If you want to test the network between each epoch, uncomment the following line:
-        //test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false);
+        test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false);
 
         // Learning Rate decay
         network->learning_rate -= LEARNING_RATE*(1./(float)(epochs+1));

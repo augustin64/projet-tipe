@@ -87,9 +87,14 @@ void update_bias(Network* network, Network* d_network) {
             Kernel_cnn* d_cnn = dk_i->cnn;
 
             for (int a=0; a < output_depth; a++) {
-                cnn->bias[a] -= network->learning_rate * d_cnn->d_bias[a];
-                d_cnn->d_bias[a] = 0;
-                cnn->bias[a] = clip(cnn->bias[a]);
+                for (int b=0; b < output_width; b++) {
+                    for (int c=0; c < output_width; c++) {
+                        cnn->bias[a][b][c] -= network->learning_rate * d_cnn->d_bias[a][b][c];
+                        d_cnn->d_bias[a][b][c] = 0;
+
+                        cnn->bias[a][b][c] = clip(cnn->bias[a][b][c]);
+                    }
+                }
             }
         } else if (k_i->nn) { // Full connection
             Kernel_nn* nn = k_i->nn;
@@ -172,7 +177,11 @@ void reset_d_bias(Network* network) {
             Kernel_cnn* cnn = k_i_1->cnn;
 
             for (int a=0; a < output_depth; a++) {
-                cnn->d_bias[a] = 0;
+                for (int b=0; b < output_width; b++) {
+                    for (int c=0; c < output_width; c++) {
+                        cnn->d_bias[a][b][c] = 0;
+                    }
+                }
             }
         } else if (k_i->nn) { // Full connection
             Kernel_nn* nn = k_i_1->nn;

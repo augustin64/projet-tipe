@@ -36,7 +36,16 @@ void free_convolution(Network* network, int pos) {
     int c = k_pos->columns;
     int k_size = k_pos->k_size;
     int r = k_pos->rows;
+    int bias_size = network->width[pos+1]; // Not sure of the value
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
+    for (int i=0; i < c; i++) {
+        for (int j=0; j < bias_size; j++) {
+            gree(k_pos->bias[i][j]);
+            gree(k_pos->d_bias[i][j]);
+        }
+        gree(k_pos->bias[i]);
+        gree(k_pos->d_bias[i]);
+    }
     gree(k_pos->bias);
     gree(k_pos->d_bias);
 

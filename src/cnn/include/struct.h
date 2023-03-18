@@ -13,8 +13,8 @@ typedef struct Kernel_cnn {
     int k_size; // k_size = dim_input - dim_output + 1
     int rows; // Depth de l'input
     int columns; // Depth de l'output
-    float* bias; // bias[columns]
-    float* d_bias; // d_bias[columns]
+    float*** bias; // bias[columns][dim_output][dim_output]
+    float*** d_bias; // d_bias[columns][dim_output][dim_output]
     float**** weights; // weights[rows][columns][k_size][k_size]
     float**** d_weights; // d_weights[rows][columns][k_size][k_size]
 } Kernel_cnn;

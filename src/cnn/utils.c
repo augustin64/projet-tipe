@@ -33,6 +33,7 @@ void knuth_shuffle(int* tab, int n) {
 }
 
 bool equals_networks(Network* network1, Network* network2) {
+    int output_dim;
     checkEquals(size, "size", -1);
     checkEquals(initialisation, "initialisation", -1);
     checkEquals(dropout, "dropout", -1);
@@ -67,17 +68,22 @@ bool equals_networks(Network* network1, Network* network2) {
             }
         } else {
             // Type CNN
+            output_dim = network1->width[i+1];
             checkEquals(kernel[i]->cnn->k_size, "kernel[i]->k_size", i);
             checkEquals(kernel[i]->cnn->rows, "kernel[i]->rows", i);
             checkEquals(kernel[i]->cnn->columns, "kernel[i]->columns", i);
             for (int j=0; j < network1->kernel[i]->cnn->columns; j++) {
-                checkEquals(kernel[i]->cnn->bias[j], "kernel[i]->cnn->bias[j]", j);
+                for (int k=0; k < output_dim; k++) {
+                    for (int l=0; l < output_dim; l++) {
+                        checkEquals(kernel[i]->cnn->bias[j][k][l], "kernel[i]->cnn->bias[j][k][l]", l);
+                    }
+                }
             }
             for (int j=0; j < network1->kernel[i]->cnn->rows; j++) {
                 for (int k=0; k < network1->kernel[i]->cnn->columns; k++) {
                     for (int l=0; l < network1->kernel[i]->cnn->k_size; l++) {
                         for (int m=0; m < network1->kernel[i]->cnn->k_size; m++) {
-                            checkEquals(kernel[i]->cnn->weights[j][k][l][m], "kernel[i]->cnn->weights[j][k][l][m]", m);
+                            checkEquals(kernel[i]->cnn->weights[j][k][l][m], "kernel[i]->cnn->bias[j][k][l][m]", m);
                         }
                     }
                 }
@@ -100,6 +106,7 @@ Network* copy_network(Network* network) {
     int rows;
     int k_size;
     int columns;
+    int output_dim;
 
     copyVar(dropout);
     copyVar(learning_rate);
@@ -165,6 +172,8 @@ Network* copy_network(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
+            output_dim = network->width[i+1];
+
 
             network_cp->kernel[i]->nn = NULL;
             network_cp->kernel[i]->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
@@ -173,11 +182,19 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->cnn->k_size);
             copyVar(kernel[i]->cnn->columns);
 
-            network_cp->kernel[i]->cnn->bias = (float*)nalloc(columns, sizeof(float));
-            network_cp->kernel[i]->cnn->d_bias = (float*)nalloc(columns, sizeof(float));
+            network_cp->kernel[i]->cnn->bias = (float***)nalloc(columns, sizeof(float**));
+            network_cp->kernel[i]->cnn->d_bias = (float***)nalloc(columns, sizeof(float**));
             for (int j=0; j < columns; j++) {
-                copyVar(kernel[i]->cnn->bias[j]);
-                network_cp->kernel[i]->cnn->d_bias[j] = 0.;
+                network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(output_dim, sizeof(float*));
+                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(output_dim, sizeof(float*));
+                for (int k=0; k < output_dim; k++) {
+                    network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
+                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
+                    for (int l=0; l < output_dim; l++) {
+                        copyVar(kernel[i]->cnn->bias[j][k][l]);
+                        network_cp->kernel[i]->cnn->d_bias[j][k][l] = 0.;
+                    }
+                }
             }
 
             network_cp->kernel[i]->cnn->weights = (float****)nalloc(rows, sizeof(float***));
@@ -243,6 +260,7 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
     int rows;
     int k_size;
     int columns;
+    int output_dim;
 
     copyVarParams(learning_rate);
 
@@ -266,9 +284,14 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
             rows = network_src->kernel[i]->cnn->rows;
             k_size = network_src->kernel[i]->cnn->k_size;
             columns = network_src->kernel[i]->cnn->columns;
+            output_dim = network_src->width[i+1];
 
             for (int j=0; j < columns; j++) {
-                copyVarParams(kernel[i]->cnn->bias[j]);
+                for (int k=0; k < output_dim; k++) {
+                    for (int l=0; l < output_dim; l++) {
+                        copyVarParams(kernel[i]->cnn->bias[j][k][l]);
+                    }
+                }
             }
             for (int j=0; j < rows; j++) {
                 for (int k=0; k < columns; k++) {
@@ -298,6 +321,7 @@ int count_null_weights(Network* network) {
     int rows;
     int k_size;
     int columns;
+    int output_dim;
 
     for (int i=0; i < size-1; i++) {
         if (!network->kernel[i]->cnn && network->kernel[i]->nn) { // Cas du NN
@@ -319,9 +343,14 @@ int count_null_weights(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
+            output_dim = network->width[i+1];
 
             for (int j=0; j < columns; j++) {
-                null_bias += fabs(network->kernel[i]->cnn->bias[j]) <= epsilon;
+                for (int k=0; k < output_dim; k++) {
+                    for (int l=0; l < output_dim; l++) {
+                        null_bias += fabs(network->kernel[i]->cnn->bias[j][k][l]) <= epsilon;
+                    }
+                }
             }
             for (int j=0; j < rows; j++) {
                 for (int k=0; k < columns; k++) {

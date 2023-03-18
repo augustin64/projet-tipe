@@ -18,7 +18,7 @@ void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth
     for (int i=0; i<depth_output; i++) {
         for (int j=0; j<dim_output; j++) {
             for (int k=0; k<dim_output; k++) {
-                printf("%.2f", ker->bias[i]);
+                printf("%.2f", ker->bias[i][j][k]);
             }
             print_space;
         }
