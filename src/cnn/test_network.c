@@ -12,7 +12,7 @@
 #include "include/cnn.h"
 
 
-void test_network_mnist(Network* network, char* images_file, char* labels_file, bool preview_fails) {
+float* test_network_mnist(Network* network, char* images_file, char* labels_file, bool preview_fails, bool to_stdout, bool with_offset) {
     (void)preview_fails; // Inutilisé pour le moment
     int width, height; // Dimensions des images
     int nb_elem; // Nombre d'éléments
@@ -36,11 +36,11 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
 
     // Load image in the first layer of the Network
     for (int i=0; i < nb_elem; i++) {
-        if(i %(nb_elem/100) == 0) {
+        if(i %(nb_elem/100) == 0 && to_stdout) {
             printf("Avancement: %.0f%%\r",  100*i/(float)nb_elem);
             fflush(stdout);
         }
-        write_image_in_network_32(images[i], height, width, network->input[0][0]);
+        write_image_in_network_32(images[i], height, width, network->input[0][0], with_offset);
         forward_propagation(network);
         maxi = indice_max(network->input[network->size-1][0][0], 10);
 
@@ -59,11 +59,15 @@ void test_network_mnist(Network* network, char* images_file, char* labels_file, 
         free(images[i]);
     }
     free(images);
-    printf("%d Images. Taux de réussite: %.2f%%\tLoss: %lf\n", nb_elem, 100*accuracy/(float)nb_elem, loss/nb_elem);
+
+    float* results = malloc(sizeof(float)*2);
+    results[0] = 100*accuracy/(float)nb_elem;
+    results[1] = loss/(float)nb_elem;
+    return results;
 }
 
 
-void test_network_jpg(Network* network, char* data_dir, bool preview_fails) {
+float* test_network_jpg(Network* network, char* data_dir, bool preview_fails, bool to_stdout) {
     (void)preview_fails; // Inutilisé pour le moment
     jpegDataset* dataset = loadJpegDataset(data_dir);
 
@@ -71,7 +75,7 @@ void test_network_jpg(Network* network, char* data_dir, bool preview_fails) {
     int maxi;
 
     for (int i=0; i < (int)dataset->numImages; i++) {
-        if(i %(dataset->numImages/100) == 0) {
+        if(i %(dataset->numImages/100) == 0 && to_stdout) {
             printf("Avancement: %.1f%%\r",  1000*i/(float)dataset->numImages);
             fflush(stdout);
         }
@@ -86,23 +90,35 @@ void test_network_jpg(Network* network, char* data_dir, bool preview_fails) {
         free(dataset->images[i]);
     }
 
-    printf("%d Images. Taux de réussite: %.2f%%\n", dataset->numImages, 100*accuracy/(float)dataset->numImages);
+    float* results = malloc(sizeof(float)*2);
+    results[0] = 100*accuracy/(float)dataset->numImages;
+    results[1] = 0;
+
     free(dataset->images);
     free(dataset->labels);
     free(dataset);
+
+    return results;
 }
 
 
-void test_network(int dataset_type, char* modele, char* images_file, char* labels_file, char* data_dir, bool preview_fails) {
+float* test_network(int dataset_type, char* modele, char* images_file, char* labels_file, char* data_dir, bool preview_fails, bool to_stdout, bool with_offset) {
     Network* network = read_network(modele);
+    float* results;
 
     if (dataset_type == 0) {
-        test_network_mnist(network, images_file, labels_file, preview_fails);
+        results = test_network_mnist(network, images_file, labels_file, preview_fails, to_stdout, with_offset);
     } else {
-        test_network_jpg(network, data_dir, preview_fails);
+        results = test_network_jpg(network, data_dir, preview_fails, to_stdout);
     }
 
     free_network(network);
+
+    if (to_stdout) {
+        printf("Accuracy: %lf\tLoss: %lf\n", results[0], results[1]);
+        free(results); // Will not be used if to_stdout is used
+    }
+    return results;
 }
 
 
@@ -130,7 +146,7 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
             printf("\"%d\" : [", i);
         }
 
-        write_image_in_network_32(images[i], height, width, network->input[0][0]);
+        write_image_in_network_32(images[i], height, width, network->input[0][0], false);
         forward_propagation(network);
 
     

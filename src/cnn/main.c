@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
             printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
-        test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails);
+        (void)test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails, true, false);
         return 0;
     }
     if (! strcmp(argv[1], "recognize")) {

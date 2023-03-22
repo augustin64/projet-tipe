@@ -51,7 +51,7 @@ void* train_thread(void* parameters) {
 
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
-            write_image_in_network_32(images[index[i]], height, width, network->input[0][0]);
+            write_image_in_network_32(images[index[i]], height, width, network->input[0][0], true);
             forward_propagation(network);
             maxi = indice_max(network->input[network->size-1][0][0], 10);
             if (maxi == -1) {
@@ -106,6 +106,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     srand(time(NULL));
     float loss;
     float batch_loss; // May be redundant with loss, but gives more informations
+    float test_accuracy = 0.; // Used to decrease Learning rate
     float accuracy;
     float batch_accuracy;
     float current_accuracy;
@@ -233,7 +234,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     end_time = omp_get_wtime();
 
     elapsed_time = end_time - start_time;
-    printf("Taux d'apprentissage initial: %lf\n", network->learning_rate);
+    printf("Taux d'apprentissage initial: %0.2e\n", network->learning_rate);
     printf("Initialisation: ");
     printf_time(elapsed_time);
     printf("\n\n");
@@ -308,7 +309,6 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 }
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
                 printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.2f%%" RESET " \tBatch Accuracy: " YELLOW "%0.2f%%" RESET, nb_threads, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100, batch_accuracy*100);
-                fflush(stdout);
             #else
                 (void)nb_images_total_remaining; // Juste pour enlever un warning
 
@@ -331,7 +331,6 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 update_bias(network, network);
 
                 printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.4f%%" RESET "\tBatch Accuracy: " YELLOW "%0.2f%%" RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100, batch_accuracy*100);
-                fflush(stdout);
             #endif
         }
         //* Fin d'une époque: affichage des résultats et sauvegarde du réseau
@@ -347,11 +346,25 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         printf("\n");
         #endif
         write_network(out, network);
-        // If you want to test the network between each epoch, uncomment the following line:
-        test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false);
+        // If you want to test the network between each epoch, uncomment the following lines:
+        /*
+        float* test_results = test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false, false, true);
+        printf("Tests: Accuracy: %0.2lf%%\tLoss: %lf\n", test_results[0], test_results[1]);
+        if (test_results[0] < test_accuracy) {
+            network->learning_rate *= 0.1;
+            printf("Decreased learning rate to %0.2e\n", network->learning_rate);
+        }
+        if (test_results[0] == test_accuracy) {
+            network->learning_rate *= 2;
+            printf("Increased learning rate to %0.2e\n", network->learning_rate);
+        }
+        test_accuracy = test_results[0];
+        free(test_results);
 
-        // Learning Rate decay
-        network->learning_rate -= LEARNING_RATE*(1./(float)(epochs+1));
+        test_results = test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false, false, false);
+        printf("Tests sans offset: Accuracy: %0.2lf%%\tLoss: %lf\n", test_results[0], test_results[1]);
+        free(test_results);
+        */
     }
 
     //* Fin de l'algo

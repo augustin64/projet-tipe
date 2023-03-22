@@ -1,7 +1,8 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <float.h> // Is it used ?
+#include <math.h>
 
 #include "include/backpropagation.h"
 #include "include/initialisation.h"
@@ -33,7 +34,80 @@ int will_be_drop(int dropout_prob) {
     return (rand() % 100) < dropout_prob;
 }
 
-void write_image_in_network_32(int** image, int height, int width, float** input) {
+void write_image_in_network_32(int** image, int height, int width, float** input, bool random_offset) {
+    int i_offset = 0;
+    int j_offset = 0;
+    int min_col = 0;
+    int min_ligne = 0;
+
+    if (random_offset) {
+        /*
+                                    <-- min_ligne
+                .%%:.
+                ######%%%%%%%%%.
+                .:.:%##########:
+                        . .... ##:
+                            .##
+                            ##.
+                            :##
+                            .##.
+                            :#%
+                            %#.
+                        :#%
+                        .##.
+                        ##%
+                        %##
+                        ##.
+                        ##:
+                    :##.
+                    .###.
+                    :###
+                    :#%
+                                    <-- max_ligne
+               ^-- min_col
+                                 ^-- max_col
+        */
+        int sum_colonne[width];
+        int sum_ligne[height];
+
+        for (int i=0; i < width; i++) {
+            sum_colonne[i] = 0;
+        }
+        for (int j=0; j < height; j++) {
+            sum_ligne[j] = 0;
+        }
+
+        for (int i=0; i < width; i++) {
+            for (int j=0; j < height; j++) {
+                sum_ligne[i] += image[i][j];
+                sum_colonne[j] += image[i][j];
+            }
+        }
+
+        min_ligne = -1;
+        while (sum_ligne[min_ligne+1] == 0 && min_ligne < width+1) {
+            min_ligne++;
+        }
+
+        int max_ligne = width;
+        while (sum_ligne[max_ligne-1] == 0 && max_ligne > 0) {
+            max_ligne--;
+        }
+
+        min_col = -1;
+        while (sum_colonne[min_col+1] == 0 && min_col < height+1) {
+            min_col++;
+        }
+
+        int max_col = height;
+        while (sum_colonne[max_col-1] == 0 && max_col > 0) {
+            max_col--;
+        }
+
+        i_offset = rand()%(27-max_ligne+min_ligne);
+        j_offset = rand()%(27-max_col+min_col);
+    }
+
     int padding = (32 - height)/2;
     for (int i=0; i < padding; i++) {
         for (int j=0; j < 32; j++) {
@@ -46,7 +120,10 @@ void write_image_in_network_32(int** image, int height, int width, float** input
 
     for (int i=0; i < width; i++) {
         for (int j=0; j < height; j++) {
-            input[i+2][j+2] = (float)image[i][j] / 255.0f;
+            int adjusted_i = i + min_ligne - i_offset;
+            int adjusted_j = j + min_col - j_offset;
+            // Make sure not to be out of the image
+            input[i+2][j+2] = adjusted_i < height && adjusted_j < width && adjusted_i >= 0 && adjusted_j >= 0 ? (float)image[adjusted_i][adjusted_j] / 255.0f : 0.;
         }
     }
 }

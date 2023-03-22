@@ -6,7 +6,7 @@
 /*
 * Renvoie le taux de réussite d'un réseau sur des données de test
 */
-void test_network(int dataset_type, char* modele, char* images_file, char* labels_file, char* data_dir, bool preview_fails);
+float* test_network(int dataset_type, char* modele, char* images_file, char* labels_file, char* data_dir, bool preview_fails, bool to_stdout, bool with_offset);
 
 /*
 * Classifie un fichier d'images sous le format MNIST à partir d'un réseau préalablement entraîné
