@@ -5,7 +5,6 @@
 #include "../include/colors.h"
 
 #include "include/function.h"
-#define BOUND_RELU 15
 
 float identity(float x) {
     return x;
@@ -28,7 +27,7 @@ float sigmoid_derivative(float x) {
 
 
 float relu(float x) {
-    return fmaxf(0, fminf(x, BOUND_RELU));
+    return fmaxf(0, fminf(x, RELU_CLIP_VALUE));
 }
 
 float relu_derivative(float x) {
@@ -40,7 +39,7 @@ float relu_derivative(float x) {
 
 float leaky_relu(float x) {
     if (x>0)
-        return fminf(x, BOUND_RELU);
+        return fminf(x, RELU_CLIP_VALUE);
     return x*LEAKER;
 }
 

@@ -12,6 +12,9 @@
 
 #define LEAKER 0.2
 
+// RELU and Leaky RELU max value
+#define RELU_CLIP_VALUE 15
+
 
 typedef float (*ptr)(float);
 typedef ptr (*pm)();
