@@ -1,9 +1,7 @@
 #ifndef JPEG_DEF_H
 #define JPEG_DEF_H
 
-// keep images in ram vs re-read and decompress each time
-// #define STORE_IMAGES_TO_RAM
-// Note: in use dataset is 90Go once decompressed, use with caution
+#include "config.h"
 
 /*
 * Struct used to describe a single JPEG image

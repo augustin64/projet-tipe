@@ -3,13 +3,7 @@
 #ifndef DEF_UPDATE_H
 #define DEF_UPDATE_H
 
-/*
-* Des valeurs trop grandes dans le réseau risqueraient de provoquer des overflows notamment.
-* On utilise donc la méthode gradient_clipping,
-* qui consiste à majorer tous les biais et poids par un hyper-paramètre choisi précédemment.
-* https://arxiv.org/pdf/1905.11881.pdf
-*/
-#define CLIP_VALUE 300
+#include "config.h"
 
 /*
 * Réduit la valeur de a si abs(a) > CLIP_VALUE

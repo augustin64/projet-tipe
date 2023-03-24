@@ -4,11 +4,11 @@
 #include "include/struct.h"
 
 float clip(float a) {
-    if (a > CLIP_VALUE) {
-        return CLIP_VALUE;
+    if (a > NETWORK_CLIP_VALUE) {
+        return NETWORK_CLIP_VALUE;
     }
-    if (a < -CLIP_VALUE) {
-        return -CLIP_VALUE;
+    if (a < -NETWORK_CLIP_VALUE) {
+        return -NETWORK_CLIP_VALUE;
     }
     return a;
 }

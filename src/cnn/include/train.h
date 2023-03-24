@@ -4,10 +4,7 @@
 #ifndef DEF_TRAIN_H
 #define DEF_TRAIN_H
 
-#define EPOCHS 10
-#define BATCHES 32
-#define USE_MULTITHREADING
-#define LEARNING_RATE 3e-4
+#include "config.h"
 
 
 /*
