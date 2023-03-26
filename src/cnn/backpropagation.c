@@ -82,7 +82,7 @@ void backward_max_pooling(float*** input, float*** output, int input_width, int 
     }
 }
 
-void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, ptr d_function, int is_first) {
+void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, funcPtr d_function, int is_first) {
     // Bias
     for (int j=0; j < size_output; j++) {
         ker->d_bias[j] += output[j];
@@ -109,7 +109,7 @@ void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output,
     }
 }
 
-void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, ptr d_function) {
+void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output,funcPtr d_function) {
     // Bias
     for (int j=0; j < size_output; j++) {
         ker->d_bias[j] += output[j];
@@ -144,7 +144,7 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
     }
 }
 
-void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, ptr d_function, int is_first) {
+void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, funcPtr d_function, int is_first) {
     // Bias
     for (int i=0; i < depth_output; i++) {
         for (int j=0; j < dim_output; j++) {

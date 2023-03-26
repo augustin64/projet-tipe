@@ -40,16 +40,16 @@ void backward_max_pooling(float*** input, float*** output, int input_width, int 
 /*
 * Transfert les informations d'erreur à travers une couche fully connected
 */
-void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, ptr d_function, int is_first);
+void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output, int size_input, int size_output, funcPtr d_function, int is_first);
 
 /*
 * Transfert les informations d'erreur à travers une couche de linéarisation
 */
-void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, ptr d_function);
+void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, funcPtr d_function);
 
 /*
 * Transfert les informations d'erreur à travers un couche de convolution
 */
-void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, ptr d_function, int is_first);
+void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, funcPtr d_function, int is_first);
 
 #endif

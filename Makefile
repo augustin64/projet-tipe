@@ -95,7 +95,7 @@ $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_initialisation.cuda.o \
 		$(BUILDDIR)/cnn_cuda_make.o \
 		$(BUILDDIR)/cnn_neuron_io.cuda.o \
-		$(BUILDDIR)/cnn_function.cuda.o  \
+		$(BUILDDIR)/cnn_cuda_function.o  \
 		$(BUILDDIR)/cnn_utils.cuda.o \
 		$(BUILDDIR)/cnn_update.cuda.o \
 		$(BUILDDIR)/cnn_free.cuda.o \
@@ -223,4 +223,5 @@ $(CACHE_DIR)/mnist-reseau-cnn.bin: $(BUILDDIR)/cnn-main
 #
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -f $(CACHE_DIR)/*
+
+#rm -f $(CACHE_DIR)/*
