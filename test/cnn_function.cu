@@ -5,10 +5,19 @@
 #include "../src/include/memory_management.h"
 #include "../src/cnn/include/function.h"
 #include "../src/include/colors.h"
+#include "../src/include/utils.h"
 
 
 int main() {
-    printf("Initialisation\n");
+    printf("Checking CUDA compatibility.\n");
+    bool cuda_compatible = check_cuda_compatibility();
+    if (!cuda_compatible) {
+        printf(RED "CUDA not compatible, skipping tests.\n" RESET);
+        return 0;
+    }
+    printf(GREEN "OK\n" RESET);
+
+    printf("Initialisation OK\n");
     // Initialise values
     int depth = 10;
     int rows = 10;

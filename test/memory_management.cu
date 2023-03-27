@@ -17,6 +17,14 @@ __global__ void check_access(int* array, int range) {
 
 
 int main() {
+    printf("Checking CUDA compatibility.\n");
+    bool cuda_compatible = check_cuda_compatibility();
+    if (!cuda_compatible) {
+        printf(RED "CUDA not compatible, skipping tests.\n" RESET);
+        return 0;
+    }
+    printf(GREEN "OK\n" RESET);
+
     printf("Pollution de la mémoire\n");
     int mem_used;
     int blocks_used;
