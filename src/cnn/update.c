@@ -1,7 +1,11 @@
 #include <stdio.h>
+#include <math.h>
+#include <float.h>
 
 #include "include/update.h"
 #include "include/struct.h"
+
+#include "include/config.h"
 
 float clip(float a) {
     if (a > NETWORK_CLIP_VALUE) {
@@ -34,7 +38,13 @@ void update_weights(Network* network, Network* d_network) {
                 for (int b=0; b < output_depth; b++) {
                     for (int c=0; c < k_size; c++) {
                         for (int d=0; d < k_size; d++) {
+                            #ifdef ADAM_CNN_WEIGHTS
+                            d_cnn->v_d_weights[a][b][c][d] = BETA_1*d_cnn->v_d_weights[a][b][c][d] + (1-BETA_1)*d_cnn->d_weights[a][b][c][d];
+                            d_cnn->s_d_weights[a][b][c][d] = BETA_2*d_cnn->s_d_weights[a][b][c][d] + (1-BETA_2)*d_cnn->d_weights[a][b][c][d]*d_cnn->d_weights[a][b][c][d];
+                            cnn->weights[a][b][c][d] -= ALPHA*(d_cnn->v_d_weights[a][b][c][d]/sqrt(d_cnn->s_d_weights[a][b][c][d]+Epsilon));
+                            #else
                             cnn->weights[a][b][c][d] -= network->learning_rate * d_cnn->d_weights[a][b][c][d];
+                            #endif
                             d_cnn->d_weights[a][b][c][d] = 0;
 
                             cnn->weights[a][b][c][d] = clip(cnn->weights[a][b][c][d]);
@@ -49,7 +59,13 @@ void update_weights(Network* network, Network* d_network) {
 
                 for (int a=0; a < input_width; a++) {
                     for (int b=0; b < output_width; b++) {
+                        #ifdef ADAM_DENSE_WEIGHTS
+                        d_nn->v_d_weights[a][b] = BETA_1*d_nn->v_d_weights[a][b] + (1-BETA_1)*d_nn->d_weights[a][b];
+                        d_nn->s_d_weights[a][b] = BETA_2*d_nn->s_d_weights[a][b] + (1-BETA_2)*d_nn->d_weights[a][b]*d_nn->d_weights[a][b];
+                        nn->weights[a][b] -= ALPHA*(d_nn->v_d_weights[a][b]/sqrt(d_nn->s_d_weights[a][b]+Epsilon));
+                        #else
                         nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
+                        #endif
                         d_nn->d_weights[a][b] = 0;
                     }
                 }
@@ -61,7 +77,13 @@ void update_weights(Network* network, Network* d_network) {
 
                 for (int a=0; a < size_input; a++) {
                     for (int b=0; b < output_width; b++) {
+                        #ifdef ADAM_DENSE_WEIGHTS
+                        d_nn->v_d_weights[a][b] = BETA_1*d_nn->v_d_weights[a][b] + (1-BETA_1)*d_nn->d_weights[a][b];
+                        d_nn->s_d_weights[a][b] = BETA_2*d_nn->s_d_weights[a][b] + (1-BETA_2)*d_nn->d_weights[a][b]*d_nn->d_weights[a][b];
+                        nn->weights[a][b] -= ALPHA*(d_nn->d_weights[a][b]/sqrt(d_nn->s_d_weights[a][b]+Epsilon));
+                        #else
                         nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
+                        #endif
                         d_nn->d_weights[a][b] = 0;
 
                         nn->weights[a][b] = clip(nn->weights[a][b]);
@@ -89,7 +111,12 @@ void update_bias(Network* network, Network* d_network) {
             for (int a=0; a < output_depth; a++) {
                 for (int b=0; b < output_width; b++) {
                     for (int c=0; c < output_width; c++) {
+                        #ifdef ADAM_CNN_BIAS
+                        d_cnn->s_d_bias[a][b][c] = BETA_2*d_cnn->s_d_bias[a][b][c] + (1-BETA_2)*d_cnn->d_bias[a][b][c]*d_cnn->d_bias[a][b][c];
+                        cnn->bias[a][b][c] -= ALPHA*(d_cnn->d_bias[a][b][c]/sqrt(d_cnn->s_d_bias[a][b][c]+Epsilon));
+                        #else
                         cnn->bias[a][b][c] -= network->learning_rate * d_cnn->d_bias[a][b][c];
+                        #endif
                         d_cnn->d_bias[a][b][c] = 0;
 
                         cnn->bias[a][b][c] = clip(cnn->bias[a][b][c]);
@@ -101,7 +128,12 @@ void update_bias(Network* network, Network* d_network) {
             Kernel_nn* d_nn = dk_i->nn;
 
             for (int a=0; a < output_width; a++) {
+                #ifdef ADAM_DENSE_BIAS
+                d_nn->s_d_bias[a] = BETA_2*d_nn->s_d_bias[a] + (1-BETA_2)*d_nn->d_bias[a]*d_nn->d_bias[a];
+                nn->bias[a] -= ALPHA*(d_nn->d_bias[a]/sqrt(d_nn->s_d_bias[a]+Epsilon));
+                #else
                 nn->bias[a] -= network->learning_rate * d_nn->d_bias[a];
+                #endif
                 d_nn->d_bias[a] = 0;
 
                 nn->bias[a] = clip(nn->bias[a]);

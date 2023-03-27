@@ -1,6 +1,8 @@
 #ifndef DEF_STRUCT_H
 #define DEF_STRUCT_H
 
+#include "config.h"
+
 #define NO_POOLING 0
 #define AVG_POOLING 1
 #define MAX_POOLING 2
@@ -15,8 +17,16 @@ typedef struct Kernel_cnn {
     int columns; // Depth de l'output
     float*** bias; // bias[columns][dim_output][dim_output]
     float*** d_bias; // d_bias[columns][dim_output][dim_output]
+    #ifdef ADAM_CNN_BIAS
+    float*** s_d_bias; // s_d_bias[columns][dim_output][dim_output]
+    float*** v_d_bias; // v_d_bias[columns][dim_output][dim_output]
+    #endif
     float**** weights; // weights[rows][columns][k_size][k_size]
     float**** d_weights; // d_weights[rows][columns][k_size][k_size]
+    #ifdef ADAM_CNN_WEIGHTS
+    float**** s_d_weights; // s_d_weights[rows][columns][k_size][k_size]
+    float**** v_d_weights; // v_d_weights[rows][columns][k_size][k_size]
+    #endif
 } Kernel_cnn;
 
 typedef struct Kernel_nn {
@@ -25,8 +35,16 @@ typedef struct Kernel_nn {
     int size_output; // Nombre d'éléments en sortie
     float* bias; // bias[size_output]
     float* d_bias; // d_bias[size_output]
+    #ifdef ADAM_DENSE_BIAS
+    float* s_d_bias; // s_d_bias[size_output]
+    float* v_d_bias; // v_d_bias[size_output]
+    #endif
     float** weights; // weight[size_input][size_output]
     float** d_weights; // d_weights[size_input][size_output]
+    #ifdef ADAM_DENSE_WEIGHTS
+    float** s_d_weights; // s_d_weights[size_input][size_output]
+    float** v_d_weights; // v_d_weights[size_input][size_output]
+    #endif
 } Kernel_nn;
 
 typedef struct Kernel {

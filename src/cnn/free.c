@@ -42,27 +42,55 @@ void free_convolution(Network* network, int pos) {
         for (int j=0; j < bias_size; j++) {
             gree(k_pos->bias[i][j]);
             gree(k_pos->d_bias[i][j]);
+            #ifdef ADAM_CNN_BIAS
+            gree(k_pos->s_d_bias[i][j]);
+            gree(k_pos->v_d_bias[i][j]);
+            #endif
         }
         gree(k_pos->bias[i]);
         gree(k_pos->d_bias[i]);
+        #ifdef ADAM_CNN_BIAS
+        gree(k_pos->s_d_bias[i]);
+        gree(k_pos->v_d_bias[i]);
+        #endif
     }
     gree(k_pos->bias);
     gree(k_pos->d_bias);
+    #ifdef ADAM_CNN_BIAS
+    gree(k_pos->s_d_bias);
+    gree(k_pos->v_d_bias);
+    #endif
 
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
                 gree(k_pos->weights[i][j][k]);
                 gree(k_pos->d_weights[i][j][k]);
+                #ifdef ADAM_CNN_WEIGHTS
+                gree(k_pos->s_d_weights[i][j][k]);
+                gree(k_pos->v_d_weights[i][j][k]);
+                #endif
             }
             gree(k_pos->weights[i][j]);
             gree(k_pos->d_weights[i][j]);
+            #ifdef ADAM_CNN_WEIGHTS
+            gree(k_pos->s_d_weights[i][j]);
+            gree(k_pos->v_d_weights[i][j]);
+            #endif
         }
         gree(k_pos->weights[i]);
         gree(k_pos->d_weights[i]);
+        #ifdef ADAM_CNN_WEIGHTS
+        gree(k_pos->s_d_weights[i]);
+        gree(k_pos->v_d_weights[i]);
+        #endif
     }
     gree(k_pos->weights);
     gree(k_pos->d_weights);
+    #ifdef ADAM_CNN_WEIGHTS
+    gree(k_pos->s_d_weights);
+    gree(k_pos->v_d_weights);
+    #endif
 
     gree(k_pos);
 }
@@ -74,12 +102,24 @@ void free_dense(Network* network, int pos) {
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i]);
         gree(k_pos->d_weights[i]);
+        #ifdef ADAM_DENSE_WEIGHTS
+        gree(k_pos->s_d_weights[i]);
+        gree(k_pos->v_d_weights[i]);
+        #endif
     }
     gree(k_pos->weights);
     gree(k_pos->d_weights);
+    #ifdef ADAM_DENSE_WEIGHTS
+    gree(k_pos->s_d_weights);
+    gree(k_pos->v_d_weights);
+    #endif
 
     gree(k_pos->bias);
     gree(k_pos->d_bias);
+    #ifdef ADAM_DENSE_BIAS
+    gree(k_pos->s_d_bias);
+    gree(k_pos->v_d_bias);
+    #endif
 
     gree(k_pos);
 }
@@ -91,12 +131,24 @@ void free_dense_linearisation(Network* network, int pos) {
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i]);
         gree(k_pos->d_weights[i]);
+        #ifdef ADAM_DENSE_WEIGHTS
+        gree(k_pos->s_d_weights[i]);
+        gree(k_pos->v_d_weights[i]);
+        #endif
     }
     gree(k_pos->weights);
     gree(k_pos->d_weights);
+    #ifdef ADAM_DENSE_WEIGHTS
+    gree(k_pos->s_d_weights);
+    gree(k_pos->v_d_weights);
+    #endif
 
     gree(k_pos->bias);
     gree(k_pos->d_bias);
+    #ifdef ADAM_DENSE_BIAS
+    gree(k_pos->s_d_bias);
+    gree(k_pos->v_d_bias);
+    #endif
 
     gree(k_pos);
 }

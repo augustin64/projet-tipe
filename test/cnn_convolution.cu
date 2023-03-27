@@ -107,13 +107,25 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     // bias[kernel->columns][dim_output][dim_output]
     kernel->bias = create_matrix(kernel->columns, output_dim, output_dim, 15.0f);
     kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    #ifdef ADAM_CNN_BIAS
+    kernel->s_d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    kernel->v_d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    #endif
 
     // weights[rows][columns][k_size][k_size]
     kernel->weights = (float****)nalloc(kernel->rows, sizeof(float***));
     kernel->d_weights = (float****)nalloc(kernel->rows, sizeof(float***));
+    #ifdef ADAM_CNN_WEIGHTS
+    kernel->s_d_weights = (float****)nalloc(kernel->rows, sizeof(float***));
+    kernel->v_d_weights = (float****)nalloc(kernel->rows, sizeof(float***));
+    #endif
     for (int i=0; i < kernel->rows; i++) {
         kernel->weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 15.0f);
         kernel->d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
+        #ifdef ADAM_CNN_WEIGHTS
+        kernel->s_d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
+        kernel->v_d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
+        #endif
     }
 
     float*** input = create_matrix(kernel->rows, input_dim, input_dim, 5.0f);
@@ -152,13 +164,25 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
 
     free_matrix(kernel->bias, kernel->columns, output_dim);
     free_matrix(kernel->d_bias, kernel->columns, output_dim);
+    #ifdef ADAM_CNN_BIAS
+    free_matrix(kernel->s_d_bias, kernel->columns, output_dim);
+    free_matrix(kernel->v_d_bias, kernel->columns, output_dim);
+    #endif
 
     for (int i=0; i < kernel->rows; i++) {
         free_matrix(kernel->weights[i], kernel->columns, kernel->k_size);
         free_matrix(kernel->d_weights[i], kernel->columns, kernel->k_size);
+        #ifdef ADAM_CNN_WEIGHTS
+        free_matrix(kernel->s_d_weights[i], kernel->columns, kernel->k_size);
+        free_matrix(kernel->v_d_weights[i], kernel->columns, kernel->k_size);
+        #endif
     }
     gree(kernel->weights);
     gree(kernel->d_weights);
+    #ifdef ADAM_CNN_WEIGHTS
+    gree(kernel->s_d_weights);
+    gree(kernel->v_d_weights);
+    #endif
 
     free_matrix(input, kernel->rows, input_dim);
     free_matrix(output_cpu, kernel->columns, output_dim);
