@@ -12,6 +12,7 @@
 #include "include/make.h"
 
 #include "../include/colors.h"
+#include "../include/utils.h"
 #include "include/cnn.h"
 
 // Augmente les dimensions de l'image d'entrée
@@ -188,7 +189,7 @@ void forward_propagation(Network* network) {
         */
         if (k_i->cnn) { // Convolution
             make_convolution(k_i->cnn, input, output, output_width);
-            copy_input_to_input_z(output, output_z, output_depth, output_width, output_width);
+            copy_3d_array(output, output_z, output_depth, output_width, output_width);
             apply_function_to_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
@@ -197,7 +198,7 @@ void forward_propagation(Network* network) {
             } else { // Matrice -> Vecteur
                 make_dense_linearized(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
-            copy_input_to_input_z(output, output_z, 1, 1, output_width);
+            copy_3d_array(output, output_z, 1, 1, output_width);
             apply_function_to_vector(activation, output, output_width);
         }
         else { // Pooling
@@ -214,7 +215,7 @@ void forward_propagation(Network* network) {
                     printf("identifiant: %d, position: %d\n", pooling, i);
                 }
             }
-            copy_input_to_input_z(output, output_z, output_depth, output_width, output_width);
+            copy_3d_array(output, output_z, output_depth, output_width, output_width);
         }
     }
 }
@@ -276,16 +277,6 @@ void drop_neurones(float*** input, int depth, int dim1, int dim2, int dropout) {
             for (int k=0; k < dim2; k++) {
                 if (will_be_drop(dropout))
                     input[i][j][k] = 0;
-            }
-        }
-    }
-}
-
-void copy_input_to_input_z(float*** output, float*** output_z, int output_depth, int output_rows, int output_columns) {
-    for (int i=0; i<output_depth; i++) {
-        for (int j=0; j<output_rows; j++) {
-            for (int k=0; k<output_columns; k++) {
-                output_z[i][j][k] = output[i][j][k];
             }
         }
     }

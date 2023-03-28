@@ -38,4 +38,11 @@ extern "C"
 */
 bool check_cuda_compatibility();
 
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Copier des valeurs d'un tableau de dimension 3 de mémoire partagée
+*/
+void copy_3d_array(float*** source, float*** dest, int dimension1, int dimension2, int dimension3);
 #endif
