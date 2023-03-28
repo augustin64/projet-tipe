@@ -6,9 +6,7 @@
 #include "../include/utils.h"
 
 
-#define BLOCKSIZE_x 16
-#define BLOCKSIZE_y 8
-#define BLOCKSIZE_z 8
+#include "include/config.h"
 
 
 void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim) {

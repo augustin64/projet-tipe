@@ -38,4 +38,9 @@
 // https://arxiv.org/pdf/1905.11881.pdf
 #define NETWORK_CLIP_VALUE 300
 
+//* Paramètres CUDA
+#define BLOCKSIZE_x 10
+#define BLOCKSIZE_y 10
+#define BLOCKSIZE_z 10
+
 #endif

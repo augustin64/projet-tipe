@@ -7,9 +7,7 @@
 
 #include "include/function.h"
 
-#define BLOCKSIZE_x 16
-#define BLOCKSIZE_y 8
-#define BLOCKSIZE_z 8
+#include "include/config.h"
 
 //* Identity
 #ifdef __CUDACC__
