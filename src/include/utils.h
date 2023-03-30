@@ -45,4 +45,12 @@ extern "C"
 * Copier des valeurs d'un tableau de dimension 3 de mémoire partagée
 */
 void copy_3d_array(float*** source, float*** dest, int dimension1, int dimension2, int dimension3);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Remplir un tableau de 0.
+*/
+void reset_3d_array(float*** source, int dimension1, int dimension2, int dimension3);
 #endif
