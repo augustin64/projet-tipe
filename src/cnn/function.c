@@ -107,20 +107,16 @@ float leaky_relu_derivative(float x) {
 
 //* Tanh
 #ifdef __CUDACC__
-__device__
-#endif
-float device_tanh_(float x) {
+__device__ float device_tanh_(float x) {
     return tanh(x);
 }
 
-#ifdef __CUDACC__
-__device__
-#endif
-float device_tanh_derivative(float x) {
+__device__ float device_tanh_derivative(float x) {
     float a = tanh(x);
     return 1 - a*a;
 }
 
+#endif
 float tanh_(float x) {
     return tanh(x);
 }
@@ -303,6 +299,7 @@ funcPtr get_activation_function(int activation) {
 
 
 #ifdef __CUDACC__
+extern "C"
 funcPtr get_activation_function_cuda(int activation) {
     funcPtr host_function;
     

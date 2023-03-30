@@ -142,6 +142,9 @@ funcPtr get_activation_function(int activation);
 /*
 * Récupère un pointeur sur le device vers la fonction d'activation demandée puis le transforme en pointeur sur l'host
 */
+#ifdef __CUDACC__
+extern "C"
 funcPtr get_activation_function_cuda(int activation);
+#endif
 
 #endif
