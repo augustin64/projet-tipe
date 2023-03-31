@@ -5,6 +5,7 @@
 
 #include "include/memory_management.h"
 #include "include/colors.h"
+#include "include/utils.h"
 
 
 Memory* memory = NULL;
@@ -56,6 +57,9 @@ Memory* create_memory_block(size_t size) {
     Memory* mem = (Memory*)malloc(sizeof(Memory));
     #ifdef __CUDACC__
     cudaMallocManaged(&(mem->start), size, cudaMemAttachHost);
+
+    gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
     #else
     mem->start = malloc(size);
     #endif

@@ -39,6 +39,8 @@
 #define NETWORK_CLIP_VALUE 300
 
 //* Paramètres CUDA
+// Le produit des 3 dimensions doit être au maximum 1024 (atteignable avec 8*8*16)
+// Le réduire permet d'éviter des erreurs "Out of memory" au lancement des Kernel
 #define BLOCKSIZE_x 10
 #define BLOCKSIZE_y 10
 #define BLOCKSIZE_z 10

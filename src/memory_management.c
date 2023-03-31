@@ -5,6 +5,7 @@
 
 #include "include/memory_management.h"
 #include "include/colors.h"
+#include "include/utils.h"
 
 
 Memory* memory = NULL;
@@ -56,6 +57,9 @@ Memory* create_memory_block(size_t size) {
     Memory* mem = (Memory*)malloc(sizeof(Memory));
     #ifdef __CUDACC__
     cudaMallocManaged(&(mem->start), size, cudaMemAttachHost);
+
+    gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
     #else
     mem->start = malloc(size);
     #endif
@@ -93,6 +97,7 @@ void* allocate_memory(int nb_elements, size_t size, Memory* mem) {
         //printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), nb_elements*size);
         // Sinon on continue sur l'élément suivant de la liste
         if (!mem->next) {
+            //! WARNING: May cause Infinite allocations when trying to allocate more than MEMORY_BLOCK size at once that is not naturally aligned (CUDA only)
             mem->next = create_memory_block(MEMORY_BLOCK < nb_elements*size ? nb_elements*size : MEMORY_BLOCK);
         }
         return allocate_memory(nb_elements, size, mem->next);

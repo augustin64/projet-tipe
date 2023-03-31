@@ -4,6 +4,7 @@
 #include <float.h> // Is it used ?
 #include <math.h>
 
+#include "../include/memory_management.h"
 #include "include/backpropagation.h"
 #include "include/initialisation.h"
 #include "include/function.h"
@@ -226,7 +227,7 @@ void backward_propagation(Network* network, int wanted_number) {
     // Backward sur la dernière couche qui utilise toujours SOFTMAX
     float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]); // Sortie désirée, permet d'initialiser une erreur
     softmax_backward_cross_entropy(network->input[n-1][0][0], wanted_output, network->width[n-1]);
-    free(wanted_output);
+    gree(wanted_output);
 
     /*
     * On propage à chaque étape:
@@ -252,14 +253,12 @@ void backward_propagation(Network* network, int wanted_number) {
 
 
         if (k_i->cnn) { // Convolution
-            funcPtr d_f = get_activation_function(-activation);
-            backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, d_f, i==0);
+            backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, -activation, i==0);
         } else if (k_i->nn) { // Full connection
-            funcPtr d_f = get_activation_function(-activation);
             if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
-                backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, d_f, i==0);
+                backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, -activation, i==0);
             } else { // Matrice -> vecteur
-                backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, d_f);
+                backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, -activation);
             }
         } else { // Pooling
             if (k_i->pooling == AVG_POOLING) {
@@ -313,7 +312,7 @@ float compute_cross_entropy_loss(float* output, float* wanted_output, int len) {
 }
 
 float* generate_wanted_output(int wanted_number, int size_output) {
-    float* wanted_output = (float*)malloc(sizeof(float)*size_output);
+    float* wanted_output = (float*)nalloc(size_output, sizeof(float));
     for (int i=0; i < size_output; i++) {
         if (i==wanted_number) {
             wanted_output[i]=1;

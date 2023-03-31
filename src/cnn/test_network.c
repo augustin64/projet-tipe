@@ -51,7 +51,7 @@ float* test_network_mnist(Network* network, char* images_file, char* labels_file
         // Compute loss
         wanted_output = generate_wanted_output(labels[i], 10);
         loss += compute_mean_squared_error(network->input[network->size-1][0][0], wanted_output, 10);
-        free(wanted_output);
+        gree(wanted_output);
 
         for (int j=0; j < height; j++) {
             free(images[i][j]);
@@ -60,7 +60,7 @@ float* test_network_mnist(Network* network, char* images_file, char* labels_file
     }
     free(images);
 
-    float* results = malloc(sizeof(float)*2);
+    float* results = (float*)malloc(sizeof(float)*2);
     results[0] = 100*accuracy/(float)nb_elem;
     results[1] = loss/(float)nb_elem;
     return results;
@@ -90,7 +90,7 @@ float* test_network_jpg(Network* network, char* data_dir, bool preview_fails, bo
         free(dataset->images[i]);
     }
 
-    float* results = malloc(sizeof(float)*2);
+    float* results = (float*)malloc(sizeof(float)*2);
     results[0] = 100*accuracy/(float)dataset->numImages;
     results[1] = 0;
 

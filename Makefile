@@ -101,7 +101,7 @@ $(BUILDDIR)/cnn-main-cuda: $(BUILDDIR)/cnn_main.cuda.o \
 		$(BUILDDIR)/cnn_free.cuda.o \
 		$(BUILDDIR)/cnn_jpeg.cuda.o \
 		$(BUILDDIR)/cnn_cuda_convolution.o \
-		$(BUILDDIR)/cnn_backpropagation.cuda.o \
+		$(BUILDDIR)/cnn_cuda_backpropagation.o \
 		$(BUILDDIR)/colors.cuda.o \
 		$(BUILDDIR)/cuda_memory_management.o \
 		$(BUILDDIR)/mnist.cuda.o \
@@ -126,7 +126,7 @@ $(BUILDDIR)/cnn_%.cuda.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
-	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	$(NVCC)  $(NVCCFLAGS)  -c -dc $< -o $@
 else
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 	@echo "$(NVCC) not found, skipping"
@@ -142,7 +142,7 @@ $(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
-	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	$(NVCC)  $(NVCCFLAGS)  -c -dc $< -o $@
 else
 	@echo "$(NVCC) not found, skipping"
 endif

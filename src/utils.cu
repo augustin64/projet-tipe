@@ -73,7 +73,6 @@ __global__ void copy_3d_array_kernel(float*** source, float*** dest, int dimensi
     dest[idx][idy][idz] = source[idx][idy][idz];
 }
 
-extern "C"
 void copy_3d_array(float*** source, float*** dest, int dimension1, int dimension2, int dimension3) {
     dim3 gridSize(i_div_up(dimension1, BLOCKSIZE_x), i_div_up(dimension2, BLOCKSIZE_y), i_div_up(dimension3, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
@@ -89,6 +88,41 @@ void copy_3d_array(float*** source, float*** dest, int dimension1, int dimension
         for (int j=0; j < dimension2; j++) {
             for (int k=0; k < dimension3; k++) {
                 dest[i][j][k] = source[i][j][k];
+            }
+        }
+    }
+}
+#endif
+
+#ifdef __CUDACC__
+__global__ void reset_3d_array_kernel(float*** dest, int dimension1, int dimension2, int dimension3) {
+    int idx = threadIdx.x + blockDim.x*blockIdx.x; // < dimension1
+    int idy = threadIdx.y + blockDim.y*blockIdx.y; // < dimension2
+    int idz = threadIdx.z + blockDim.z*blockIdx.z; // < dimension3
+
+    if (idx >= dimension1 || idy >= dimension2 || idz >= dimension3) {
+        return;
+    }
+
+    dest[idx][idy][idz] = 0.;
+}
+
+extern "C"
+void reset_3d_array(float*** dest, int dimension1, int dimension2, int dimension3) {
+    dim3 gridSize(i_div_up(dimension1, BLOCKSIZE_x), i_div_up(dimension2, BLOCKSIZE_y), i_div_up(dimension3, BLOCKSIZE_z));
+    dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
+
+    reset_3d_array_kernel<<<gridSize, blockSize>>>(dest, dimension1, dimension2, dimension3);
+
+    gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
+}
+#else
+void reset_3d_array(float*** dest, int dimension1, int dimension2, int dimension3) {
+    for (int i=0; i < dimension1; i++) {
+        for (int j=0; j < dimension2; j++) {
+            for (int k=0; k < dimension3; k++) {
+                dest[i][j][k] = 0.;
             }
         }
     }
