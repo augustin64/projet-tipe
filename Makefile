@@ -126,7 +126,7 @@ $(BUILDDIR)/cnn_%.cuda.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
-	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	$(NVCC)  $(NVCCFLAGS)  -c -dc $< -o $@
 else
 $(BUILDDIR)/cnn_cuda_%.o: $(CNN_SRCDIR)/%.cu $(CNN_SRCDIR)/include/%.h
 	@echo "$(NVCC) not found, skipping"
@@ -142,7 +142,7 @@ $(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
 
 ifdef NVCC_INSTALLED
 $(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
-	$(NVCC)  $(NVCCFLAGS)  -c $< -o $@
+	$(NVCC)  $(NVCCFLAGS)  -c -dc $< -o $@
 else
 	@echo "$(NVCC) not found, skipping"
 endif
