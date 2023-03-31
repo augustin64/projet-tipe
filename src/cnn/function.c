@@ -5,26 +5,21 @@
 #include "../include/colors.h"
 #include "../include/utils.h"
 
-#include "include/function.h"
-
 #include "include/config.h"
+
+#include "include/function.h"
 
 //* Identity
 #ifdef __CUDACC__
-__device__ float device_identity(float x) {
-    return x;
-}
-
-__device__ float device_identity_derivative(float x) {
-    (void)x;
-    return 1;
-}
+__host__ __device__
 #endif
-
 float identity(float x) {
     return x;
 }
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 float identity_derivative(float x) {
     (void)x;
     return 1;
@@ -33,20 +28,15 @@ float identity_derivative(float x) {
 
 //* Sigmoid
 #ifdef __CUDACC__
-__device__ float device_sigmoid(float x) {
-    return 1/(1 + exp(-x));
-}
-
-__device__ float device_sigmoid_derivative(float x) {
-    float tmp = exp(-x);
-    return tmp/((1+tmp)*(1+tmp));
-}
+__host__ __device__
 #endif
-
 float sigmoid(float x) {
     return 1/(1 + exp(-x));
 }
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 float sigmoid_derivative(float x) {
     float tmp = exp(-x);
     return tmp/((1+tmp)*(1+tmp));
@@ -55,21 +45,15 @@ float sigmoid_derivative(float x) {
 
 //* RELU
 #ifdef __CUDACC__
-__device__ float device_relu(float x) {
-    return fmaxf(0, fminf(x, RELU_CLIP_VALUE));
-}
-
-__device__ float device_relu_derivative(float x) {
-    if (x > 0)
-        return 1;
-    return 0;
-}
+__host__ __device__
 #endif
-
 float relu(float x) {
     return fmaxf(0, fminf(x, RELU_CLIP_VALUE));
 }
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 float relu_derivative(float x) {
     if (x > 0)
         return 1;
@@ -79,25 +63,17 @@ float relu_derivative(float x) {
 
 //* Leaky RELU
 #ifdef __CUDACC__
-__device__ float device_leaky_relu(float x) {
-    if (x>0)
-        return fminf(x, RELU_CLIP_VALUE);
-    return x*LEAKER;
-}
-
-__device__ float device_leaky_relu_derivative(float x) {
-    if (x > 0)
-        return 1;
-    return LEAKER;
-}
+__host__ __device__
 #endif
-
 float leaky_relu(float x) {
     if (x>0)
         return fminf(x, RELU_CLIP_VALUE);
     return x*LEAKER;
 }
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 float leaky_relu_derivative(float x) {
     if (x > 0)
         return 1;
@@ -107,20 +83,15 @@ float leaky_relu_derivative(float x) {
 
 //* Tanh
 #ifdef __CUDACC__
-__device__ float device_tanh_(float x) {
-    return tanh(x);
-}
-
-__device__ float device_tanh_derivative(float x) {
-    float a = tanh(x);
-    return 1 - a*a;
-}
-
+__host__ __device__
 #endif
 float tanh_(float x) {
     return tanh(x);
 }
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 float tanh_derivative(float x) {
     float a = tanh(x);
     return 1 - a*a;
@@ -134,17 +105,17 @@ float tanh_derivative(float x) {
  * Définition des pointeurs de fonctions pour CUDA
  * voir https://stackoverflow.com/a/15646771
 */
-__device__ funcPtr ptr_sigmoid = device_sigmoid;
-__device__ funcPtr ptr_relu = device_relu;
-__device__ funcPtr ptr_leaky_relu = device_leaky_relu;
-__device__ funcPtr ptr_tanh = device_tanh_;
-__device__ funcPtr ptr_identity = device_identity;
+__device__ funcPtr ptr_sigmoid = sigmoid;
+__device__ funcPtr ptr_relu = relu;
+__device__ funcPtr ptr_leaky_relu = leaky_relu;
+__device__ funcPtr ptr_tanh = tanh_;
+__device__ funcPtr ptr_identity = identity;
 
-__device__ funcPtr ptr_identity_derivative = device_identity_derivative;
-__device__ funcPtr ptr_sigmoid_derivative = device_sigmoid_derivative;
-__device__ funcPtr ptr_relu_derivative = device_relu_derivative;
-__device__ funcPtr ptr_leaky_relu_derivative = device_leaky_relu_derivative;
-__device__ funcPtr ptr_tanh_derivative = device_tanh_derivative;
+__device__ funcPtr ptr_identity_derivative = identity_derivative;
+__device__ funcPtr ptr_sigmoid_derivative = sigmoid_derivative;
+__device__ funcPtr ptr_relu_derivative = relu_derivative;
+__device__ funcPtr ptr_leaky_relu_derivative = leaky_relu_derivative;
+__device__ funcPtr ptr_tanh_derivative = tanh_derivative;
 #endif
 
 

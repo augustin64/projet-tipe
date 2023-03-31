@@ -20,81 +20,66 @@ typedef float (*funcPtr)(float);
 
 //* Identité
 #ifdef __CUDACC__
-__device__ float device_identity(float x);
-__device__ float device_identity_derivative(float x);
-#endif
-
-#ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float identity(float x);
 
 #ifdef __CUDACC__
 extern "C"
+__host__ __device__ 
 #endif
 float identity_derivative(float x);
 
 //* Sigmoid
 #ifdef __CUDACC__
-__device__ float device_sigmoid(float x);
-__device__ float device_sigmoid_derivative(float x);
-#endif
-
-#ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float sigmoid(float x);
 
 #ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float sigmoid_derivative(float x);
 
 //* RELU
 #ifdef __CUDACC__
-__device__ float device_relu(float x);
-__device__ float device_relu_derivative(float x);
-#endif
-
-#ifdef __CUDACC__
 extern "C"
+__host__ __device__ 
 #endif
 float relu(float x);
 
 #ifdef __CUDACC__
 extern "C"
+__host__ __device__ 
 #endif
 float relu_derivative(float x);
 
 //* Leaky RELU
 #ifdef __CUDACC__
-__device__ float device_leaky_relu(float x);
-__device__ float device_leaky_relu_derivative(float x);
-#endif
-
-#ifdef __CUDACC__
 extern "C"
+__host__ __device__ 
 #endif
 float leaky_relu(float x);
 
 #ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float leaky_relu_derivative(float x);
 
 //* Tanh
 #ifdef __CUDACC__
-__device__ float device_tanh_(float x);
-__device__ float device_tanh_derivative(float x);
-#endif
-
-#ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float tanh_(float x);
 
 #ifdef __CUDACC__
 extern "C"
+__host__ __device__
 #endif
 float tanh_derivative(float x);
 
