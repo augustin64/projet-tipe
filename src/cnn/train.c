@@ -28,6 +28,19 @@ int div_up(int a, int b) { // Partie entière supérieure de a/b
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
+void* load_image(void* parameters) {
+    LoadImageParameters* param = (LoadImageParameters*)parameters;
+
+    if (!param->dataset->images[param->index]) {
+        imgRawImage* image = loadJpegImageFile(param->dataset->fileNames[param->index]);
+        param->dataset->images[param->index] = image->lpData;
+        free(image);
+    } else {
+        printf_warning((char*)"Image déjà chargée\n"); // Pas possible techniquement, donc on met un warning
+    }
+
+    return NULL;
+}
 
 void* train_thread(void* parameters) {
     TrainParameters* param = (TrainParameters*)parameters;
@@ -48,6 +61,16 @@ void* train_thread(void* parameters) {
     float* wanted_output;
     float accuracy = 0.;
     float loss = 0.;
+
+    pthread_t tid;
+    LoadImageParameters* load_image_param;
+    if (dataset_type != 0) {
+        load_image_param = (LoadImageParameters*)malloc(sizeof(LoadImageParameters));
+        load_image_param->dataset = param->dataset;
+        load_image_param->index = index[start];
+
+        pthread_create(&tid, NULL, load_image, (void*) load_image_param);
+    }
 
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
@@ -70,10 +93,16 @@ void* train_thread(void* parameters) {
                 accuracy += 1.;
             }
         } else {
+            pthread_join(tid, NULL);
             if (!param->dataset->images[index[i]]) {
                 image = loadJpegImageFile(param->dataset->fileNames[index[i]]);
                 param->dataset->images[index[i]] = image->lpData;
                 free(image);
+            }
+
+            if (i != start+nb_images-1) {
+                load_image_param->index = index[i+1];
+                pthread_create(&tid, NULL, load_image, (void*) load_image_param);
             }
             write_image_in_network_260(param->dataset->images[index[i]], height, width, network->input[0]);
             forward_propagation(network);
@@ -87,6 +116,10 @@ void* train_thread(void* parameters) {
             free(param->dataset->images[index[i]]);
             param->dataset->images[index[i]] = NULL;
         }
+    }
+
+    if (dataset_type != 0) {
+        free(load_image_param);
     }
 
     param->accuracy = accuracy;

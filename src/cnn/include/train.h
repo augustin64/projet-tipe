@@ -8,7 +8,7 @@
 
 
 /*
-* Structure donnée en argument à la fonction 'train_thread'
+ * Structure donnée en argument à la fonction 'train_thread'
 */
 typedef struct TrainParameters {
     Network* network; // Réseau
@@ -26,10 +26,23 @@ typedef struct TrainParameters {
 } TrainParameters;
 
 /*
+ * Structure donnée en argument à la fonction 'load_image'
+*/
+typedef struct LoadImageParameters {
+    jpegDataset* dataset; // Dataset si de type JPEG
+    int index; // Numéro de l'image à charger
+} LoadImageParameters;
+
+/*
  * Partie entière supérieure de a/b
 */
 int div_up(int a, int b);
 
+/*
+ * Fonction auxiliaire pour charger (ouvrir et décompresser) les images de manière asynchrone
+ * économise environ 20ms par image pour des images de taille 256*256*3
+*/
+void* load_image(void* parameters);
 
 /*
  * Fonction auxiliaire d'entraînement destinée à être exécutée sur plusieurs threads à la fois
