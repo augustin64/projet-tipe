@@ -58,15 +58,15 @@ src/dense
 Résultats sur MNIST:
 ```
 $ build/dense-main train -e 5 -i data/mnist/train-images-idx3-ubyte -l data/mnist/train-labels-idx1-ubyte
-Threads [8]	Époque [0/5]	Image [60000/60000]	Accuracy: 86.7%
-Threads [8]	Époque [1/5]	Image [60000/60000]	Accuracy: 90.0%
-Threads [8]	Époque [2/5]	Image [60000/60000]	Accuracy: 90.5%
-Threads [8]	Époque [3/5]	Image [60000/60000]	Accuracy: 90.8%
-Threads [8]	Époque [4/5]	Image [60000/60000]	Accuracy: 90.9%
+Threads [8] Époque [0/5]    Image [60000/60000] Accuracy: 86.7%
+Threads [8] Époque [1/5]    Image [60000/60000] Accuracy: 90.0%
+Threads [8] Époque [2/5]    Image [60000/60000] Accuracy: 90.5%
+Threads [8] Époque [3/5]    Image [60000/60000] Accuracy: 90.8%
+Threads [8] Époque [4/5]    Image [60000/60000] Accuracy: 90.9%
 Execution time: 50 s.
 
 $ build/dense-main test -i data/mnist/t10k-images-idx3-ubyte -l data/mnist/t10k-labels-idx1-ubyte -m out.bin
-10000 Images	Accuracy: 90.4%
+10000 Images   Accuracy: 90.4%
 ```
 <br/><br/>
 
@@ -130,15 +130,15 @@ Pas de fichier de sortie spécifié, défaut: out.bin
 Taux d'apprentissage initial: 3.00e-04
 Initialisation: 185ms
 
-Threads [8]	Époque [0/5]	Image [60000/60000]	Accuracy: 60.5244% 	Loss: 0.046990: Temps: 1mn 31s
-Threads [8]	Époque [1/5]	Image [60000/60000]	Accuracy: 91.3681% 	Loss: 0.012858: Temps: 1mn 31s
-Threads [8]	Époque [2/5]	Image [60000/60000]	Accuracy: 93.0354% 	Loss: 0.010549: Temps: 1mn 30s
-Threads [8]	Époque [3/5]	Image [60000/60000]	Accuracy: 93.8429% 	Loss: 0.009243: Temps: 1mn 29s
-Threads [8]	Époque [4/5]	Image [60000/60000]	Accuracy: 94.4507% 	Loss: 0.008328: Temps: 1mn 31s
+Threads [8] Époque [0/5]    Image [60000/60000] Accuracy: 60.5244%  Loss: 0.046990: Temps: 1mn 31s
+Threads [8] Époque [1/5]    Image [60000/60000] Accuracy: 91.3681%  Loss: 0.012858: Temps: 1mn 31s
+Threads [8] Époque [2/5]    Image [60000/60000] Accuracy: 93.0354%  Loss: 0.010549: Temps: 1mn 30s
+Threads [8] Époque [3/5]    Image [60000/60000] Accuracy: 93.8429%  Loss: 0.009243: Temps: 1mn 29s
+Threads [8] Époque [4/5]    Image [60000/60000] Accuracy: 94.4507%  Loss: 0.008328: Temps: 1mn 31s
 
 Temps total: 7mn 33s
 $ build/cnn-main test -m out.bin -d mnist -i data/mnist/t10k-images-idx3-ubyte -l data/mnist/t10k-labels-idx1-ubyte
-Accuracy: 94.860001	Loss: 0.007952
+Accuracy: 94.860001 Loss: 0.007952
 ```
 <br/><br/>
 
