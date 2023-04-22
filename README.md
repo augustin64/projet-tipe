@@ -4,33 +4,38 @@ Julien CHEMILLIER, Augustin LUCAS
 - [Objectifs](#objectifs)
     + [Objectif principal](#objectif-principal)
     + [Découpage du projet](#découpage-du-projet)
-    + [Résultats](#résultats-selon-ce-découpage)
-        - [Réseau dense](#réseau-dense)
-        - [Réseau convolutif](#réseau-convolutif)
-        - [Optimisations](#optimisations)
-            + [Adam Optimizer](#adam-optimizer)
-            + [Utilisation de la carte graphique](#utilisation-de-la-carte-graphique)
+- [Résultats](#résultats-selon-ce-découpage)
+    + [Réseau dense](#réseau-dense)
+    + [Réseau convolutif](#réseau-convolutif)
+    + [Optimisations](#optimisations)
+        - [Adam Optimizer](#adam-optimizer)
+        - [Utilisation de la carte graphique](#utilisation-de-la-carte-graphique)
 - [Utilisation](#utilisation)
     + [Dépendances](#dépendances)
     + [Compilation](#compilation)
     + [Exécution](#exécution)
-- [Articles de recherche utilisés](#articles-de-recherches-utilisés)
+- [Articles de recherche utilisés](#articles-de-recherche-utilisés)
 
 # Objectifs
 ## Objectif principal
-Classification de villes à l'aide d'un réseau de neurones convolutif
+Classification de villes à l'aide d'un réseau de neurones convolutif.  
+Le réseau sera codé en C en limitant les utilisations de librairies tierces.  
+Les images de villes sont des photos au sol (Google street view)  
 <br/><br/>
 
 ## Découpage du projet
 1. Créer un réseau de neurones "basique", constitué uniquement de couches denses pour se familiariser avec la structure de réseaux de neurones et le langage C qui n'avait que peu été étudié auparavant.
 2. Créer un réseau de neurones convolutif plus efficace sur des images de grande taille.
 3. Implémenter différentes techniques d'optimisation du temps de calcul (utilisation du GPU) et du nombre d'itérations (Adam Optimizer)
+4. Implémenter les détails nécessaires pour avoir un réseau sous la structure d'AlexNet fonctionnel. Le tester sur les images de villes
+
+Les trois premières étapes se feront sur le jeu de données [MNIST](#articles-de-recherche-utilisés) pour des calculs plus adaptés à une phase de développement. Après avoir validé le fonctionnement de ces réseaux, le réseau créé à l'étape 3 sera utilisé sur le jeu de données [50States10K](#articles-de-recherche-utilisés).
 
 <br/><br/>
 
-## Résultats selon ce découpage
+# Résultats selon ce découpage
 
-### Réseau dense
+## Réseau dense
 Le code est disponible dans `src/dense`
 
 <summary>Arborescence du code</summary>
@@ -153,7 +158,7 @@ Meilleur taux de réussite sur le jeu de test avec Adam Optimizer (`ADAM_DENSE_W
 
 ### Utilisation de la Carte Graphique
 
-Un des objectifs principaux de ce TIPE étant également de réaliser un réseau de neurones n'utilisant pas de bibliothèques extérieures pour plus de clarté, seulement la gestion de la mémoire partagée sera faite "en boîte noire", on essayera d'éviter les appels aux fonctions de multiplication de matrices ou de convolution toute faites par exemple.
+Un des objectifs principaux de ce TIPE étant également de réaliser un réseau de neurones n'utilisant pas de bibliothèques extérieures pour plus de clarté, seulement la gestion de la mémoire partagée sera faite "en boîte noire". Par exemple, on essayera d'éviter les appels aux fonctions de multiplication de matrices ou de convolution toute faites.
 
 Pour utiliser la carte graphique, toutes les données traitées par le GPU doivent être copiées dans la mémoire de celui-ci, mais la manière dont cela est géré impose d'allouer des blocs de 48kB de mémoire pour en éviter une saturation très rapide. Une "surcouche" à la gestion de la mémoire est donc implémentée dans `src/cnn/memory_management.cu`
 
@@ -203,10 +208,10 @@ Les distributions suivantes ont étés essayées, il sera sans doute nécessaire
 - Ubuntu
 
 ## Dépendances
-- cuda : pour utiliser la carte graphique (NVIDIA seulement)
-- libjpeg-dev : n'est pas installé par défaut sur ubuntu notamment
-- GNU Make : installé par défaut sur la majorité des distributions
-- GCC : installé par défaut sur la majorité des distributions
+- `cuda` : pour utiliser la carte graphique (NVIDIA seulement)
+- `libjpeg-dev` : n'est pas installé par défaut sur ubuntu notamment
+- GNU `make` : installé par défaut sur la majorité des distributions
+- `gcc` : installé par défaut sur la majorité des distributions
 
 ## Compilation
 
@@ -228,14 +233,15 @@ Se référer à `doc/{cnn,dense}` pour avoir des informations plus détaillées.
 
 <br/><br/>
 
-# Articles de recherches utilisés
+# Articles de recherche utilisés
 |Titre|Auteur|Lien|
 |---|---|---|
 |LeNet-5|Yann Lecun|http://yann.lecun.com/exdb/lenet/index.html|
+|MNIST|Yann Lecun|http://yann.lecun.com/exdb/mnist/index.html|
 |AlexNet|Alex Krizhevsky et al.|https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf|
 |Dropout|Nitish Srivastava et al.|https://www.jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf|
 |Adam Optimizer|Diederik P. Kingma, Jimmy Lei Ba|https://arxiv.org/pdf/1412.6980.pdf|
 |Recent Advances in Convolutional Neural Networks|Jiuxiang Gu, Zhenhua Wang, Jason Kuen et al.|https://arxiv.org/pdf/1512.07108.pdf|
-|DeepGeo & 50STates10K Database|Sudharshan Suresh, Nathaniel Chodosh, Montiel Abello|https://arxiv.org/pdf/1810.03077v1.pdf|
+|DeepGeo & 50States10K Database|Sudharshan Suresh, Nathaniel Chodosh, Montiel Abello|https://arxiv.org/pdf/1810.03077v1.pdf|
 |Img2GPS|James Hays and Alexei A. Efros|http://graphics.cs.cmu.edu/projects/im2gps/im2gps.pdf|
 |PlaNet|Tobias Weyand|https://arxiv.org/pdf/1602.05314.pdf|
