@@ -79,4 +79,12 @@ La backpropagation des poids ne fonctionne cependant pas sur les couches de conv
 ### **18 Février 2023** Amélioration des résultats sur la seconde implémentation [a461e07](https://github.com/julienChemillier/TIPE/commit/a461e0756a6ef1bd1e9fe587f84de7f406f1fd12)
 Améliorations significative des résultats sur le réseau `simple_one` atteignant:
 -92% avec une linéarisation et une dense (1x32x32, 80, 10)
-La backpropagation ne fonctionne pas encore sur la convolution.
+La backpropagation fonctionne également sur la convolution.
+Le réseau LeNet5 donne 60% de réussite environ
+
+<br/>
+<br/>
+<br/>
+
+### **27 Mars 2023** Implémentation d'Adam Optimizer [5f684d9]
+Adam Optimizer est complètement implémenté, donnant jusqu'à 97.5% de réussite sur MNIST (avec LeNet-5) avec un bon choix de paramètres. (détaillés dans le README)
