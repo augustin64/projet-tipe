@@ -1,6 +1,8 @@
 # Compte rendu
 
-### **22 Avril 2022** MNIST, premiers résultats sur le réseau dense. [b30bedd](https://github.com/julienChemillier/TIPE/commit/b30bedd375e23ec7c2e5b10acf397a10885d8b5e)
+Ce fichier recense l'avancement global du projet et les différentes étapes franchies (avec leurs commits et date).  
+
+### **22 Avril 2022** MNIST, premiers résultats sur le réseau dense. [b30bedd]
 Le réseau minimise la fonction d'erreur (différence entre sortie voulue et obtenue).  
 Cela donne comme résultat une précision de 10.2% en moyenne soit à peine mieux qu'aléatoire.  
 Chaque image renvoie les mêmes poids sur la dernière couche.  
@@ -23,7 +25,7 @@ Voici un tableau comparant la fréquence d'apparition de chaque chiffre et l'act
 <br/>
 <br/>
 
-### **25 Avril 2022** Optimisation de la taille des époques. [698e72f](https://github.com/julienChemillier/TIPE/commit/698e72f56ed93aa6f5d9c81912ee98461f534410)
+### **25 Avril 2022** Optimisation de la taille des époques. [698e72f]
 Le réseau donne des probabilités dont la somme est de 1 (grâce à softmax).  
 Un problème de sur-ajustement apparaît, résultant à de mauvais résultats sur des nouvelles données.  
 Plus le réseau contient de couches, plus sa convergence vers des probabilités convenables est longue.  
@@ -41,7 +43,7 @@ Voici un tableau comparant les exactitudes des différentes époques et les dime
 <br/>
 <br/>
 
-### **14 Mai 2022** Implémentation du multithreading. [d40212d](https://github.com/julienChemillier/TIPE/commit/d40212d313b3e8260cb9f5527f261d5d86ad2d1b)
+### **14 Mai 2022** Implémentation du multithreading. [d40212d]
 Le problème qui se posera dans le futur est celui de la puissance de calcul nécessaire.  
 Pour l'optimiser, il faut donc utiliser au maximum les ressources disponibles.
 
@@ -49,17 +51,17 @@ Pour l'optimiser, il faut donc utiliser au maximum les ressources disponibles.
 <br/>
 <br/>
 
-### **28 Septembre 2022** Enregistrement des fichiers du CNN [a478a45](https://github.com/julienChemillier/TIPE/commit/a478a454fd1698585b2de83c8abbdca36eb2111b)
+### **28 Septembre 2022** Enregistrement des fichiers du CNN [a478a45]
 Le réseau neuronal simple donnant des résultats convaincants (approximativement 90% de réussite sur l'échantillon de test),
-Le réseau neuronal convolutif a commencé à être développé depuis [6532ad2](https://github.com/julienChemillier/TIPE/commit/6532ad2545f8882638209cc6918bf37a9f816840).  
+Le réseau neuronal convolutif a commencé à être développé depuis [6532ad2].  
 Ce commit introduit l'enregistrement du réseau de neurones convolutif,
-suivi de près par les tests unitaires correspondants [b12a03c](https://github.com/julienChemillier/TIPE/commit/b12a03c1baa8e8505066fa07ae2f20882a24854b).
+suivi de près par les tests unitaires correspondants [b12a03c]
 
 <br/>
 <br/>
 <br/>
 
-### **30 Novembre 2022** Réparation du NN simple [ffc0c6e](https://github.com/julienChemillier/TIPE/commit/ffc0c6ea9fe30c7e98624ca26867d984ec90c693)
+### **30 Novembre 2022** Réparation du NN simple [ffc0c6e]
 Après un peu de débogage sur le réseau convolutif, on s'est rendu compte que le réseau simple ne fonctionnait pas bien avec des couches intermédiaires et du multithreading.  
 Le problème principal étant la découpe des batches étant la même à chaque époque.  
 Après implémentation d'un mélange de Knuth, tout est rentré dans l'ordre donnant des résultats encore plus satisfaisants pour les couches intermédiaires. (De l'ordre de 70% avec deux couches intermédiaires et utilisation du multithreading).
@@ -68,7 +70,7 @@ Après implémentation d'un mélange de Knuth, tout est rentré dans l'ordre don
 <br/>
 <br/>
 
-### **25 Janvier 2023** Premiers résultats sur la seconde implémentation [220d0a7](https://github.com/julienChemillier/TIPE/commit/220d0a71be2a28f63ba1e1c7804e2e9fd909e12d)
+### **25 Janvier 2023** Premiers résultats sur la seconde implémentation [220d0a7]
 Premiers résultats sur le réseau `simple_one` qui suit la structure du premier réseau.  
 La backpropagation des poids ne fonctionne cependant pas sur les couches de convolution et de pooling.
 
@@ -76,7 +78,7 @@ La backpropagation des poids ne fonctionne cependant pas sur les couches de conv
 <br/>
 <br/>
 
-### **18 Février 2023** Amélioration des résultats sur la seconde implémentation [a461e07](https://github.com/julienChemillier/TIPE/commit/a461e0756a6ef1bd1e9fe587f84de7f406f1fd12)
+### **18 Février 2023** Amélioration des résultats sur la seconde implémentation [a461e07]
 Améliorations significative des résultats sur le réseau `simple_one` atteignant:
 -92% avec une linéarisation et une dense (1x32x32, 80, 10)
 La backpropagation fonctionne également sur la convolution.
