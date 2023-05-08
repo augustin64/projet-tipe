@@ -115,7 +115,19 @@ endif
 $(BUILDDIR)/cnn-preview: $(CNN_SRCDIR)/preview.c $(BUILDDIR)/cnn_jpeg.o $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c $(BUILDDIR)/cnn_free.o $(BUILDDIR)/cnn_neuron_io.o $(BUILDDIR)/utils.o $(BUILDDIR)/memory_management.o $(BUILDDIR)/colors.o
+$(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c \
+		$(BUILDDIR)/cnn_free.o \
+		$(BUILDDIR)/cnn_neuron_io.o \
+		$(BUILDDIR)/utils.o \
+		$(BUILDDIR)/memory_management.o \
+		$(BUILDDIR)/cnn_cnn.o \
+		$(BUILDDIR)/cnn_make.o \
+		$(BUILDDIR)/cnn_backpropagation.o \
+		$(BUILDDIR)/cnn_function.o \
+		$(BUILDDIR)/cnn_convolution.o  \
+		$(BUILDDIR)/colors.o \
+		$(BUILDDIR)/mnist.o \
+		$(BUILDDIR)/cnn_jpeg.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
