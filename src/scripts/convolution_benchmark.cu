@@ -157,7 +157,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     double cpu_time_used, gpu_time_used;
 
     start = clock();
-    make_convolution_device(kernel, input, output_gpu, output_dim);
+    make_convolution_device(kernel, input, output_gpu, output_dim, 1);
     end = clock();
 
     gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -165,7 +165,7 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
 
 
     start = clock();
-    make_convolution_cpu(kernel, input, output_cpu, output_dim);
+    make_convolution_cpu(kernel, input, output_cpu, output_dim, 1);
     end = clock();
 
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;

@@ -189,7 +189,7 @@ void forward_propagation(Network* network) {
         * On copie les valeurs de output dans output_z, puis on applique la fonction d'activation à output_z
         */
         if (k_i->cnn) { // Convolution
-            make_convolution(k_i->cnn, input, output, output_width);
+            make_convolution(k_i->cnn, input, output, output_width, 1);
             copy_3d_array(output, output_z, output_depth, output_width, output_width);
             apply_function_to_matrix(activation, output, output_depth, output_width);
         }

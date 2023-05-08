@@ -6,12 +6,12 @@
 /*
 * Effectue une convolution sans stride sur le processeur
 */
-void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim);
+void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride);
 
 /*
 * Effectue la convolution sur le CPU ou GPU
 */
-void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim);
+void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride);
 
 #ifdef __CUDACC__
 extern "C"
