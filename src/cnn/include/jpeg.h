@@ -34,6 +34,11 @@ typedef struct jpegDataset {
 imgRawImage* loadJpegImageFile(char* lpFilename);
 
 /*
+* Write a JPEG image to lpFilename
+*/
+int storeJpegImageFile(struct imgRawImage* lpImage, char* lpFilename);
+
+/*
 * Load a complete dataset from its path
 */
 jpegDataset* loadJpegDataset(char* folderPath);

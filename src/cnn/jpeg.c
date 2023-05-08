@@ -74,6 +74,52 @@ imgRawImage* loadJpegImageFile(char* lpFilename) {
     return lpNewImage;
 }
 
+
+int storeJpegImageFile(imgRawImage* lpImage, char* lpFilename) {
+	struct jpeg_compress_struct info;
+	struct jpeg_error_mgr err;
+
+	unsigned char* lpRowBuffer[1];
+
+	FILE* fHandle;
+
+	fHandle = fopen(lpFilename, "wb");
+	if(fHandle == NULL) {
+		#ifdef DEBUG
+			fprintf(stderr, "%s:%u Failed to open output file %s\n", __FILE__, __LINE__, lpFilename);
+		#endif
+		return 1;
+	}
+
+	info.err = jpeg_std_error(&err);
+	jpeg_create_compress(&info);
+
+	jpeg_stdio_dest(&info, fHandle);
+
+	info.image_width = lpImage->width;
+	info.image_height = lpImage->height;
+	info.input_components = 3;
+	info.in_color_space = JCS_RGB;
+
+	jpeg_set_defaults(&info);
+	jpeg_set_quality(&info, 100, TRUE);
+
+	jpeg_start_compress(&info, TRUE);
+
+	/* Write every scanline ... */
+	while(info.next_scanline < info.image_height) {
+		lpRowBuffer[0] = &(lpImage->lpData[info.next_scanline * (lpImage->width * 3)]);
+		jpeg_write_scanlines(&info, lpRowBuffer, 1);
+	}
+
+	jpeg_finish_compress(&info);
+	fclose(fHandle);
+
+	jpeg_destroy_compress(&info);
+	return 0;
+}
+
+
 jpegDataset* loadJpegDataset(char* folderPath) {
     jpegDataset* dataset = (jpegDataset*)malloc(sizeof(jpegDataset));
     imgRawImage* image;
