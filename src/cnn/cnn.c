@@ -208,9 +208,9 @@ void forward_propagation(Network* network) {
                 return;
             } else { // Pooling sur une matrice
                 if (pooling == AVG_POOLING) {
-                    make_average_pooling(input, output, input_width/output_width, output_depth, output_width);
+                    make_average_pooling(input, output, input_width/output_width, output_depth, output_width, input_width/output_width);
                 } else if (pooling == MAX_POOLING) {
-                    make_max_pooling(input, output, input_width/output_width, output_depth, output_width);
+                    make_max_pooling(input, output, input_width/output_width, output_depth, output_width, input_width/output_width);
                 } else {
                     printf_error("Impossible de reconnaître le type de couche de pooling: ");
                     printf("identifiant: %d, position: %d\n", pooling, i);

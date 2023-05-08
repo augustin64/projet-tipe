@@ -19,7 +19,7 @@ extern "C"
 /*
 * Effectue un average pooling avec stride=size
 */
-void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim);
+void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride);
 
 #ifdef __CUDACC__
 extern "C"
@@ -27,7 +27,7 @@ extern "C"
 /*
 * Effectue un max pooling avec stride=size
 */
-void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim);
+void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride);
 
 #ifdef __CUDACC__
 extern "C"
