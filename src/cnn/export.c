@@ -82,7 +82,7 @@ void print_poids_ker_cnn(char* modele) {
 
 
 void write_image(float** data, int width, int height, char* base_filename, int layer_id, int kernel_id) {
-    int filename_length = strlen(base_filename) + (int)log10(layer_id+1)+1 + (int)log10(kernel_id+1)+1 + 21+12;
+    int filename_length = strlen(base_filename) + (int)log10(layer_id+1)+1 + (int)log10(kernel_id+1)+1 + 21;
     char* filename = (char*)malloc(sizeof(char)*filename_length);
 
     sprintf(filename, "%s_layer-%d_feature-%d.jpeg", base_filename, layer_id, kernel_id);
