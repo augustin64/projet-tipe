@@ -8,16 +8,6 @@
 
 #include "include/config.h"
 
-#ifndef __CUDACC__
-int min(int a, int b) {
-    return a<b?a:b;
-}
-
-int max(int a, int b) {
-    return a > b ? a : b;
-}
-#endif
-
 /*
 * Softmax backward MSE
 */

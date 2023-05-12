@@ -4,16 +4,6 @@
 #ifndef DEF_BACKPROPAGATION_H
 #define DEF_BACKPROPAGATION_H
 
-/*
-* Renvoie la valeur minimale entre a et b
-*/
-int min(int a, int b);
-
-/*
-* Renvoie la valeur maximale entre a et b
-*/
-int max(int a, int b);
-
 
 #ifdef __CUDACC__
 extern "C"

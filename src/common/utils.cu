@@ -16,6 +16,17 @@
 #define BLOCKSIZE_z 8
 
 
+#ifndef __CUDACC__
+int min(int a, int b) {
+    return a<b?a:b;
+}
+
+int max(int a, int b) {
+    return a > b ? a : b;
+}
+#endif
+
+
 int i_div_up(int a, int b) { // Partie entière supérieure de a/b
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }

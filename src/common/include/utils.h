@@ -25,6 +25,20 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 #endif
 
+
+#ifndef __CUDACC__
+/*
+* Renvoie la valeur minimale entre a et b
+*/
+int min(int a, int b);
+
+/*
+* Renvoie la valeur maximale entre a et b
+*/
+int max(int a, int b);
+#endif
+
+
 /*
 * Partie entière supérieure de a/b
 */
