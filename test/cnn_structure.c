@@ -3,11 +3,10 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/include/colors.h"
+#include "../src/common/include/colors.h"
 #include "../src/cnn/include/creation.h"
 #include "../src/cnn/include/utils.h"
 #include "../src/cnn/include/free.h"
-#include "../src/include/colors.h"
 
 
 int main() {

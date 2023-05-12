@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/memory_management.h"
+#include "../common/include/memory_management.h"
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 #include "include/initialisation.h"
-#include "../include/colors.h"
 #include "include/function.h"
-#include "../include/utils.h"
 
 #include "include/creation.h"
 
@@ -38,7 +38,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int acti
     return network;
 }
 
-Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+/*Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     Network* network = create_network(8, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
     add_convolution(network, 6, 28, activation);
     add_average_pooling(network, 14);
@@ -48,7 +48,31 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
     add_dense(network, 84, activation);
     add_dense(network, 10, SOFTMAX);
     return network;
+}*/
+Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+    input_dim = 260;
+    input_depth = 3;
+    Network* network = create_network(16, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
+    printf_warning("Creating large network");
+    printf(" %d %d\n", input_dim, input_depth);
+    add_convolution(network, 6, 258, activation);
+    add_convolution(network, 16, 256, activation);
+    add_average_pooling(network, 64);
+    add_convolution(network, 16, 60, activation);
+    add_average_pooling(network, 30);
+    add_convolution(network, 16, 26, activation);
+    add_convolution(network, 16, 22, activation);
+    add_convolution(network, 16, 18, activation);
+    add_dense_linearisation(network, 840, activation);
+    add_dense(network, 520, activation);
+    add_dense(network, 420, activation);
+    add_dense(network, 320, activation);
+    add_dense(network, 220, activation);
+    add_dense(network, 120, activation);
+    add_dense(network, 50, SOFTMAX);
+    return network;
 }
+
 
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
     Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_dim, input_depth);

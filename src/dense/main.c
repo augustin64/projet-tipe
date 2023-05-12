@@ -6,11 +6,12 @@
 #include <pthread.h>
 #include <sys/sysinfo.h>
 
-#include "include/main.h"
-#include "../include/mnist.h"
-#include "../include/colors.h"
-#include "include/neuron_io.h"
 #include "include/neural_network.h"
+#include "../common/include/colors.h"
+#include "../common/include/mnist.h"
+#include "include/neuron_io.h"
+
+#include "include/main.h"
 
 #define EPOCHS 10
 #define BATCHES 100

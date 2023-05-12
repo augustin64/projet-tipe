@@ -2,10 +2,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "../src/include/memory_management.h"
+#include "../src/common/include/memory_management.h"
+#include "../src/common/include/colors.h"
+#include "../src/common/include/utils.h"
 #include "../src/cnn/include/function.h"
-#include "../src/include/colors.h"
-#include "../src/include/utils.h"
 
 #include "../src/cnn/include/config.h"
 

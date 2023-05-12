@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../src/dense/include/neuron_io.h"
 #include "../src/dense/include/neural_network.h"
-#include "../src/include/colors.h"
+#include "../src/dense/include/neuron_io.h"
+#include "../src/common/include/colors.h"
 
 
 Neuron* creer_neuron(int nb_sortants) {

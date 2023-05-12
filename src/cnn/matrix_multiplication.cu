@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "../include/colors.h"
-#include "../include/utils.h"
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 
 #define BLOCKSIZE_x 16
 #define BLOCKSIZE_y 16

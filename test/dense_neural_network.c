@@ -5,7 +5,7 @@
 
 #include "../src/dense/include/neural_network.h"
 #include "../src/dense/include/neuron_io.h"
-#include "../src/include/colors.h"
+#include "../src/common/include/colors.h"
 
 int main() {
     printf("Création du réseau\n");

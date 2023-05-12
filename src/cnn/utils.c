@@ -4,8 +4,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "../include/memory_management.h"
-#include "../include/colors.h"
+#include "../common/include/memory_management.h"
+#include "../common/include/colors.h"
 #include "include/struct.h"
 
 #define copyVar(var) network_cp->var = network->var

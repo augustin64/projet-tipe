@@ -2,8 +2,8 @@
 #include <math.h>
 #include <float.h>
 
-#include "../include/colors.h"
-#include "../include/utils.h"
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 
 #include "include/config.h"
 

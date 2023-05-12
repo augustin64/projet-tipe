@@ -2,9 +2,9 @@
 #include <float.h>
 #include <math.h>
 
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 #include "include/convolution.h"
-#include "../include/colors.h"
-#include "../include/utils.h"
 
 #include "include/make.h"
 

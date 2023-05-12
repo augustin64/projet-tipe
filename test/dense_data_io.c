@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../src/include/mnist.h"
-#include "../src/include/colors.h"
+#include "../src/common/include/colors.h"
+#include "../src/common/include/mnist.h"
 
 
 void read_test(int nb_images, int width, int height, int*** images, unsigned int* labels) {

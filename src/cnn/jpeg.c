@@ -5,9 +5,10 @@
 #include <jerror.h>
 #include <jpeglib.h>
 
+#include "../common/include/utils.h"
+#include "../common/include/colors.h"
+
 #include "include/jpeg.h"
-#include "../include/utils.h"
-#include "../include/colors.h"
 
 // How to load a JPEG using libjpeg: https://www.tspi.at/2020/03/20/libjpegexample.html
 imgRawImage* loadJpegImageFile(char* lpFilename) {

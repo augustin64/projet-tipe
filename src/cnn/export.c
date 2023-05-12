@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <math.h>
 
+
+#include "../common/include/colors.h"
 #include "include/backpropagation.h"
+#include "../common/include/mnist.h"
 #include "include/neuron_io.h"
-#include "../include/colors.h"
-#include "../include/mnist.h"
 #include "include/struct.h"
 #include "include/jpeg.h"
 #include "include/free.h"

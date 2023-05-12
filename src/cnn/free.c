@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../include/memory_management.h"
+#include "../common/include/memory_management.h"
 
 #include "include/free.h"
 

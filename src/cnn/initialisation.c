@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../include/colors.h"
+#include "../common/include/colors.h"
 #include "include/initialisation.h"
 
 // glorot (wavier initialisation) linear, tanh, softmax, logistic (1/(fan_in+fan_out/2))

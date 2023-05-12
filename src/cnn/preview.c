@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "../include/utils.h"
+#include "../common/include/utils.h"
 
 #include "include/jpeg.h"
 

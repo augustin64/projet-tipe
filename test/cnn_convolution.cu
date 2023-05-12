@@ -6,11 +6,11 @@
 #include <time.h>
 #include <omp.h>
 
-#include "../src/include/memory_management.h"
+#include "../src/common/include/memory_management.h"
 #include "../src/cnn/include/convolution.h"
+#include "../src/common/include/colors.h"
+#include "../src/common/include/utils.h"
 #include "../src/cnn/include/struct.h"
-#include "../src/include/colors.h"
-#include "../src/include/utils.h"
 
 
 float random_float(float low, float high) {

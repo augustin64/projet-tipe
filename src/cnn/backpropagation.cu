@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "include/backpropagation.h"
-#include "../include/utils.h"
+#include "../common/include/utils.h"
 #include "include/struct.h"
 
 #include "include/config.h"

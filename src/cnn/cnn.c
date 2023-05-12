@@ -4,7 +4,9 @@
 #include <float.h> // Is it used ?
 #include <math.h>
 
-#include "../include/memory_management.h"
+#include "../common/include/memory_management.h"
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 #include "include/backpropagation.h"
 #include "include/initialisation.h"
 #include "include/function.h"
@@ -12,8 +14,6 @@
 #include "include/update.h"
 #include "include/make.h"
 
-#include "../include/colors.h"
-#include "../include/utils.h"
 #include "include/cnn.h"
 
 // Augmente les dimensions de l'image d'entrée

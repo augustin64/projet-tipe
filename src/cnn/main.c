@@ -5,9 +5,10 @@
 #include <stdbool.h>
 #include <float.h>
 
+
+#include "../common/include/colors.h"
 #include "include/initialisation.h"
 #include "include/test_network.h"
-#include "../include/colors.h"
 #include "include/function.h"
 #include "include/creation.h"
 #include "include/train.h"

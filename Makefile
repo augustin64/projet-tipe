@@ -6,8 +6,9 @@ CUDA_INCLUDE := /opt/cuda/include # Default installation path for ArchLinux, may
 
 NVCC_INSTALLED := $(shell command -v $(NVCC) 2> /dev/null)
 
-DENSE_SRCDIR := $(SRCDIR)/dense
-CNN_SRCDIR   := $(SRCDIR)/cnn
+COMMON_SRCDIR := $(SRCDIR)/common
+DENSE_SRCDIR  := $(SRCDIR)/dense
+CNN_SRCDIR    := $(SRCDIR)/cnn
 
 DENSE_SRC    := $(wildcard $(DENSE_SRCDIR)/*.c)
 CNN_SRC      := $(wildcard $(CNN_SRCDIR)/*.c)
@@ -146,14 +147,14 @@ endif
 #
 # Build general files
 #
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
+$(BUILDDIR)/%.o: $(COMMON_SRCDIR)/%.c $(COMMON_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
 
-$(BUILDDIR)/%.cuda.o: $(SRCDIR)/%.c $(SRCDIR)/include/%.h
+$(BUILDDIR)/%.cuda.o: $(COMMON_SRCDIR)/%.c $(COMMON_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS) -DUSE_CUDA -lcuda -I$(CUDA_INCLUDE)
 
 ifdef NVCC_INSTALLED
-$(BUILDDIR)/cuda_%.o: $(SRCDIR)/%.cu $(SRCDIR)/include/%.h
+$(BUILDDIR)/cuda_%.o: $(COMMON_SRCDIR)/%.cu $(COMMON_SRCDIR)/include/%.h
 	$(NVCC)  $(NVCCFLAGS)  -c -dc $< -o $@
 else
 	@echo "$(NVCC) not found, skipping"
@@ -182,7 +183,7 @@ $(BUILDDIR)/test-dense_%: $(TEST_SRCDIR)/dense_%.c $(DENSE_OBJ) $(BUILDDIR)/colo
 $(BUILDDIR)/test-memory_management: $(TEST_SRCDIR)/memory_management.c $(BUILDDIR)/colors.o $(BUILDDIR)/utils.o $(BUILDDIR)/test_memory_management.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
-$(BUILDDIR)/test_memory_management.o: $(SRCDIR)/memory_management.c $(SRCDIR)/include/memory_management.h
+$(BUILDDIR)/test_memory_management.o: $(COMMON_SRCDIR)/memory_management.c $(COMMON_SRCDIR)/include/memory_management.h
 	$(CC)  -c $< -o $@  $(CFLAGS) -DTEST_MEMORY_MANAGEMENT
 
 ifdef NVCC_INSTALLED

@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "../include/memory_management.h"
-#include "../include/mnist.h"
+#include "../common/include/memory_management.h"
+#include "../common/include/mnist.h"
 #include "include/neuron_io.h"
 #include "include/struct.h"
 #include "include/jpeg.h"

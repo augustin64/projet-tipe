@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../src/include/memory_management.h"
-#include "../src/include/colors.h"
-#include "../src/include/utils.h"
+#include "../src/common/include/memory_management.h"
+#include "../src/common/include/colors.h"
+#include "../src/common/include/utils.h"
 
 #define N 350
 
