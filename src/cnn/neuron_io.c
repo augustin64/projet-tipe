@@ -76,12 +76,14 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         int output_dim = network->width[indice_couche+1];
 
         // Écriture du pré-corps
-        uint32_t pre_buffer[5];
+        uint32_t pre_buffer[7];
         pre_buffer[0] = kernel->activation;
         pre_buffer[1] = kernel->linearisation;
         pre_buffer[2] = cnn->k_size;
         pre_buffer[3] = cnn->rows;
         pre_buffer[4] = cnn->columns;
+        pre_buffer[5] = kernel->stride;
+        pre_buffer[6] = kernel->padding;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
@@ -112,11 +114,13 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         Kernel_nn* nn = kernel->nn;
 
         // Écriture du pré-corps
-        uint32_t pre_buffer[4];
+        uint32_t pre_buffer[6];
         pre_buffer[0] = kernel->activation;
         pre_buffer[1] = kernel->linearisation;
         pre_buffer[2] = nn->size_input;
         pre_buffer[3] = nn->size_output;
+        pre_buffer[4] = kernel->stride;
+        pre_buffer[5] = kernel->padding;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
@@ -135,9 +139,11 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
             fwrite(buffer, sizeof(buffer), 1, ptr);
         }
     } else if (type_couche == 2) { // Cas du Pooling Layer
-        uint32_t pre_buffer[2];
+        uint32_t pre_buffer[4];
         pre_buffer[0] = kernel->linearisation;
         pre_buffer[1] = kernel->pooling;
+        pre_buffer[2] = kernel->stride;
+        pre_buffer[3] = kernel->padding;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
     }
 }
@@ -234,7 +240,7 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         // Lecture du "Pré-corps"
         kernel->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
         kernel->nn = NULL;
-        uint32_t buffer[5];
+        uint32_t buffer[7];
         (void) !fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
@@ -242,6 +248,8 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         kernel->cnn->k_size = buffer[2];
         kernel->cnn->rows = buffer[3];
         kernel->cnn->columns = buffer[4];
+        kernel->stride = buffer[5];
+        kernel->padding = buffer[6];
 
         // Lecture du corps
         Kernel_cnn* cnn = kernel->cnn;
@@ -322,13 +330,15 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         // Lecture du "Pré-corps"
         kernel->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
         kernel->cnn = NULL;
-        uint32_t buffer[4];
+        uint32_t buffer[6];
         (void) !fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
         kernel->nn->size_input = buffer[2];
         kernel->nn->size_output = buffer[3];
+        kernel->stride = buffer[4];
+        kernel->padding = buffer[5];
 
         // Lecture du corps
         Kernel_nn* nn = kernel->nn;
@@ -374,15 +384,19 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
             }
         }
     } else if (type_couche == POOLING) { // Cas du Pooling Layer
-        uint32_t pooling, linearisation;
+        uint32_t pooling, linearisation, stride, padding;
         (void) !fread(&linearisation, sizeof(linearisation), 1, ptr);
         (void) !fread(&pooling, sizeof(pooling), 1, ptr);
+        (void) !fread(&stride, sizeof(stride), 1, ptr);
+        (void) !fread(&padding, sizeof(padding), 1, ptr);
 
         kernel->cnn = NULL;
         kernel->nn = NULL;
         kernel->activation = IDENTITY;
         kernel->pooling = pooling;
         kernel->linearisation = linearisation;
+        kernel->stride = stride;
+        kernel->padding = padding;
     }
     return kernel;
 }

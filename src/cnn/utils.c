@@ -45,6 +45,8 @@ bool equals_networks(Network* network1, Network* network2) {
 
     for (int i=0; i < network1->size-1; i++) {
         checkEquals(kernel[i]->activation, "kernel[i]->activation", i);
+        checkEquals(kernel[i]->stride, "kernel[i]->stride", i);
+        checkEquals(kernel[i]->padding, "kernel[i]->padding", i);
         if ((!network1->kernel[i]->cnn ^ !network2->kernel[i]->cnn) || (!network1->kernel[i]->nn ^ !network2->kernel[i]->nn)) {
             printf(BOLDRED "[ ERROR ]" RESET "network1->kernel[%d] et network1->kernel[%d] diffèrent de type\n", i, i);
             return false;
@@ -129,6 +131,8 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 1
+            copyVar(kernel[i]->stride); // -1
+            copyVar(kernel[i]->padding); // -1
             network_cp->kernel[i]->cnn = NULL;
             network_cp->kernel[i]->nn = NULL;
         }
@@ -136,6 +140,8 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 0
+            copyVar(kernel[i]->stride); // -1
+            copyVar(kernel[i]->padding); // -1
 
             size_input = network->kernel[i]->nn->size_input;
             size_output = network->kernel[i]->nn->size_output;
@@ -188,6 +194,8 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->pooling);
             copyVar(kernel[i]->activation);
             copyVar(kernel[i]->linearisation); // 0
+            copyVar(kernel[i]->stride);
+            copyVar(kernel[i]->padding);
 
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;

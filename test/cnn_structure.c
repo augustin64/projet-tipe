@@ -40,6 +40,8 @@ int main() {
         printf("width: %d\n", network->width[i]);
         printf("depth: %d\n", network->depth[i]);
         printf("activation: %d\n", kernel->activation);
+        printf("stride: %d\n", kernel->stride);
+        printf("padding: %d\n", kernel->padding);
     }
     printf("\n" GREEN "OK\n" RESET);
 

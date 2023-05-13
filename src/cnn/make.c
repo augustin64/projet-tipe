@@ -24,6 +24,7 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < output_width
     int max_move = size - padding;
+    int input_dim = output_width*stride - 2*padding + size - stride;
 
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
@@ -36,8 +37,9 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, output_width)) {
+            if (pooling_not_outside(idy_2, idz_2, 0, input_dim)) {
                 sum += input[idx][idy_2][idz_2];
+                nb_elements++;
             }
         }
     }
@@ -59,6 +61,7 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
     int max_move = size - padding;
+    int input_dim = output_width*stride - 2*padding + size - stride;
 
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
@@ -69,7 +72,7 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, output_width)) {
+                        if (pooling_not_outside(j_2, k_2, 0, input_dim)) {
                             sum += input[i][j_2][k_2];
                             nb_elements++;
                         }
@@ -105,6 +108,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < output_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < output_width
+    int input_dim = output_width*stride - 2*padding + size - stride;
 
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
@@ -118,7 +122,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, output_width)) {
+            if (pooling_not_outside(idy_2, idz_2, 0, input_dim)) {
                 temp = input[idx][idy_2][idz_2];
                 m = m > temp ? m : temp; // max(m, temp)
             }
@@ -142,6 +146,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
     int max_move = size - padding;
+    int input_dim = output_width*stride - 2*padding + size - stride;
     float m;
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
@@ -151,7 +156,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, output_width)) {
+                        if (pooling_not_outside(j_2, k_2, 0, input_dim)) {
                             m = fmaxf(m, input[i][j_2][k_2]);
                         }
                     }
