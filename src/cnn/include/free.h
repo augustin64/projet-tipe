@@ -4,14 +4,16 @@
 #define DEF_FREE_H
 
 /*
-* Libère la mémoire allouée à une couche de type input cube
-* Donc free networkt->input[pos][i][j]
+* Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
+* lorsque ces couches sont non denses (donc sont des matrice de dimension 3)
+* Libère donc l'espace mémoire alloué dans 'create_a_cube_input_layer' et create_a_cube_input_z_layer' (creation.c)
 */
 void free_a_cube_input_layer(Network* network, int pos, int depth, int dim);
 
 /*
-* Libère la mémoire allouée à une couche de type input line
-* Donc free networkt->input[pos][0][0]
+* Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
+* lorsque ces couches sont denses (donc sont des matrice de dimension 1)
+* Libère donc l'espace mémoire alloué dans 'create_a_line_input_layer' et create_a_line_input_z_layer' (creation.c)
 */
 void free_a_line_input_layer(Network* network, int pos);
 
@@ -41,7 +43,7 @@ void free_dense_linearisation(Network* network, int pos);
 void free_network_creation(Network* network);
 
 /*
-* Libère l'espace mémoire alloué à un réseau quelconque
+* Libère entièrement l'espace mémoire alloué à un réseau quelconque
 */
 void free_network(Network* network);
 

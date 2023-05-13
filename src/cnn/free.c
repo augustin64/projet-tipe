@@ -19,6 +19,8 @@ void free_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
 }
 
 void free_a_line_input_layer(Network* network, int pos) {
+    // Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
+    // lorsque ces couches sont denses (donc sont des matrice de dimension 1)
     gree(network->input[pos][0][0]);
     gree(network->input_z[pos][0][0]);
     gree(network->input[pos][0]);
@@ -28,6 +30,7 @@ void free_a_line_input_layer(Network* network, int pos) {
 }
 
 void free_pooling(Network* network, int pos) {
+    // Le pooling n'alloue rien d'autre que l'input
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
 }
 
@@ -36,7 +39,7 @@ void free_convolution(Network* network, int pos) {
     int c = k_pos->columns;
     int k_size = k_pos->k_size;
     int r = k_pos->rows;
-    int bias_size = network->width[pos+1]; // Not sure of the value
+    int bias_size = network->width[pos+1];
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
     for (int i=0; i < c; i++) {
         for (int j=0; j < bias_size; j++) {
@@ -154,7 +157,9 @@ void free_dense_linearisation(Network* network, int pos) {
 }
 
 void free_network_creation(Network* network) {
+    // On libère l'input correspondant à l'image: input[0] (car elle n'appartient à aucune couche)
     free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
+
     for (int i=0; i < network->max_size-1; i++) {
         gree(network->kernel[i]);
     }
@@ -169,15 +174,21 @@ void free_network_creation(Network* network) {
 
 void free_network(Network* network) {
     for (int i=network->size-2; i>=0; i--) {
-        if (network->kernel[i]->cnn != NULL) { // Convolution
+        if (network->kernel[i]->cnn != NULL) {
+            // Convolution
             free_convolution(network, i);
-        } else if (network->kernel[i]->nn != NULL) {
-            if (network->kernel[i]->linearisation == DOESNT_LINEARISE) { // Dense non linearized
+        } 
+        else if (network->kernel[i]->nn != NULL) {
+            // Dense
+            if (network->kernel[i]->linearisation == DOESNT_LINEARISE) {
+                // Dense normale
                 free_dense(network, i);
-            } else { // Dense linearisation
+            } else {
+                // Dense qui linéarise
                 free_dense_linearisation(network, i);
             }
-        } else { // Pooling
+        } else {
+            // Pooling
             free_pooling(network, i);
         }
     }
