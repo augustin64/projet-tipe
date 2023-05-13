@@ -3,8 +3,10 @@
 #ifndef DEF_MAKE_H
 #define DEF_MAKE_H
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 /*
-* 
 * On renvoie true si et seulement si _ et _:
 * lower_bound <= y < upper_bound
 * lower_bound <= x < upper_bound

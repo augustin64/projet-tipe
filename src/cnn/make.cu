@@ -10,6 +10,9 @@
 
 #include "include/config.h"
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 int pooling_not_outside(int x, int y, int lower_bound, int upper_bound) {
     return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
 }
@@ -136,7 +139,7 @@ void make_max_pooling_device(float*** input, float*** output, int size, int outp
     dim3 gridSize(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    make_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride, int padding);
+    make_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride, padding);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }

@@ -7,7 +7,9 @@
 
 #include "include/config.h"
 
-
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 int convolution_not_outside(int x, int y, int lower_bound, int upper_bound) {
     return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
 }
@@ -86,6 +88,9 @@ void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output
 }
 #endif
 
+#ifdef __CUDACC__
+extern "C"
+#endif
 void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_width, int stride, int padding) {
     #ifndef __CUDACC__
     make_convolution_cpu(kernel, input, output, output_width, stride, padding);

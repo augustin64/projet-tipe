@@ -1,5 +1,8 @@
 #include "struct.h"
 
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 /*
 On renvoie true si et seulement si _ et _:
 lower_bound <= x < upper_bound
@@ -24,6 +27,9 @@ __global__ void make_convolution_kernel(int k_size, int columns, int rows, float
 void make_convolution_device(Kernel_cnn* kernel, float*** input, float*** output, int output_width, int stride, int padding);
 #endif
 
+#ifdef __CUDACC__
+extern "C"
+#endif
 /*
 * Détermine si la convolution peut-être faite sur la carte graphique au moment de la compilation
 */

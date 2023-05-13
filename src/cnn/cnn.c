@@ -9,6 +9,7 @@
 #include "../common/include/utils.h"
 #include "include/backpropagation.h"
 #include "include/initialisation.h"
+#include "include/convolution.h"
 #include "include/function.h"
 #include "include/creation.h"
 #include "include/update.h"
