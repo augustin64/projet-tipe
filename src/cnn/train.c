@@ -63,9 +63,8 @@ void* train_thread(void* parameters) {
     float loss = 0.;
 
     pthread_t tid;
-    LoadImageParameters* load_image_param;
+    LoadImageParameters* load_image_param = (LoadImageParameters*)malloc(sizeof(LoadImageParameters));
     if (dataset_type != 0) {
-        load_image_param = (LoadImageParameters*)malloc(sizeof(LoadImageParameters));
         load_image_param->dataset = param->dataset;
         load_image_param->index = index[start];
 
@@ -118,9 +117,7 @@ void* train_thread(void* parameters) {
         }
     }
 
-    if (dataset_type != 0) {
-        free(load_image_param);
-    }
+    free(load_image_param);
 
     param->accuracy = accuracy;
     param->loss = loss;
@@ -140,6 +137,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     float loss;
     float batch_loss; // May be redundant with loss, but gives more informations
     float test_accuracy = 0.; // Used to decrease Learning rate
+    (void)test_accuracy; // To avoid warnings when not used
     float accuracy;
     float batch_accuracy;
     float current_accuracy;
