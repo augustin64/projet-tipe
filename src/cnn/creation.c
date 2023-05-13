@@ -115,7 +115,7 @@ void add_average_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
     network->kernel[k_pos]->pooling = AVG_POOLING;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
-    create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
+    create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     network->size++;
 }
 
@@ -137,7 +137,7 @@ void add_max_pooling(Network* network, int dim_output) {
     network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
     network->kernel[k_pos]->pooling = MAX_POOLING;
     create_a_cube_input_layer(network, n, network->depth[n-1], network->width[n-1]/2);
-    create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2); // Will it be used ?
+    create_a_cube_input_z_layer(network, n, network->depth[n-1], network->width[n-1]/2);
     network->size++;
 }
 
