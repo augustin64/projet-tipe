@@ -358,16 +358,16 @@ void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output,
 * Backward linearisation
 */
 #ifdef __CUDACC__
-__global__ void backward_linearisation_kernel_1(Kernel_nn* ker, float*** input, float* output, int depth_input, int dim_input, int size_output) {
-    int idx = threadIdx.x + blockDim.x*blockIdx.x; // < depth_input
-    int idy = threadIdx.y + blockDim.y*blockIdx.y; // < dim_input
-    int idz = threadIdx.z + blockDim.z*blockIdx.z; // < dim_input
+__global__ void backward_linearisation_kernel_1(Kernel_nn* ker, float*** input, float* output, int input_depth, int input_width, int size_output) {
+    int idx = threadIdx.x + blockDim.x*blockIdx.x; // < input_depth
+    int idy = threadIdx.y + blockDim.y*blockIdx.y; // < input_width
+    int idz = threadIdx.z + blockDim.z*blockIdx.z; // < input_width
 
-    if (idx >= depth_input || idy >= dim_input || idz >= dim_input) {
+    if (idx >= input_depth || idy >= input_width || idz >= input_width) {
         return;
     }
 
-    int id = idx*dim_input*dim_input + idy*dim_input + idz;
+    int id = idx*input_width*input_width + idy*input_width + idz;
     
     for (int j=0; j < size_output; j++) {
         ker->d_weights[id][j] += input[idx][idy][idz]*output[j];
@@ -379,15 +379,15 @@ __global__ void backward_linearisation_kernel_1(Kernel_nn* ker, float*** input, 
     }
 }
 
-__global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, funcPtr d_f) {
-    int idx = threadIdx.x + blockDim.x*blockIdx.x; // < depth_input
-    int idy = threadIdx.y + blockDim.y*blockIdx.y; // < dim_input
-    int idz = threadIdx.z + blockDim.z*blockIdx.z; // < dim_input
+__global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, funcPtr d_f) {
+    int idx = threadIdx.x + blockDim.x*blockIdx.x; // < input_depth
+    int idy = threadIdx.y + blockDim.y*blockIdx.y; // < input_width
+    int idz = threadIdx.z + blockDim.z*blockIdx.z; // < input_width
 
-    if (idx >= depth_input || idy >= dim_input || idz >= dim_input) {
+    if (idx >= input_depth || idy >= input_width || idz >= input_width) {
         return;
     }
-    int id = idx*dim_input*dim_input + idy*dim_input + idz;
+    int id = idx*input_width*input_width + idy*input_width + idz;
 
     float tmp=0;
     for (int j=0; j < size_output; j++) {
@@ -396,12 +396,12 @@ __global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, 
     input[idx][idy][idz] = tmp*( (*d_f)(input_z[idx][idy][idz]) );
 }
 
-void backward_linearisation_device(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, int activation) {
+void backward_linearisation_device(Kernel_nn* ker, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, int activation) {
     // Make computation
-    dim3 gridSize(i_div_up(depth_input, BLOCKSIZE_x), i_div_up(dim_input, BLOCKSIZE_y), i_div_up(dim_input, BLOCKSIZE_y));
+    dim3 gridSize(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(input_width, BLOCKSIZE_y), i_div_up(input_width, BLOCKSIZE_y));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_linearisation_kernel_1<<<gridSize, blockSize>>>(ker, input, output, depth_input, dim_input, size_output);
+    backward_linearisation_kernel_1<<<gridSize, blockSize>>>(ker, input, output, input_depth, input_width, size_output);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -409,14 +409,14 @@ void backward_linearisation_device(Kernel_nn* ker, float*** input, float*** inpu
     // Second kernel
     funcPtr d_function = get_activation_function_cuda(activation);
 
-    backward_linearisation_kernel_2<<<gridSize, blockSize>>>(ker, input, input_z, output, depth_input, dim_input, size_output, d_function);
+    backward_linearisation_kernel_2<<<gridSize, blockSize>>>(ker, input, input_z, output, input_depth, input_width, size_output, d_function);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void backward_linearisation_cpu(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, int activation) {
+void backward_linearisation_cpu(Kernel_nn* ker, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, int activation) {
    
     funcPtr d_function = get_activation_function(activation);
 
@@ -427,9 +427,9 @@ void backward_linearisation_cpu(Kernel_nn* ker, float*** input, float*** input_z
 
     // Weights
     int cpt = 0;
-    for (int i=0; i < depth_input; i++) {
-        for (int k=0; k < dim_input; k++) {
-            for (int l=0; l < dim_input; l++) {
+    for (int i=0; i < input_depth; i++) {
+        for (int k=0; k < input_width; k++) {
+            for (int l=0; l < input_width; l++) {
                 for (int j=0; j < size_output; j++) {
                     ker->d_weights[cpt][j] += input[i][k][l]*output[j];
                 }
@@ -440,9 +440,9 @@ void backward_linearisation_cpu(Kernel_nn* ker, float*** input, float*** input_z
 
     // Input
     cpt = 0;
-    for (int i=0; i < depth_input; i++) {
-        for (int k=0; k < dim_input; k++) {
-            for (int l=0; l < dim_input; l++) {
+    for (int i=0; i < input_depth; i++) {
+        for (int k=0; k < input_width; k++) {
+            for (int l=0; l < input_width; l++) {
                 float tmp=0;
                 for (int j=0; j < size_output; j++) {
                     tmp += output[j]*ker->weights[cpt][j];
@@ -457,11 +457,11 @@ void backward_linearisation_cpu(Kernel_nn* ker, float*** input, float*** input_z
 #ifdef __CUDACC__
 extern "C"
 #endif
-void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int depth_input, int dim_input, int size_output, int activation) {
+void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, int activation) {
     #ifndef __CUDACC__
-    backward_linearisation_cpu(ker, input, input_z, output, depth_input, dim_input, size_output, activation);
+    backward_linearisation_cpu(ker, input, input_z, output, input_depth, input_width, size_output, activation);
     #else
-    backward_linearisation_device(ker, input, input_z, output, depth_input, dim_input, size_output, activation);
+    backward_linearisation_device(ker, input, input_z, output, input_depth, input_width, size_output, activation);
     #endif
 }
 
@@ -469,18 +469,18 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
 * Backward convolution
 */
 #ifdef __CUDACC__
-__global__ void backward_convolution_dbias_kernel(Kernel_cnn* ker, float*** output, int depth_output, int dim_output) {
+__global__ void backward_convolution_dbias_kernel(Kernel_cnn* ker, float*** output, int output_depth, int output_width) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
     
-    if (idx >= depth_output || idy >= dim_output || idz >= dim_output) {
+    if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
     }
     ker->d_bias[idx][idy][idz] += output[idx][idy][idz];
 }
 
-__global__ void backward_convolution_dweight_kernel(Kernel_cnn* ker, float*** input, float*** output, int depth_input, int depth_output, int dim_output, int k_size) {
+__global__ void backward_convolution_dweight_kernel(Kernel_cnn* ker, float*** input, float*** output, int input_depth, int output_depth, int output_width, int k_size) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
@@ -488,35 +488,35 @@ __global__ void backward_convolution_dweight_kernel(Kernel_cnn* ker, float*** in
     int idz1 = idz / k_size;
     int idz2 = idz % k_size;
     
-    if (idx >= depth_input || idy >= depth_output || idz1 >= k_size || idz2 >= k_size) {
+    if (idx >= input_depth || idy >= output_depth || idz1 >= k_size || idz2 >= k_size) {
         return;
     }
     
     float tmp = 0;
-    for (int l=0; l < dim_output; l++) {
-        for (int m=0; m < dim_output; m++) {
+    for (int l=0; l < output_width; l++) {
+        for (int m=0; m < output_width; m++) {
             tmp += input[idx][l+idz1][m+idz2]*output[idy][l][m];
         }
     }
     ker->d_weights[idx][idy][idz1][idz2] += tmp;
 }
 
-__global__ void backward_convolution_propagate_kernel(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int k_size, funcPtr d_f) {
+__global__ void backward_convolution_propagate_kernel(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int k_size, funcPtr d_f) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
 
-    if (idx >= depth_input || idy >= dim_input || idz >= dim_input) {
+    if (idx >= input_depth || idy >= input_width || idz >= input_width) {
         return;
     }
 
     int min_m, max_m, min_n, max_n;
     float tmp = 0;
-    for (int l=0; l < depth_output; l++) {
+    for (int l=0; l < output_depth; l++) {
         min_m = max(0, k_size-1-idy);
-        max_m = min(k_size, dim_input - idy);
+        max_m = min(k_size, input_width - idy);
         min_n = max(0, k_size-1-idz);
-        max_n = min(k_size, dim_input-idz);
+        max_n = min(k_size, input_width-idz);
         for (int m=min_m; m < max_m; m++) {
             for (int n=min_n; n < max_n; n++) {
                 tmp += output[l][idy-k_size+m+1][idz-k_size+n+1]*ker->weights[idx][l][m][n];
@@ -526,35 +526,35 @@ __global__ void backward_convolution_propagate_kernel(Kernel_cnn* ker, float*** 
     input[idx][idy][idz] = tmp*( (*d_f)(input_z[idx][idy][idz]) );
 }
 
-void backward_convolution_device(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, int activation, int is_first) {
+void backward_convolution_device(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first) {
     // Bias Kernel
-    dim3 gridSize1(i_div_up(depth_output, BLOCKSIZE_x), i_div_up(dim_output, BLOCKSIZE_y), i_div_up(dim_output, BLOCKSIZE_y));
+    dim3 gridSize1(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_y));
     dim3 blockSize1(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(ker, output, depth_output, dim_output);
+    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(ker, output, output_depth, output_width);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 
     // Weights Kernel
-    int k_size = dim_input - dim_output +1;
+    int k_size = input_width - output_width +1;
 
-    dim3 gridSize2(i_div_up(depth_input, BLOCKSIZE_x), i_div_up(depth_output, BLOCKSIZE_y), i_div_up(k_size*k_size, BLOCKSIZE_y));
+    dim3 gridSize2(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(output_depth, BLOCKSIZE_y), i_div_up(k_size*k_size, BLOCKSIZE_y));
     dim3 blockSize2(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(ker, input, output, depth_input, depth_output, dim_output, k_size);
+    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(ker, input, output, input_depth, output_depth, output_width, k_size);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 
     // input propagation Kernel
     if (is_first != 1) {
-        dim3 gridSize3(i_div_up(depth_input, BLOCKSIZE_x), i_div_up(dim_input, BLOCKSIZE_y), i_div_up(dim_input, BLOCKSIZE_y));
+        dim3 gridSize3(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(input_width, BLOCKSIZE_y), i_div_up(input_width, BLOCKSIZE_y));
         dim3 blockSize3(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
         funcPtr d_function = get_activation_function_cuda(activation);
 
-        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(ker, input, input_z, output, depth_input, dim_input, depth_output, k_size, d_function);
+        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(ker, input, input_z, output, input_depth, input_width, output_depth, k_size, d_function);
     
         gpuErrchk( cudaPeekAtLastError() );
         gpuErrchk( cudaDeviceSynchronize() );
@@ -563,29 +563,29 @@ void backward_convolution_device(Kernel_cnn* ker, float*** input, float*** input
 #endif
 
 
-void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, int activation, int is_first) {
+void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first) {
     
     funcPtr d_function = get_activation_function(activation);
 
     // Bias
-    for (int i=0; i < depth_output; i++) {
-        for (int j=0; j < dim_output; j++) {
-            for (int k=0; k < dim_output; k++) {
+    for (int i=0; i < output_depth; i++) {
+        for (int j=0; j < output_width; j++) {
+            for (int k=0; k < output_width; k++) {
                 ker->d_bias[i][j][k] += output[i][j][k];
             }
         }
     }
 
     // Weights
-    int k_size = dim_input - dim_output +1;
+    int k_size = input_width - output_width +1;
     
-    for (int h=0; h < depth_input; h++) {
-        for (int i=0; i < depth_output; i++) {
+    for (int h=0; h < input_depth; h++) {
+        for (int i=0; i < output_depth; i++) {
             for (int j=0; j < k_size; j++) {
                 for (int k=0; k < k_size; k++) {
                     float tmp = 0;
-                    for (int l=0; l < dim_output; l++) {
-                        for (int m=0; m < dim_output; m++) {
+                    for (int l=0; l < output_width; l++) {
+                        for (int m=0; m < output_width; m++) {
                             tmp += input[h][l+j][m+k]*output[i][l][m];
                         }
                     }
@@ -599,15 +599,15 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
     if (is_first==1) // Pas besoin de backpropager dans l'input
         return;
     int min_m, max_m, min_n, max_n;
-    for (int i=0; i < depth_input; i++) {
-        for (int j=0; j < dim_input; j++) {
-            for (int k=0; k < dim_input; k++) {
+    for (int i=0; i < input_depth; i++) {
+        for (int j=0; j < input_width; j++) {
+            for (int k=0; k < input_width; k++) {
                 float tmp = 0;
-                for (int l=0; l < depth_output; l++) {
+                for (int l=0; l < output_depth; l++) {
                     min_m = max(0, k_size-1-j);
-                    max_m = min(k_size, dim_input - j);
+                    max_m = min(k_size, input_width - j);
                     min_n = max(0, k_size-1-k);
-                    max_n = min(k_size, dim_input-k);
+                    max_n = min(k_size, input_width-k);
                     for (int m=min_m; m < max_m; m++) {
                         for (int n=min_n; n < max_n; n++) {
                             tmp += output[l][j-k_size+m+1][k-k_size+n+1]*ker->weights[i][l][m][n];
@@ -623,10 +623,10 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
 #ifdef __CUDACC__
 extern "C"
 #endif
-void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int depth_input, int dim_input, int depth_output, int dim_output, int activation, int is_first) {
+void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first) {
     #ifndef __CUDACC__
-    backward_convolution_cpu(ker, input, input_z, output, depth_input, dim_input, depth_output, dim_output, activation, is_first);
+    backward_convolution_cpu(ker, input, input_z, output, input_depth, input_width, output_depth, output_width, activation, is_first);
     #else
-    backward_convolution_device(ker, input, input_z, output, depth_input, dim_input, depth_output, dim_output, activation, is_first);
+    backward_convolution_device(ker, input, input_z, output, input_depth, input_width, output_depth, output_width, activation, is_first);
     #endif
 }

@@ -33,7 +33,7 @@ void knuth_shuffle(int* tab, int n) {
 }
 
 bool equals_networks(Network* network1, Network* network2) {
-    int output_dim;
+    int output_width;
     checkEquals(size, "size", -1);
     checkEquals(initialisation, "initialisation", -1);
     checkEquals(dropout, "dropout", -1);
@@ -70,13 +70,13 @@ bool equals_networks(Network* network1, Network* network2) {
             }
         } else {
             // Type CNN
-            output_dim = network1->width[i+1];
+            output_width = network1->width[i+1];
             checkEquals(kernel[i]->cnn->k_size, "kernel[i]->k_size", i);
             checkEquals(kernel[i]->cnn->rows, "kernel[i]->rows", i);
             checkEquals(kernel[i]->cnn->columns, "kernel[i]->columns", i);
             for (int j=0; j < network1->kernel[i]->cnn->columns; j++) {
-                for (int k=0; k < output_dim; k++) {
-                    for (int l=0; l < output_dim; l++) {
+                for (int k=0; k < output_width; k++) {
+                    for (int l=0; l < output_width; l++) {
                         checkEquals(kernel[i]->cnn->bias[j][k][l], "kernel[i]->cnn->bias[j][k][l]", l);
                     }
                 }
@@ -108,7 +108,7 @@ Network* copy_network(Network* network) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
+    int output_width;
 
     copyVar(dropout);
     copyVar(learning_rate);
@@ -200,7 +200,7 @@ Network* copy_network(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
-            output_dim = network->width[i+1];
+            output_width = network->width[i+1];
 
 
             network_cp->kernel[i]->nn = NULL;
@@ -217,20 +217,20 @@ Network* copy_network(Network* network) {
             network_cp->kernel[i]->cnn->v_d_bias = (float***)nalloc(columns, sizeof(float**));
             #endif
             for (int j=0; j < columns; j++) {
-                network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(output_dim, sizeof(float*));
-                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(output_dim, sizeof(float*));
+                network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(output_width, sizeof(float*));
+                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
                 #ifdef ADAM_CNN_BIAS
-                network_cp->kernel[i]->cnn->s_d_bias[j] = (float**)nalloc(output_dim, sizeof(float*));
-                network_cp->kernel[i]->cnn->v_d_bias[j] = (float**)nalloc(output_dim, sizeof(float*));
+                network_cp->kernel[i]->cnn->s_d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
+                network_cp->kernel[i]->cnn->v_d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
                 #endif
-                for (int k=0; k < output_dim; k++) {
-                    network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
-                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
+                for (int k=0; k < output_width; k++) {
+                    network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(output_width, sizeof(float));
+                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
                     #ifdef ADAM_CNN_BIAS
-                    network_cp->kernel[i]->cnn->s_d_bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
-                    network_cp->kernel[i]->cnn->v_d_bias[j][k] = (float*)nalloc(output_dim, sizeof(float));
+                    network_cp->kernel[i]->cnn->s_d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
+                    network_cp->kernel[i]->cnn->v_d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
                     #endif
-                    for (int l=0; l < output_dim; l++) {
+                    for (int l=0; l < output_width; l++) {
                         copyVar(kernel[i]->cnn->bias[j][k][l]);
                         network_cp->kernel[i]->cnn->d_bias[j][k][l] = 0.;
                         #ifdef ADAM_CNN_BIAS
@@ -324,7 +324,7 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
+    int output_width;
 
     copyVarParams(learning_rate);
 
@@ -348,11 +348,11 @@ void copy_network_parameters(Network* network_src, Network* network_dest) {
             rows = network_src->kernel[i]->cnn->rows;
             k_size = network_src->kernel[i]->cnn->k_size;
             columns = network_src->kernel[i]->cnn->columns;
-            output_dim = network_src->width[i+1];
+            output_width = network_src->width[i+1];
 
             for (int j=0; j < columns; j++) {
-                for (int k=0; k < output_dim; k++) {
-                    for (int l=0; l < output_dim; l++) {
+                for (int k=0; k < output_width; k++) {
+                    for (int l=0; l < output_width; l++) {
                         copyVarParams(kernel[i]->cnn->bias[j][k][l]);
                     }
                 }
@@ -385,7 +385,7 @@ int count_null_weights(Network* network) {
     int rows;
     int k_size;
     int columns;
-    int output_dim;
+    int output_width;
 
     for (int i=0; i < size-1; i++) {
         if (!network->kernel[i]->cnn && network->kernel[i]->nn) { // Cas du NN
@@ -407,11 +407,11 @@ int count_null_weights(Network* network) {
             rows = network->kernel[i]->cnn->rows;
             k_size = network->kernel[i]->cnn->k_size;
             columns = network->kernel[i]->cnn->columns;
-            output_dim = network->width[i+1];
+            output_width = network->width[i+1];
 
             for (int j=0; j < columns; j++) {
-                for (int k=0; k < output_dim; k++) {
-                    for (int l=0; l < output_dim; l++) {
+                for (int k=0; k < output_width; k++) {
+                    for (int l=0; l < output_width; l++) {
                         null_bias += fabs(network->kernel[i]->cnn->bias[j][k][l]) <= epsilon;
                     }
                 }

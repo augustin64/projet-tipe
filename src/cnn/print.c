@@ -11,13 +11,13 @@
 #define purple printf("\033[0;35m")
 #define reset_color printf("\033[0m")
 
-void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth_output, int dim_output) {
-    int k_size = dim_input - dim_output + 1;
+void print_kernel_cnn(Kernel_cnn* ker, int input_depth, int input_width, int output_depth, int output_width) {
+    int k_size = input_width - output_width + 1;
     // print bias
     green;
-    for (int i=0; i<depth_output; i++) {
-        for (int j=0; j<dim_output; j++) {
-            for (int k=0; k<dim_output; k++) {
+    for (int i=0; i<output_depth; i++) {
+        for (int j=0; j<output_width; j++) {
+            for (int k=0; k<output_width; k++) {
                 printf("%.2f", ker->bias[i][j][k]);
             }
             print_space;
@@ -29,9 +29,9 @@ void print_kernel_cnn(Kernel_cnn* ker, int depth_input, int dim_input, int depth
 
     //print weights
     red;
-    for (int i=0; i<depth_input; i++) {
+    for (int i=0; i<input_depth; i++) {
         printf("------Line %d-----\n", i);
-        for (int j=0; j<depth_output; j++) {
+        for (int j=0; j<output_depth; j++) {
             for (int k=0; k<k_size; k++) {
                 for (int l=0; l<k_size; l++) {
                     printf("%.2f", ker->weights[i][j][k][l]);

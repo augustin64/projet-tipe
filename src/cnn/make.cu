@@ -24,7 +24,7 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < output_width
     int max_move = size - padding;
-    int input_dim = output_width*stride - 2*padding + size - stride;
+    int input_width = output_width*stride - 2*padding + size - stride;
 
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
@@ -37,7 +37,7 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, input_dim)) {
+            if (pooling_not_outside(idy_2, idz_2, 0, input_width)) {
                 sum += input[idx][idy_2][idz_2];
                 nb_elements++;
             }
@@ -61,7 +61,7 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
     int max_move = size - padding;
-    int input_dim = output_width*stride - 2*padding + size - stride;
+    int input_width = output_width*stride - 2*padding + size - stride;
 
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
@@ -72,7 +72,7 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, input_dim)) {
+                        if (pooling_not_outside(j_2, k_2, 0, input_width)) {
                             sum += input[i][j_2][k_2];
                             nb_elements++;
                         }
@@ -108,7 +108,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < output_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < output_width
-    int input_dim = output_width*stride - 2*padding + size - stride;
+    int input_width = output_width*stride - 2*padding + size - stride;
 
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
@@ -122,7 +122,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, input_dim)) {
+            if (pooling_not_outside(idy_2, idz_2, 0, input_width)) {
                 temp = input[idx][idy_2][idz_2];
                 m = m > temp ? m : temp; // max(m, temp)
             }
@@ -146,7 +146,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
     int max_move = size - padding;
-    int input_dim = output_width*stride - 2*padding + size - stride;
+    int input_width = output_width*stride - 2*padding + size - stride;
     float m;
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
@@ -156,7 +156,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, input_dim)) {
+                        if (pooling_not_outside(j_2, k_2, 0, input_width)) {
                             m = fmaxf(m, input[i][j_2][k_2]);
                         }
                     }
@@ -248,7 +248,7 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 * Dense linearized
 */
 #ifdef __CUDACC__
-__global__ void make_dense_linearized_kernel(float** weights, float* bias, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+__global__ void make_dense_linearized_kernel(float** weights, float* bias, float*** input, float* output, int input_depth, int input_width, int size_output) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < size_output
 
@@ -257,38 +257,38 @@ __global__ void make_dense_linearized_kernel(float** weights, float* bias, float
     }
     float f = bias[idx];
 
-    for (int i=0; i < depth_input; i++) {
-        for (int j=0; j < dim_input; j++) {
-            for (int k=0; k < dim_input; k++) {
-                f += input[i][j][k]*weights[k + j*dim_input + i*depth_input][idx];
+    for (int i=0; i < input_depth; i++) {
+        for (int j=0; j < input_width; j++) {
+            for (int k=0; k < input_width; k++) {
+                f += input[i][j][k]*weights[k + j*input_width + i*input_depth][idx];
             }
         }
     }
     output[idx] = f;
 }
 
-void make_dense_linearized_device(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+void make_dense_linearized_device(Kernel_nn* kernel, float*** input, float* output, int input_depth, int input_width, int size_output) {
     // Make computation
     dim3 gridSize(i_div_up(size_output, BLOCKSIZE_x*BLOCKSIZE_y), 1, 1);
     dim3 blockSize(BLOCKSIZE_x*BLOCKSIZE_y, 1, BLOCKSIZE_z);
 
-    make_dense_linearized_kernel<<<gridSize, blockSize>>>(kernel->weights, kernel->bias, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_kernel<<<gridSize, blockSize>>>(kernel->weights, kernel->bias, input, output, input_depth, input_width, size_output);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void make_dense_linearized_cpu(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
-    // input[depth_input][dim_input][dim_input]
+void make_dense_linearized_cpu(Kernel_nn* kernel, float*** input, float* output, int input_depth, int input_width, int size_output) {
+    // input[input_depth][input_width][input_width]
     // output[size_output]
     float f;
 
     for (int l=0; l < size_output; l++) {
         f = kernel->bias[l];
-        for (int i=0; i < depth_input; i++) {
-            for (int j=0; j < dim_input; j++) {
-                for (int k=0; k < dim_input; k++) {
-                    f += input[i][j][k]*kernel->weights[k + j*dim_input + i*depth_input][l];
+        for (int i=0; i < input_depth; i++) {
+            for (int j=0; j < input_width; j++) {
+                for (int k=0; k < input_width; k++) {
+                    f += input[i][j][k]*kernel->weights[k + j*input_width + i*input_depth][l];
                 }
             }
         }
@@ -299,10 +299,10 @@ void make_dense_linearized_cpu(Kernel_nn* kernel, float*** input, float* output,
 #ifdef __CUDACC__
 extern "C"
 #endif
-void make_dense_linearized(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output) {
+void make_dense_linearized(Kernel_nn* kernel, float*** input, float* output, int input_depth, int input_width, int size_output) {
     #ifndef __CUDACC__
-    make_dense_linearized_cpu(kernel, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_cpu(kernel, input, output, input_depth, input_width, size_output);
     #else
-    make_dense_linearized_device(kernel, input, output, depth_input, dim_input, size_output);
+    make_dense_linearized_device(kernel, input, output, input_depth, input_width, size_output);
     #endif
 }

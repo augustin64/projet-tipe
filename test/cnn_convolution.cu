@@ -93,9 +93,9 @@ bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int 
     return true;
 }
 
-void run_convolution_test(int input_dim, int output_dim, int rows, int columns) {
-    assert(input_dim >= output_dim);
-    int k_size = input_dim - output_dim +1;
+void run_convolution_test(int input_width, int output_width, int rows, int columns) {
+    assert(input_width >= output_width);
+    int k_size = input_width - output_width +1;
 
     // Génération des données aléatoires
     Kernel_cnn* kernel = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
@@ -104,12 +104,12 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     kernel->rows = rows;
     kernel->columns = columns;
 
-    // bias[kernel->columns][dim_output][dim_output]
-    kernel->bias = create_matrix(kernel->columns, output_dim, output_dim, 15.0f);
-    kernel->d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    // bias[kernel->columns][output_width][output_width]
+    kernel->bias = create_matrix(kernel->columns, output_width, output_width, 15.0f);
+    kernel->d_bias = create_matrix(kernel->columns, output_width, output_width, 1.5f);
     #ifdef ADAM_CNN_BIAS
-    kernel->s_d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
-    kernel->v_d_bias = create_matrix(kernel->columns, output_dim, output_dim, 1.5f);
+    kernel->s_d_bias = create_matrix(kernel->columns, output_width, output_width, 1.5f);
+    kernel->v_d_bias = create_matrix(kernel->columns, output_width, output_width, 1.5f);
     #endif
 
     // weights[rows][columns][k_size][k_size]
@@ -128,11 +128,11 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
         #endif
     }
 
-    float*** input = create_matrix(kernel->rows, input_dim, input_dim, 5.0f);
-    float*** output_cpu = create_empty_matrix(kernel->columns, output_dim, output_dim);
-    float*** output_gpu = create_empty_matrix(kernel->columns, output_dim, output_dim);
+    float*** input = create_matrix(kernel->rows, input_width, input_width, 5.0f);
+    float*** output_cpu = create_empty_matrix(kernel->columns, output_width, output_width);
+    float*** output_gpu = create_empty_matrix(kernel->columns, output_width, output_width);
 
-    printf("(%d, %d, %d, %d) Data generation complete\n", rows, columns, input_dim, output_dim);
+    printf("(%d, %d, %d, %d) Data generation complete\n", rows, columns, input_width, output_width);
 
 
     // Lancement des calculs
@@ -140,33 +140,33 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     double cpu_time_used, gpu_time_used;
 
     start_time = omp_get_wtime();
-    make_convolution_device(kernel, input, output_gpu, output_dim, 1);
+    make_convolution_device(kernel, input, output_gpu, output_width, 1);
     end_time = omp_get_wtime();
 
 
     gpu_time_used = end_time - start_time;
-    printf("(%d, %d, %d, %d) Time used for GPU: %lf seconds\n", rows, columns, input_dim, output_dim, gpu_time_used);
+    printf("(%d, %d, %d, %d) Time used for GPU: %lf seconds\n", rows, columns, input_width, output_width, gpu_time_used);
 
 
     start_time = omp_get_wtime();
-    make_convolution_cpu(kernel, input, output_cpu, output_dim, 1);
+    make_convolution_cpu(kernel, input, output_cpu, output_width, 1);
     end_time = omp_get_wtime();
 
     cpu_time_used = end_time - start_time;
-    printf("(%d, %d, %d, %d) Time used for CPU: %lf seconds\n", rows, columns, input_dim, output_dim, cpu_time_used);    
+    printf("(%d, %d, %d, %d) Time used for CPU: %lf seconds\n", rows, columns, input_width, output_width, cpu_time_used);    
 
     // Vérification de l'égalité des matrices
-    printf("(%d, %d, %d, %d) Checking equality.\n", rows, columns, input_dim, output_dim);
-    if (!check_matrices_equality(output_gpu, output_cpu, kernel->columns, output_dim, output_dim, kernel->k_size)) {// TODO: change acceptation
+    printf("(%d, %d, %d, %d) Checking equality.\n", rows, columns, input_width, output_width);
+    if (!check_matrices_equality(output_gpu, output_cpu, kernel->columns, output_width, output_width, kernel->k_size)) {// TODO: change acceptation
         exit(1);
     }
     printf(GREEN "OK\n" RESET);
 
-    free_matrix(kernel->bias, kernel->columns, output_dim);
-    free_matrix(kernel->d_bias, kernel->columns, output_dim);
+    free_matrix(kernel->bias, kernel->columns, output_width);
+    free_matrix(kernel->d_bias, kernel->columns, output_width);
     #ifdef ADAM_CNN_BIAS
-    free_matrix(kernel->s_d_bias, kernel->columns, output_dim);
-    free_matrix(kernel->v_d_bias, kernel->columns, output_dim);
+    free_matrix(kernel->s_d_bias, kernel->columns, output_width);
+    free_matrix(kernel->v_d_bias, kernel->columns, output_width);
     #endif
 
     for (int i=0; i < kernel->rows; i++) {
@@ -184,9 +184,9 @@ void run_convolution_test(int input_dim, int output_dim, int rows, int columns) 
     gree(kernel->v_d_weights);
     #endif
 
-    free_matrix(input, kernel->rows, input_dim);
-    free_matrix(output_cpu, kernel->columns, output_dim);
-    free_matrix(output_gpu, kernel->columns, output_dim);
+    free_matrix(input, kernel->rows, input_width);
+    free_matrix(output_cpu, kernel->columns, output_width);
+    free_matrix(output_gpu, kernel->columns, output_width);
 }
 
 

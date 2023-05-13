@@ -54,12 +54,12 @@ def generate_data_mul():
 
 def generate_data_conv():
     values = []
-    output_dim = 40
+    output_width = 40
     rows = 40
     columns = 40
     for i in range(10):
-        values.append(avg([conv_matrix((i+1)*100, output_dim, rows, columns) for j in range(10)]))
-        print(f"Added ({(i+1)*100}, output_dim, rows, columns)")
+        values.append(avg([conv_matrix((i+1)*100, output_width, rows, columns) for j in range(10)]))
+        print(f"Added ({(i+1)*100}, output_width, rows, columns)")
 
     with open("result_conv.json", "weights") as file:
         json.dump(values, file, indent=4)

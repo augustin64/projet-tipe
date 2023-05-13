@@ -73,7 +73,7 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
     int indice_buffer = 0;
     if (type_couche == 0) { // Cas du CNN
         Kernel_cnn* cnn = kernel->cnn;
-        int output_dim = network->width[indice_couche+1];
+        int output_width = network->width[indice_couche+1];
 
         // Écriture du pré-corps
         uint32_t pre_buffer[7];
@@ -90,9 +90,9 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         // We need to split in small buffers to keep some free memory in the computer
         for (int i=0; i < cnn->columns; i++) {
             indice_buffer = 0;
-            float buffer[output_dim*output_dim];
-            for (int j=0; j < output_dim; j++) {
-                for (int k=0; k < output_dim; k++) {
+            float buffer[output_width*output_width];
+            for (int j=0; j < output_width; j++) {
+                for (int k=0; k < output_width; k++) {
                     bufferAdd(cnn->bias[i][j][k]);
                 }
             }
@@ -234,7 +234,7 @@ Network* read_network(char* filename) {
     return network;
 }
 
-Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
+Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
     Kernel* kernel = (Kernel*)nalloc(1, sizeof(Kernel));
     if (type_couche == CNN) { // Cas du CNN
         // Lecture du "Pré-corps"
@@ -262,20 +262,20 @@ Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr) {
         cnn->v_d_bias = (float***)nalloc(cnn->columns, sizeof(float**));
         #endif
         for (int i=0; i < cnn->columns; i++) {
-            cnn->bias[i] = (float**)nalloc(output_dim, sizeof(float*));
-            cnn->d_bias[i] = (float**)nalloc(output_dim, sizeof(float*));
+            cnn->bias[i] = (float**)nalloc(output_width, sizeof(float*));
+            cnn->d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
             #ifdef ADAM_CNN_BIAS
-            cnn->s_d_bias[i] = (float**)nalloc(output_dim, sizeof(float*));
-            cnn->v_d_bias[i] = (float**)nalloc(output_dim, sizeof(float*));
+            cnn->s_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
+            cnn->v_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
             #endif
-            for (int j=0; j < output_dim; j++) {
-                cnn->bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
-                cnn->d_bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
+            for (int j=0; j < output_width; j++) {
+                cnn->bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                cnn->d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 #ifdef ADAM_CNN_BIAS
-                cnn->s_d_bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
-                cnn->v_d_bias[i][j] = (float*)nalloc(output_dim, sizeof(float));
+                cnn->s_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                cnn->v_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 #endif
-                for (int k=0; k < output_dim; k++) {
+                for (int k=0; k < output_width; k++) {
                     (void) !fread(&tmp, sizeof(tmp), 1, ptr);
                     cnn->bias[i][j][k] = tmp;
                     cnn->d_bias[i][j][k] = 0.;

@@ -33,5 +33,5 @@ Network* read_network(char* filename);
 /*
 * Lit une kernel dans le fichier spécifié par le pointeur ptr
 */
-Kernel* read_kernel(int type_couche, int output_dim, FILE* ptr);
+Kernel* read_kernel(int type_couche, int output_width, FILE* ptr);
 #endif

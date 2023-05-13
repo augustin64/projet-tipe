@@ -153,7 +153,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
 
     //* Chargement du dataset
-    int input_dim = -1;
+    int input_width = -1;
     int input_depth = -1;
 
     int nb_images_total; // Images au total
@@ -172,11 +172,11 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         images = read_mnist_images(images_file);
         labels = read_mnist_labels(labels_file);
 
-        input_dim = 32;
+        input_width = 32;
         input_depth = 1;
     } else { // Type JPG
         dataset = loadJpegDataset(data_dir);
-        input_dim = dataset->height + 4; // image_size + padding
+        input_width = dataset->height + 4; // image_size + padding
         input_depth = dataset->numComponents;
 
         nb_images_total = dataset->numImages;
@@ -185,8 +185,8 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     //* Création du réseau
     Network* network;
     if (!recover) {
-        network = create_network_lenet5(LEARNING_RATE, 0, RELU, NORMALIZED_XAVIER, input_dim, input_depth);
-        //network = create_simple_one(LEARNING_RATE, 0, RELU, GLOROT, input_dim, input_depth);
+        network = create_network_lenet5(LEARNING_RATE, 0, RELU, NORMALIZED_XAVIER, input_width, input_depth);
+        //network = create_simple_one(LEARNING_RATE, 0, RELU, GLOROT, input_width, input_depth);
     } else {
         network = read_network(recover);
         network->learning_rate = LEARNING_RATE;

@@ -9,7 +9,7 @@
 
 #include "include/creation.h"
 
-Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
+Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
     if (dropout < 0 || dropout > 100) {
         printf_error("La probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
@@ -29,17 +29,17 @@ Network* create_network(int max_size, float learning_rate, int dropout, int acti
     }
     network->kernel[0]->linearisation = DOESNT_LINEARISE;
     network->kernel[0]->activation = activation;
-    network->width[0] = input_dim;
+    network->width[0] = input_width;
     network->depth[0] = input_depth;
     network->kernel[0]->nn = NULL;
     network->kernel[0]->cnn = NULL;
-    create_a_cube_input_layer(network, 0, input_depth, input_dim);
-    create_a_cube_input_z_layer(network, 0, input_depth, input_dim);
+    create_a_cube_input_layer(network, 0, input_depth, input_width);
+    create_a_cube_input_z_layer(network, 0, input_depth, input_width);
     return network;
 }
 
-Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(8, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
+Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
+    Network* network = create_network(8, learning_rate, dropout, activation, initialisation, input_width, input_depth);
     add_convolution(network, 5, 6, 1, 0, activation);
     add_average_pooling(network, 2, 2, 0);
     add_convolution(network, 5, 16, 1, 0, activation);
@@ -50,8 +50,8 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
     return network;
 }
 
-Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
+Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
+    Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_width, input_depth);
     add_dense_linearisation(network, 80, activation);
     add_dense(network, 10, SOFTMAX);
     return network;
@@ -104,8 +104,8 @@ void add_average_pooling(Network* network, int kernel_size, int stride, int padd
         printf_error("Impossible de rajouter une couche d'average pooling, le réseau est déjà plein\n");
         return;
     }
-    int dim_input = network->width[k_pos];
-    int dim_output = (2*padding + dim_input - (kernel_size - stride))/stride;
+    int input_width = network->width[k_pos];
+    int output_width = (2*padding + input_width - (kernel_size - stride))/stride;
 
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
@@ -115,8 +115,8 @@ void add_average_pooling(Network* network, int kernel_size, int stride, int padd
     network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
     network->kernel[k_pos]->pooling = AVG_POOLING;
 
-    create_a_cube_input_layer(network, n, network->depth[n-1], dim_output);
-    create_a_cube_input_z_layer(network, n, network->depth[n-1], dim_output);
+    create_a_cube_input_layer(network, n, network->depth[n-1], output_width);
+    create_a_cube_input_z_layer(network, n, network->depth[n-1], output_width);
     network->size++;
 }
 
@@ -127,8 +127,8 @@ void add_max_pooling(Network* network, int kernel_size, int stride, int padding)
         printf_error("Impossible de rajouter une couche de max pooling, le réseau est déjà plein\n");
         return;
     }
-    int dim_input = network->width[k_pos];
-    int dim_output = (2*padding + dim_input - (kernel_size - stride))/stride;
+    int input_width = network->width[k_pos];
+    int output_width = (2*padding + input_width - (kernel_size - stride))/stride;
 
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
@@ -136,8 +136,8 @@ void add_max_pooling(Network* network, int kernel_size, int stride, int padding)
     network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
     network->kernel[k_pos]->pooling = MAX_POOLING;
 
-    create_a_cube_input_layer(network, n, network->depth[n-1], dim_output);
-    create_a_cube_input_z_layer(network, n, network->depth[n-1], dim_output);
+    create_a_cube_input_layer(network, n, network->depth[n-1], output_width);
+    create_a_cube_input_z_layer(network, n, network->depth[n-1], output_width);
     network->size++;
 }
 
@@ -148,13 +148,13 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
         printf_error("Impossible de rajouter une couche de convolution, le réseau est déjà plein \n");
         return;
     }
-    int depth_input = network->depth[k_pos];
-    int dim_input = network->width[k_pos];
+    int input_depth = network->depth[k_pos];
+    int input_width = network->width[k_pos];
 
-    int dim_output = (2*padding + dim_input - (kernel_size - stride))/stride;
-    int depth_output = number_of_kernels;
+    int output_width = (2*padding + input_width - (kernel_size - stride))/stride;
+    int output_depth = number_of_kernels;
 
-    int bias_size = dim_output;
+    int bias_size = output_width;
 
     network->kernel[k_pos]->nn = NULL;
     network->kernel[k_pos]->stride = stride;
@@ -166,23 +166,23 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
     network->kernel[k_pos]->cnn = (Kernel_cnn*)nalloc(1, sizeof(Kernel_cnn));
     Kernel_cnn* cnn = network->kernel[k_pos]->cnn;
     cnn->k_size = kernel_size;
-    cnn->rows = depth_input;
-    cnn->columns = depth_output;
+    cnn->rows = input_depth;
+    cnn->columns = output_depth;
 
-    cnn->weights = (float****)nalloc(depth_input, sizeof(float***));
-    cnn->d_weights = (float****)nalloc(depth_input, sizeof(float***));
+    cnn->weights = (float****)nalloc(input_depth, sizeof(float***));
+    cnn->d_weights = (float****)nalloc(input_depth, sizeof(float***));
     #ifdef ADAM_CNN_WEIGHTS
-    cnn->s_d_weights = (float****)nalloc(depth_input, sizeof(float***));
-    cnn->v_d_weights = (float****)nalloc(depth_input, sizeof(float***));
+    cnn->s_d_weights = (float****)nalloc(input_depth, sizeof(float***));
+    cnn->v_d_weights = (float****)nalloc(input_depth, sizeof(float***));
     #endif
-    for (int i=0; i < depth_input; i++) {
-        cnn->weights[i] = (float***)nalloc(depth_output, sizeof(float**));
-        cnn->d_weights[i] = (float***)nalloc(depth_output, sizeof(float**));
+    for (int i=0; i < input_depth; i++) {
+        cnn->weights[i] = (float***)nalloc(output_depth, sizeof(float**));
+        cnn->d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
         #ifdef ADAM_CNN_WEIGHTS
-        cnn->s_d_weights[i] = (float***)nalloc(depth_output, sizeof(float**));
-        cnn->v_d_weights[i] = (float***)nalloc(depth_output, sizeof(float**));
+        cnn->s_d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
+        cnn->v_d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
         #endif
-        for (int j=0; j < depth_output; j++) {
+        for (int j=0; j < output_depth; j++) {
             cnn->weights[i][j] = (float**)nalloc(kernel_size, sizeof(float*));
             cnn->d_weights[i][j] = (float**)nalloc(kernel_size, sizeof(float*));
             #ifdef ADAM_CNN_WEIGHTS
@@ -207,13 +207,13 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
         }
     }
 
-    cnn->bias = (float***)nalloc(depth_output, sizeof(float**));
-    cnn->d_bias = (float***)nalloc(depth_output, sizeof(float**));
+    cnn->bias = (float***)nalloc(output_depth, sizeof(float**));
+    cnn->d_bias = (float***)nalloc(output_depth, sizeof(float**));
     #ifdef ADAM_CNN_BIAS
-    cnn->s_d_bias = (float***)nalloc(depth_output, sizeof(float**));
-    cnn->v_d_bias = (float***)nalloc(depth_output, sizeof(float**));
+    cnn->s_d_bias = (float***)nalloc(output_depth, sizeof(float**));
+    cnn->v_d_bias = (float***)nalloc(output_depth, sizeof(float**));
     #endif
-    for (int i=0; i < depth_output; i++) {
+    for (int i=0; i < output_depth; i++) {
         cnn->bias[i] = (float**)nalloc(bias_size, sizeof(float*));
         cnn->d_bias[i] = (float**)nalloc(bias_size, sizeof(float*));
         #ifdef ADAM_CNN_BIAS
@@ -239,10 +239,10 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
 
     int n_in = network->width[n-1]*network->width[n-1]*network->depth[n-1];
     int n_out = network->width[n]*network->width[n]*network->depth[n];
-    initialisation_3d_matrix(network->initialisation, cnn->bias, depth_output, dim_output, dim_output, n_in, n_out);
-    initialisation_4d_matrix(network->initialisation, cnn->weights, depth_input, depth_output, kernel_size, kernel_size, n_in, n_out);
-    create_a_cube_input_layer(network, n, depth_output, bias_size);
-    create_a_cube_input_z_layer(network, n, depth_output, bias_size);
+    initialisation_3d_matrix(network->initialisation, cnn->bias, output_depth, output_width, output_width, n_in, n_out);
+    initialisation_4d_matrix(network->initialisation, cnn->weights, input_depth, output_depth, kernel_size, kernel_size, n_in, n_out);
+    create_a_cube_input_layer(network, n, output_depth, bias_size);
+    create_a_cube_input_z_layer(network, n, output_depth, bias_size);
     network->size++;
 }
 

@@ -173,8 +173,8 @@ Résultats pour un réseau assez conséquent, avec des images de 256x256 pixels:
 <details>
 
 ```c
-Network* create_large_network(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth) {
-    Network* network = create_network(16, learning_rate, dropout, activation, initialisation, input_dim, input_depth);
+Network* create_large_network(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
+    Network* network = create_network(16, learning_rate, dropout, activation, initialisation, input_width, input_depth);
     add_convolution(network, 6, 258, activation);
     add_convolution(network, 16, 256, activation);
     add_average_pooling(network, 64);

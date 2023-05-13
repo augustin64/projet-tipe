@@ -6,7 +6,7 @@
 /*
 * Affiche le kernel d'une couche de convolution
 */
-void print_kernel_cnn(Kernel_cnn* k, int depth_input, int dim_input, int depth_output, int dim_output);
+void print_kernel_cnn(Kernel_cnn* k, int input_depth, int input_width, int output_depth, int output_width);
 
 /*
 * Affiche une couche de pooling

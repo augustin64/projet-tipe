@@ -7,17 +7,17 @@
 /*
 * Créé un réseau qui peut contenir max_size couche (dont celle d'input et d'output)
 */
-Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
+Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth);
 
 /*
 * Renvoie un réseau suivant l'architecture LeNet5
 */
-Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
+Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth);
 
 /*
 * Renvoie un réseau sans convolution, similaire à celui utilisé dans src/dense
 */
-Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_dim, int input_depth);
+Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth);
 
 /*
 * Créé et alloue de la mémoire à une couche de type input cube
@@ -49,7 +49,7 @@ void add_max_pooling(Network* network, int kernel_size, int stride, int padding)
 /*
 * Ajoute au réseau une couche de convolution avec la taille de noyau (kernel_size), 
 * le remplissage (padding) et le décalge (stride) choisis. Le choix de la profondeur de 
-* la couche suivante se fait avec number_of_kernels (= depth_output)
+* la couche suivante se fait avec number_of_kernels (= output_depth)
 * Puis initialise les poids et les biais construits
 */
 void add_convolution(Network* network, int kernel_size, int number_of_kernels, int stride, int padding, int activation);

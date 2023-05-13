@@ -12,15 +12,15 @@
 
 typedef struct Kernel_cnn {
     // Noyau ayant une couche matricielle en sortie
-    int k_size; // k_size = dim_input - dim_output + 1
+    int k_size; // k_size = input_width - output_width + 1
     int rows; // Depth de l'input
     int columns; // Depth de l'output
 
-    float*** bias; // bias[columns][dim_output][dim_output] <=> bias[depth output][dim output][dim output]
-    float*** d_bias; // d_bias[columns][dim_output][dim_output]
+    float*** bias; // bias[columns][output_width][output_width] <=> bias[depth output][dim output][dim output]
+    float*** d_bias; // d_bias[columns][output_width][output_width]
     #ifdef ADAM_CNN_BIAS
-        float*** s_d_bias; // s_d_bias[columns][dim_output][dim_output]
-        float*** v_d_bias; // v_d_bias[columns][dim_output][dim_output]
+        float*** s_d_bias; // s_d_bias[columns][output_width][output_width]
+        float*** v_d_bias; // v_d_bias[columns][output_width][output_width]
     #endif
 
     float**** weights; // weights[rows][columns][k_size][k_size] <=> weights[depth input][depth output][size kernel][size kernel]
