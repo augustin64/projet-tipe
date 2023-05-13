@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <float.h> // Is it used ?
+#include <float.h>
 #include <math.h>
 
 #include "../common/include/memory_management.h"
