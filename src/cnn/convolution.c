@@ -9,10 +9,6 @@
 
 
 int convolution_not_outside(int x, int y, int lower_bound, int upper_bound) {
-    // On renvoie true si et seulement si _ et _:
-    // lower_bound <= x < upper_bound
-    // lower_bound <= y < upper_bound
-    
     return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
 }
 
