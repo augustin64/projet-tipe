@@ -4,36 +4,44 @@
 #define DEF_MAKE_H
 
 /*
-* Effectue une convolution sans stride sur le processeur
+* 
+* On renvoie true si et seulement si _ et _:
+* lower_bound <= y < upper_bound
+* lower_bound <= x < upper_bound
 */
-void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride);
+int pooling_not_outside(int x, int y, int lower_bound, int upper_bound);
 
 /*
-* Effectue la convolution sur le CPU ou GPU
+* Effectue la propagation d'une convolution avec stride et padding choisis sur le processeur
 */
-void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride);
+void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride, int padding);
 
-#ifdef __CUDACC__
-extern "C"
-#endif
 /*
-* Effectue un average pooling avec stride=size
+* Effectue la propagation d'une convolution avec stride et padding choisis sur le CPU ou GPU
 */
-void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride);
-
-#ifdef __CUDACC__
-extern "C"
-#endif
-/*
-* Effectue un max pooling avec stride=size
-*/
-void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride);
+void make_convolution(Kernel_cnn* kernel, float*** input, float*** output, int output_dim, int stride, int padding);
 
 #ifdef __CUDACC__
 extern "C"
 #endif
 /*
-* Effectue une full connection
+* Effectue propagation d'average pooling avec stride et padding choisis
+*/
+void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride, int padding);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Effectue propagation de max pooling avec stride et padding choisis
+*/
+void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_dim, int stride, int padding);
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Effectue la propagation d'une couche dense
 */
 void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, int size_output);
 
@@ -41,7 +49,7 @@ void make_dense(Kernel_nn* kernel, float* input, float* output, int size_input, 
 extern "C"
 #endif
 /*
-* Effectue une full connection qui passe d'une matrice à un vecteur
+* Effectue la propagation d'une couche dense qui passe d'une matrice à un vecteur
 */
 void make_dense_linearized(Kernel_nn* kernel, float*** input, float* output, int depth_input, int dim_input, int size_output);
 

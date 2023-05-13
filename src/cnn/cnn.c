@@ -177,6 +177,8 @@ void forward_propagation(Network* network) {
 
         int activation = k_i->activation;
         int pooling = k_i->pooling;
+        int stride = k_i->stride;
+        int padding = k_i->padding;
 
         if (k_i->nn) {
             drop_neurones(input, 1, 1, input_width, network->dropout);
@@ -189,29 +191,33 @@ void forward_propagation(Network* network) {
         * On copie les valeurs de output dans output_z, puis on applique la fonction d'activation à output_z
         */
         if (k_i->cnn) { // Convolution
-            make_convolution(k_i->cnn, input, output, output_width, 1);
+            make_convolution(k_i->cnn, input, output, output_width, stride, padding);
             copy_3d_array(output, output_z, output_depth, output_width, output_width);
             apply_function_to_matrix(activation, output, output_depth, output_width);
         }
         else if (k_i->nn) { // Full connection
             if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 make_dense(k_i->nn, input[0][0], output[0][0], input_width, output_width);
-            } else { // Matrice -> Vecteur
+            } 
+            else { // Matrice -> Vecteur
                 make_dense_linearized(k_i->nn, input, output[0][0], input_depth, input_width, output_width);
             }
             copy_3d_array(output, output_z, 1, 1, output_width);
             apply_function_to_vector(activation, output, output_width);
         }
         else { // Pooling
+            int kernel_size = 2*padding + input_width + stride - output_width*stride;
             if (i == n-2) {
                 printf_error("Le réseau ne peut pas finir par un pooling layer\n");
                 return;
             } else { // Pooling sur une matrice
                 if (pooling == AVG_POOLING) {
-                    make_average_pooling(input, output, input_width/output_width, output_depth, output_width, input_width/output_width);
-                } else if (pooling == MAX_POOLING) {
-                    make_max_pooling(input, output, input_width/output_width, output_depth, output_width, input_width/output_width);
-                } else {
+                    make_average_pooling(input, output, kernel_size, output_depth, output_width, stride, padding);
+                } 
+                else if (pooling == MAX_POOLING) {
+                    make_max_pooling(input, output, kernel_size, output_depth, output_width, stride, padding);
+                } 
+                else {
                     printf_error("Impossible de reconnaître le type de couche de pooling: ");
                     printf("identifiant: %d, position: %d\n", pooling, i);
                 }

@@ -16,14 +16,14 @@ typedef struct Kernel_cnn {
     int rows; // Depth de l'input
     int columns; // Depth de l'output
 
-    float*** bias; // bias[columns][dim_output][dim_output]
+    float*** bias; // bias[columns][dim_output][dim_output] <=> bias[depth output][dim output][dim output]
     float*** d_bias; // d_bias[columns][dim_output][dim_output]
     #ifdef ADAM_CNN_BIAS
         float*** s_d_bias; // s_d_bias[columns][dim_output][dim_output]
         float*** v_d_bias; // v_d_bias[columns][dim_output][dim_output]
     #endif
 
-    float**** weights; // weights[rows][columns][k_size][k_size]
+    float**** weights; // weights[rows][columns][k_size][k_size] <=> weights[depth input][depth output][size kernel][size kernel]
     float**** d_weights; // d_weights[rows][columns][k_size][k_size]
     #ifdef ADAM_CNN_WEIGHTS
         float**** s_d_weights; // s_d_weights[rows][columns][k_size][k_size]
@@ -58,6 +58,8 @@ typedef struct Kernel {
     int activation; // Id de la fonction d'activation et -Id de sa dérivée
     int linearisation; // 1 si c'est la linéarisation d'une couche, 0 sinon
     int pooling; // 0 si pas pooling, 1 si average_pooling, 2 si max_pooling
+    int stride; // Valable uniquement une pooling et un cnn
+    int padding; // Valable uniquement une pooling et un cnn
 } Kernel;
 
 

@@ -10,59 +10,72 @@
 
 #include "include/config.h"
 
+int pooling_not_outside(int x, int y, int lower_bound, int upper_bound) {
+    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
+}
 
 /* 
 * Average Pooling
 */
 #ifdef __CUDACC__
-__global__ void make_average_pooling_kernel(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+__global__ void make_average_pooling_kernel(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < output_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < output_width
-    int n = size*size;
+    int max_move = size - padding;
 
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
     }
 
+    int nb_elements = 0;
     float sum = 0;
 
-    for (int a=0; a < size; a++) {
-        for (int b=0; b < size; b++) {
-            sum += input[idx][stride*idy +a][stride*idz +b];
+    for (int a=-padding; a < max_move; a++) {
+        for (int b=-padding; b < max_move; b++) {
+            int idy_2 = stride*idy +a;
+            int idz_2 = stride*idz +b;
+            if (pooling_not_outside(idy_2, idz_2, 0, output_width)) {
+                sum += input[idx][idy_2][idz_2];
+            }
         }
     }
-    output[idx][idy][idz] = sum/(float)n;
+    output[idx][idy][idz] = sum/(float)nb_elements;
 }
 
-void make_average_pooling_device(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_average_pooling_device(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // Make computation
     dim3 gridSize(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    make_average_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride);
+    make_average_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride, padding);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void make_average_pooling_cpu(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_average_pooling_cpu(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
-    float sum;
-    int n = size*size;
+    int max_move = size - padding;
 
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
             for (int k=0; k < output_width; k++) {
-                sum = 0;
-                for (int a=0; a < size; a++) {
-                    for (int b=0; b < size; b++) {
-                        sum += input[i][stride*j +a][stride*k +b];
+                float sum = 0.;
+                int nb_elements = 0;
+                for (int a=-padding; a < max_move; a++) {
+                    for (int b=-padding; b < max_move; b++) {
+                        int j_2 = stride*j +a;
+                        int k_2 = stride*k +b;
+                        if (pooling_not_outside(j_2, k_2, 0, output_width)) {
+                            sum += input[i][j_2][k_2];
+                            nb_elements++;
+                        }
                     }
                 }
-                output[i][j][k] = sum/(float)n;
+                output[i][j][k] = sum/(float)nb_elements;
             }
         }
     }
@@ -71,11 +84,11 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
 #ifdef __CUDACC__
 extern "C"
 #endif
-void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_average_pooling(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     #ifndef __CUDACC__
-    make_average_pooling_cpu(input, output, size, output_depth, output_width, stride);
+    make_average_pooling_cpu(input, output, size, output_depth, output_width, stride, padding);
     #else
-    make_average_pooling_device(input, output, size, output_depth, output_width, stride);
+    make_average_pooling_device(input, output, size, output_depth, output_width, stride, padding);
     #endif
 }
 
@@ -87,7 +100,7 @@ void make_average_pooling(float*** input, float*** output, int size, int output_
 * Max Pooling
 */
 #ifdef __CUDACC__
-__global__ void make_max_pooling_kernel(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+__global__ void make_max_pooling_kernel(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < output_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
@@ -97,40 +110,50 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
         return;
     }
 
+    int max_move = size - padding;
     float m = -FLT_MAX;
     float temp;
 
-    for (int a=0; a < size; a++) {
-        for (int b=0; b < size; b++) {
-            temp = input[idx][stride*idy +a][stride*idz +b];
-            m = m > temp ? m : temp; // max(m, temp)
+    for (int a=-padding; a < max_move; a++) {
+        for (int b=-padding; b < max_move; b++) {
+            int idy_2 = stride*idy +a;
+            int idz_2 = stride*idz +b;
+            if (pooling_not_outside(idy_2, idz_2, 0, output_width)) {
+                temp = input[idx][idy_2][idz_2];
+                m = m > temp ? m : temp; // max(m, temp)
+            }
         }
     }
     output[idx][idy][idz] = m;
 }
 
-void make_max_pooling_device(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_max_pooling_device(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // Make computation
     dim3 gridSize(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    make_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride);
+    make_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, size, output_depth, output_width, stride, int padding);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void make_max_pooling_cpu(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_max_pooling_cpu(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     // input[output_depth][output_width+size-1][output_width+size-1]
     // output[output_depth][output_width][output_width]
+    int max_move = size - padding;
     float m;
     for (int i=0; i < output_depth; i++) {
         for (int j=0; j < output_width; j++) {
             for (int k=0; k < output_width; k++) {
                 m = -FLT_MAX;
-                for (int a=0; a < size; a++) {
-                    for (int b=0; b < size; b++) {
-                        m = fmaxf(m, input[i][stride*j +a][stride*k +b]);
+                for (int a=-padding; a < max_move; a++) {
+                    for (int b=-padding; b < max_move; b++) {
+                        int j_2 = stride*j +a;
+                        int k_2 = stride*k +b;
+                        if (pooling_not_outside(j_2, k_2, 0, output_width)) {
+                            m = fmaxf(m, input[i][j_2][k_2]);
+                        }
                     }
                 }
                 output[i][j][k] = m;
@@ -142,11 +165,11 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
 #ifdef __CUDACC__
 extern "C"
 #endif
-void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_width, int stride) {
+void make_max_pooling(float*** input, float*** output, int size, int output_depth, int output_width, int stride, int padding) {
     #ifndef __CUDACC__
-    make_max_pooling_cpu(input, output, size, output_depth, output_width, stride);
+    make_max_pooling_cpu(input, output, size, output_depth, output_width, stride, padding);
     #else
-    make_max_pooling_device(input, output, size, output_depth, output_width, stride);
+    make_max_pooling_device(input, output, size, output_depth, output_width, stride, padding);
     #endif
 }
 

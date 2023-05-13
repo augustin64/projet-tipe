@@ -35,19 +35,24 @@ void create_a_cube_input_z_layer(Network* network, int pos, int depth, int dim);
 void create_a_line_input_layer(Network* network, int pos, int dim);
 
 /*
-* Ajoute au réseau une couche d'average pooling valide de dimension dim*dim
+* Ajoute au réseau une couche d'average pooling avec la taille de noyau (kernel_size), 
+* le remplissage (padding) et le décalge (stride) choisis
 */
-void add_average_pooling(Network* network, int dim_output);
+void add_average_pooling(Network* network, int kernel_size, int stride, int padding);
 
 /*
-* Ajoute au réseau une couche de max pooling valide de dimension dim*dim
+* Ajoute au réseau une couche de max pooling avec la taille de noyau (kernel_size), 
+* le remplissage (padding) et le décalge (stride) choisis
 */
-void add_max_pooling(Network* network, int dim_output);
+void add_max_pooling(Network* network, int kernel_size, int stride, int padding);
 
 /*
-* Ajoute au réseau une couche de convolution dim*dim et initialise les kernels
+* Ajoute au réseau une couche de convolution avec la taille de noyau (kernel_size), 
+* le remplissage (padding) et le décalge (stride) choisis. Le choix de la profondeur de 
+* la couche suivante se fait avec number_of_kernels (= depth_output)
+* Puis initialise les poids et les biais construits
 */
-void add_convolution(Network* network, int depth_output, int dim_output, int activation);
+void add_convolution(Network* network, int kernel_size, int number_of_kernels, int stride, int padding, int activation);
 
 /*
 * Ajoute au réseau une couche dense et initialise les poids et les biais
