@@ -7,7 +7,7 @@
 /*
 * Créé un réseau qui peut contenir max_size couche (dont celle d'input et d'output)
 */
-Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth);
+Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_width, int input_depth);
 
 /*
 * Renvoie un réseau suivant l'architecture LeNet5

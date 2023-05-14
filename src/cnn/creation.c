@@ -9,7 +9,7 @@
 
 #include "include/creation.h"
 
-Network* create_network(int max_size, float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
+Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_width, int input_depth) {
     if (dropout < 0 || dropout > 100) {
         printf_error("La probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
@@ -27,19 +27,15 @@ Network* create_network(int max_size, float learning_rate, int dropout, int acti
     for (int i=0; i < max_size-1; i++) {
         network->kernel[i] = (Kernel*)nalloc(1, sizeof(Kernel));
     }
-    network->kernel[0]->linearisation = DOESNT_LINEARISE;
-    network->kernel[0]->activation = activation;
     network->width[0] = input_width;
     network->depth[0] = input_depth;
-    network->kernel[0]->nn = NULL;
-    network->kernel[0]->cnn = NULL;
     create_a_cube_input_layer(network, 0, input_depth, input_width);
     create_a_cube_input_z_layer(network, 0, input_depth, input_width);
     return network;
 }
 
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
-    Network* network = create_network(8, learning_rate, dropout, activation, initialisation, input_width, input_depth);
+    Network* network = create_network(8, learning_rate, dropout, initialisation, input_width, input_depth);
     add_convolution(network, 5, 6, 1, 0, activation);
     add_average_pooling(network, 2, 2, 0);
     add_convolution(network, 5, 16, 1, 0, activation);
@@ -51,7 +47,7 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
 }
 
 Network* create_network_alexnet(float learning_rate, int dropout, int activation, int initialisation, int size_output) {
-    Network* network = create_network(12, learning_rate, dropout, activation, initialisation, 227, 3);
+    Network* network = create_network(12, learning_rate, dropout, initialisation, 227, 3);
     add_convolution(network, 11, 96, 4, 0, activation);
     add_average_pooling(network, 3, 2, 0);
     add_convolution(network, 5, 256, 1, 2, activation);
@@ -67,7 +63,7 @@ Network* create_network_alexnet(float learning_rate, int dropout, int activation
 }
 
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
-    Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_width, input_depth);
+    Network* network = create_network(3, learning_rate, dropout, initialisation, input_width, input_depth);
     add_dense_linearisation(network, 80, activation);
     add_dense(network, 10, SOFTMAX);
     return network;
