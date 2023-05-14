@@ -10,9 +10,6 @@
 
 #include "include/config.h"
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
 
 /* 
 * Average Pooling

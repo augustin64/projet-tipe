@@ -115,9 +115,9 @@ __global__ void backward_average_pooling_kernel(float*** input, float*** output,
     int max_move = kernel_size - padding;
 
     for (int a=-padding; a < max_move; a++) {
-        for (int b=-paddding; b < max_move; b++) {
+        for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
-            int idz_2 = stride*idz +b:
+            int idz_2 = stride*idz +b;
             if (not_outside(idy_2, idz_2, 0, input_width)) {
                 int y = min(idy_2+1, min(kernel_size, input_width - idy_2));
                 int z = min(idz_2+1, min(kernel_size, input_width - idz_2));
@@ -214,7 +214,7 @@ __global__ void backward_max_pooling_kernel(float*** input, float*** output, int
         }
     }
     if (cpt==0) {
-        printf_error("Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
+        printf(RED "[ERROR]" RESET " Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
     }
     input[idx][stride*idy +a_max][stride*idz +b_max] = output[idx][idy][idz]/cpt;
 }
@@ -262,7 +262,7 @@ void backward_max_pooling_cpu(float*** input, float*** output, int input_width, 
                     }
                 }
                 if (cpt==0) {
-                    printf_error("Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
+                    printf_error((char*)"Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
                 }
                 else {
                     input[i][stride*j +a_max][stride*k +b_max] = output[i][j][k]/cpt;

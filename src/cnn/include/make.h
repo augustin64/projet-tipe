@@ -3,9 +3,6 @@
 #ifndef DEF_MAKE_H
 #define DEF_MAKE_H
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
 
 /*
 * Effectue la propagation d'une convolution avec stride et padding choisis sur le processeur

@@ -7,9 +7,6 @@
 
 #include "include/config.h"
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
 
 void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_width, int stride, int padding) {
     // c'est le kernel de input

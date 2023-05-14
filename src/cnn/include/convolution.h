@@ -1,8 +1,5 @@
 #include "struct.h"
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
 
 /*
 * Effectue la convolution naïvement sur le processeur

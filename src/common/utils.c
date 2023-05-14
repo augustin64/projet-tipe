@@ -26,6 +26,10 @@ int max(int a, int b) {
 }
 #endif
 
+
+#ifdef __CUDACC__
+__host__ __device__
+#endif
 int not_outside(int x, int y, int lower_bound, int upper_bound) {
     return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
 }
