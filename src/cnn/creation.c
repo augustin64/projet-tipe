@@ -50,6 +50,22 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
     return network;
 }
 
+Network* create_network_alexnet(float learning_rate, int dropout, int activation, int initialisation, int size_output) {
+    Network* network = create_network(12, learning_rate, dropout, activation, initialisation, 227, 3);
+    add_convolution(network, 11, 96, 4, 0, activation);
+    add_average_pooling(network, 3, 2, 0);
+    add_convolution(network, 5, 256, 1, 2, activation);
+    add_average_pooling(network, 3, 2, 0);
+    add_convolution(network, 3, 384, 1, 1, activation);
+    add_convolution(network, 3, 384, 1, 1, activation);
+    add_convolution(network, 3, 256, 1, 1, activation);
+    add_average_pooling(network, 3, 2, 0);
+    add_dense_linearisation(network, 4096, activation);
+    add_dense(network, 4096, activation);
+    add_dense(network, size_output, activation);
+    return network;
+}
+
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
     Network* network = create_network(3, learning_rate, dropout, activation, initialisation, input_width, input_depth);
     add_dense_linearisation(network, 80, activation);
