@@ -3,10 +3,17 @@
 #include <math.h>
 
 #include "include/backpropagation.h"
+#include "../common/include/colors.h"
 #include "../common/include/utils.h"
 #include "include/struct.h"
 
 #include "include/config.h"
+
+
+int not_outside(int x, int y, int lower_bound, int upper_bound) {
+    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
+}
+
 
 /*
 * Softmax backward MSE
@@ -101,7 +108,7 @@ void softmax_backward_cross_entropy(float* input, float* output, int size) {
 * Backward average pooling
 */
 #ifdef __CUDACC__
-__global__ void backward_average_pooling_kernel(float*** input, float*** output, int input_width, int output_width, int depth, int n, int size) {
+__global__ void backward_average_pooling_kernel(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
@@ -110,45 +117,54 @@ __global__ void backward_average_pooling_kernel(float*** input, float*** output,
     if (idx >= depth || idy >= output_width || idz >= output_width) {
         return;
     }
+    int max_move = kernel_size - padding;
 
-    for (int a=0; a < size; a++) {
-        for (int b=0; b < size; b++) {
-            input[idx][size*idy +a][size*idz +b] += output[idx][idy][idz]/n;
+    for (int a=-padding; a < max_move; a++) {
+        for (int b=-paddding; b < max_move; b++) {
+            int idy_2 = stride*idy +a;
+            int idz_2 = stride*idz +b:
+            if (not_outside(idy_2, idz_2, 0, input_width)) {
+                int y = min(idy_2+1, min(kernel_size, input_width - idy_2));
+                int z = min(idz_2+1, min(kernel_size, input_width - idz_2));
+                input[idx][idy_2][idz_2] += output[idx][idy][idz]/(y*z);
+            }
         }
     }
 }
 
 
-void backward_average_pooling_device(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_average_pooling_device(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     // Make computation
     dim3 gridSize(i_div_up(depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    int size = input_width/output_width; // Taille du pooling
-
     reset_3d_array(input, depth, input_width, input_width);
 
-    backward_average_pooling_kernel<<<gridSize, blockSize>>>(input, output, input_width, output_width, depth, size*size, size);
+    backward_average_pooling_kernel<<<gridSize, blockSize>>>(input, output, input_width, output_width, depth, kernel_size, stride, padding);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void backward_average_pooling_cpu(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_average_pooling_cpu(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     /* Input et output ont la même profondeur (depth) */
 
-    int size = input_width/output_width; // Taille du pooling
-    int n = size*size; // Nombre d'éléments dans le pooling
-
     reset_3d_array(input, depth, input_width, input_width);
+    int max_move = kernel_size - padding;
 
     for (int i=0; i < depth; i++) {
         for (int j=0; j < output_width; j++) {
             for (int k=0; k < output_width; k++) {
-                for (int a=0; a < size; a++) {
-                    for (int b=0; b < size; b++) {
-                        input[i][size*j +a][size*k +b] += output[i][j][k]/n;
+                for (int a=-padding; a < max_move; a++) {
+                    for (int b=-padding; b < max_move; b++) {
+                        int j_2 = stride*j +a;
+                        int k_2 = stride*k + b;
+                        if (not_outside(j_2, k_2, 0, input_width)){
+                            int j_3 = min(j_2+1, min(kernel_size, input_width - j_2));
+                            int k_3 = min(k_2+1, min(kernel_size, input_width - k_2));
+                            input[i][j_2][k_2] += output[i][j][k]/(j_3*k_3);
+                        }
                     }
                 }
             }
@@ -159,11 +175,11 @@ void backward_average_pooling_cpu(float*** input, float*** output, int input_wid
 #ifdef __CUDACC__
 extern "C"
 #endif
-void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     #ifndef __CUDACC__
-    backward_average_pooling_cpu(input, output, input_width, output_width, depth);
+    backward_average_pooling_cpu(input, output, input_width, output_width, depth, kernel_size, stride, padding);
     #else
-    backward_average_pooling_device(input, output, input_width, output_width, depth);
+    backward_average_pooling_device(input, output, input_width, output_width, depth, kernel_size, stride, padding);
     #endif
 }
 
@@ -172,7 +188,7 @@ void backward_average_pooling(float*** input, float*** output, int input_width, 
 * Backward max pooling
 */
 #ifdef __CUDACC__
-__global__ void backward_max_pooling_kernel(float*** input, float*** output, int input_width, int output_width, int depth, int n, int size) {
+__global__ void backward_max_pooling_kernel(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < output_width
@@ -181,44 +197,51 @@ __global__ void backward_max_pooling_kernel(float*** input, float*** output, int
     if (idx >= depth || idy >= output_width || idz >= output_width) {
         return;
     }
-
+    int max_move = kernel_size - padding;
     float m = -FLT_MAX;
     int a_max = -1;
     int b_max = -1;
+    int cpt = 0;
 
-    for (int a=0; a < size; a++) {
-        for (int b=0; b < size; b++) {
-            if (input[idx][size*idy +a][size*idz +b] > m) {
-                m = input[idx][size*idy +a][size*idz +b];
-                a_max = a;
-                b_max = b;
+    for (int a=-padding; a < max_move; a++) {
+        for (int b=-padding; b < max_move; b++) {
+            int idy_2 = stride*idy +a;
+            int idz_2 = stride*idz +b;
+            if (not_outside(idy_2, idz_2, 0, input_width)) {
+                if (input[idx][idy_2][idz_2] > m) {
+                    m = input[idx][idy_2][idz_2];
+                    a_max = a;
+                    b_max = b;
+                }
+                input[idx][idy_2][idz_2] = 0;
+                cpt++;
             }
-            input[idx][size*idy +a][size*idz +b] = 0;
         }
     }
-    input[idx][size*idy +a_max][size*idz +b_max] = output[idx][idy][idz]/n;
+    if (cpt==0) {
+        printf_error("Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
+    }
+    input[idx][stride*idy +a_max][stride*idz +b_max] = output[idx][idy][idz]/cpt;
 }
 
 
-void backward_max_pooling_device(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_max_pooling_device(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     // Make computation
     dim3 gridSize(i_div_up(depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_z));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    int size = input_width/output_width; // Taille du pooling
-
-    backward_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, input_width, output_width, depth, size*size, size);
+    backward_max_pooling_kernel<<<gridSize, blockSize>>>(input, output, input_width, output_width, depth, kernel_size, stride, padding);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
 #endif
 
-void backward_max_pooling_cpu(float*** input, float*** output, int input_width, int output_width, int depth) {
-    int size = input_width/output_width;
-
+void backward_max_pooling_cpu(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     float m; // Maximum
     int a_max, b_max; // Indices du maximum
+    int cpt;
+    int max_move = kernel_size - padding;
 
     for (int i=0; i < depth; i++) {
         for (int j=0; j < output_width; j++) {
@@ -226,18 +249,29 @@ void backward_max_pooling_cpu(float*** input, float*** output, int input_width, 
                 m = -FLT_MAX;
                 a_max = -1;
                 b_max = -1;
+                cpt = 0;
 
-                for (int a=0; a < size; a++) {
-                    for (int b=0; b < size; b++) {
-                        if (input[i][size*j +a][size*k +b] > m) {
-                            m = input[i][size*j +a][size*k +b];
-                            a_max = a;
-                            b_max = b;
+                for (int a=-padding; a < max_move; a++) {
+                    for (int b=-padding; b < max_move; b++) {
+                        int j_2 = stride*j +a;
+                        int k_2 = stride*k +b;
+                        if (not_outside(j_2, k_2, 0, input_width)) {
+                            if (input[i][j_2][k_2] > m) {
+                                m = input[i][j_2][k_2];
+                                a_max = a;
+                                b_max = b;
+                            }
+                            input[i][j_2][k_2] = 0;
+                            cpt++;
                         }
-                        input[i][size*j +a][size*k +b] = 0;
                     }
                 }
-                input[i][size*j +a_max][size*k +b_max] = output[i][j][k]/(size*size);
+                if (cpt==0) {
+                    printf_error("Dimensions ou stride ou padding erroné dans 'backward_max_pooling_cpu'\n");
+                }
+                else {
+                    input[i][stride*j +a_max][stride*k +b_max] = output[i][j][k]/cpt;
+                }
             }
         }
     }
@@ -246,11 +280,11 @@ void backward_max_pooling_cpu(float*** input, float*** output, int input_width, 
 #ifdef __CUDACC__
 extern "C"
 #endif
-void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth) {
+void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding) {
     #ifndef __CUDACC__
-    backward_max_pooling_cpu(input, output, input_width, output_width, depth);
+    backward_max_pooling_cpu(input, output, input_width, output_width, depth, kernel_size, stride, padding);
     #else
-    backward_max_pooling_device(input, output, input_width, output_width, depth);
+    backward_max_pooling_device(input, output, input_width, output_width, kernel_size, depth, stride, padding);
     #endif
 }
 

@@ -258,6 +258,8 @@ void backward_propagation(Network* network, int wanted_number) {
 
         int is_last_layer = i==0;
         int activation = is_last_layer?SIGMOID:network->kernel[i-1]->activation;
+        int padding = k_i->padding;
+        int stride = k_i->stride;
 
 
         if (k_i->cnn) { // Convolution
@@ -269,10 +271,11 @@ void backward_propagation(Network* network, int wanted_number) {
                 backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, -activation);
             }
         } else { // Pooling
+            int kernel_size = 2*padding + input_width + stride - output_width*stride;
             if (k_i->pooling == AVG_POOLING) {
-                backward_average_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
+                backward_average_pooling(input, output, input_width, output_width, input_depth, kernel_size, stride, padding); // Depth pour input et output a la même valeur
             } else {
-                backward_max_pooling(input, output, input_width, output_width, input_depth); // Depth pour input et output a la même valeur
+                backward_max_pooling(input, output, input_width, output_width, input_depth, kernel_size, stride, padding); // Depth pour input et output a la même valeur
             }
         }
     }

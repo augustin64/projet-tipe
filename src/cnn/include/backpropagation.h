@@ -31,7 +31,7 @@ extern "C"
 * Transfert les informations d'erreur à travers une couche d'average pooling
 * en considérant cross_entropy comme fonction d'erreur
 */
-void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
+void backward_average_pooling(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding);
 
 
 #ifdef __CUDACC__
@@ -41,7 +41,7 @@ extern "C"
 * Transfert les informations d'erreur à travers une couche de max pooling
 * en considérant cross_entropy comme fonction d'erreur
 */
-void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth);
+void backward_max_pooling(float*** input, float*** output, int input_width, int output_width, int depth, int kernel_size, int stride, int padding);
 
 
 #ifdef __CUDACC__
