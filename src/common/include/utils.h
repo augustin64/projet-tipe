@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef USE_CUDA
    #ifndef __CUDACC__
@@ -47,7 +48,7 @@ __host__ __device__
 * lower_bound <= x < upper_bound
 * lower_bound <= y < upper_bound
 */
-int not_outside(int x, int y, int lower_bound, int upper_bound);
+bool not_outside(int x, int y, int lower_bound, int upper_bound);
 
 /*
 * Partie entière supérieure de a/b
