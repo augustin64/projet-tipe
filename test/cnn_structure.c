@@ -24,24 +24,27 @@ int main() {
             } else {
                 printf("\n==== Couche %d de type "YELLOW"Max Pooling"RESET" ====\n", i);
             }
+            int kernel_size = 2*kernel->padding + network->width[i] + kernel->stride - network->width[i+1]*kernel->stride;
+            printf("kernel: %dx%d, pad=%d, stride=%d\n", kernel_size, kernel_size, kernel->padding, kernel->stride);
         } else if (!kernel->cnn) {
             printf("\n==== Couche %d de type "GREEN"NN"RESET" ====\n", i);
+            if (kernel->linearisation) {
+                printf(YELLOW"Linéarisation: %d\n"RESET, kernel->linearisation);
+            }
             printf("input: %d\n", kernel->nn->size_input);
             printf("output: %d\n", kernel->nn->size_output);
         } else {
             printf("\n==== Couche %d de type "BLUE"CNN"RESET" ====\n", i);
-            printf("k_size: %d\n", kernel->cnn->k_size);
-            printf("rows: %d\n", kernel->cnn->rows);
-            printf("columns: %d\n", kernel->cnn->columns);
+            printf("kernel: %dx%d, pad=%d, stride=%d\n", kernel->cnn->k_size, kernel->cnn->k_size, kernel->padding, kernel->stride);
+            printf("%d kernels\n", kernel->cnn->columns);
         }
-        if (kernel->linearisation) {
-            printf(YELLOW"Linéarisation: %d\n"RESET, kernel->linearisation);
+        if (!kernel->nn) {
+            printf("depth: %d\n", network->depth[i]);
+            printf("width: %d\n", network->width[i]);
         }
-        printf("width: %d\n", network->width[i]);
-        printf("depth: %d\n", network->depth[i]);
-        printf("activation: %d\n", kernel->activation);
-        printf("stride: %d\n", kernel->stride);
-        printf("padding: %d\n", kernel->padding);
+        if (kernel->nn || kernel->cnn) {
+            printf("activation: %d\n", kernel->activation);
+        }
     }
     printf("\n" GREEN "OK\n" RESET);
 
