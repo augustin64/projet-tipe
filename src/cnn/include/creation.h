@@ -15,10 +15,16 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
 Network* create_network_lenet5(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth);
 
 /*
-* Renvoie un réseau suivante l'architecture AlexNet
-* C'est à dire une entrée de 3x227x227 et une sortie de taille 'size_output'
+* Renvoie un réseau suivant l'architecture AlexNet
+* C'est à dire en entrée 3x227x227 et une sortie de taille 'size_output'
 */
 Network* create_network_alexnet(float learning_rate, int dropout, int activation, int initialisation, int size_output);
+
+/*
+* Renvoie un réseau suivant l'architecture VGG16 modifiée pour prendre en entrée 3x256x256
+* et une sortie de taille 'size_output'
+*/
+Network* create_network_VGG16(float learning_rate, int dropout, int activation, int initialisation, int size_output);
 
 /*
 * Renvoie un réseau sans convolution, similaire à celui utilisé dans src/dense

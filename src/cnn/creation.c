@@ -62,6 +62,38 @@ Network* create_network_alexnet(float learning_rate, int dropout, int activation
     return network;
 }
 
+Network* create_network_VGG16(float learning_rate, int dropout, int activation, int initialisation, int size_output) {
+    Network* network = create_network(23, learning_rate, dropout, initialisation, 256, 3);
+    add_convolution(network, 3, 64, 1, 0, activation); // Conv3-64
+    add_convolution(network, 3, 64, 1, 0, activation); // Conv3-64
+    add_average_pooling(network, 2, 2, 0); // Max Pool
+
+    add_convolution(network, 3, 128, 1, 0, activation); // Conv3-128
+    add_convolution(network, 1, 128, 1, 0, activation); // Conv1-128
+    add_average_pooling(network, 2, 2, 0); // Max Pool
+
+    add_convolution(network, 3, 256, 1, 0, activation); // Conv3-256
+    add_convolution(network, 3, 256, 1, 0, activation); // Conv3-256
+    add_convolution(network, 1, 256, 1, 0, activation); // Conv1-256
+    add_average_pooling(network, 2, 2, 0); // Max Pool
+
+    add_convolution(network, 3, 512, 1, 0, activation); // Conv3-512
+    add_convolution(network, 3, 512, 1, 0, activation); // Conv3-512
+    add_convolution(network, 1, 512, 1, 0, activation); // Conv1-512
+    add_average_pooling(network, 2, 2, 0); // Max Pool
+
+    add_convolution(network, 3, 512, 1, 0, activation); // Conv3-512
+    add_convolution(network, 3, 512, 1, 0, activation); // Conv3-512
+    add_convolution(network, 1, 512, 1, 0, activation); // Conv1-512
+    add_average_pooling(network, 2, 2, 0); // Max Pool
+
+    add_dense_linearisation(network, 2048, activation);
+    add_dense(network, 2048, activation);
+    add_dense(network, 256, activation);
+    add_dense(network, size_output, SOFTMAX);
+    return network;
+}
+
 Network* create_simple_one(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
     Network* network = create_network(3, learning_rate, dropout, initialisation, input_width, input_depth);
     add_dense_linearisation(network, 80, activation);
