@@ -3,12 +3,6 @@
 #ifdef __CUDACC__
 __host__ __device__
 #endif
-/*
-On renvoie true si et seulement si _ et _:
-lower_bound <= x < upper_bound
-lower_bound <= y < upper_bound
-*/
-int convolution_not_outside(int x, int y, int lower_bound, int upper_bound);
 
 /*
 * Effectue la convolution naïvement sur le processeur

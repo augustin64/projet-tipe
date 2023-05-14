@@ -40,6 +40,13 @@ int max(int a, int b);
 
 
 /*
+* On renvoie true si et seulement si _ et _:
+* lower_bound <= x < upper_bound
+* lower_bound <= y < upper_bound
+*/
+int not_outside(int x, int y, int lower_bound, int upper_bound);
+
+/*
 * Partie entière supérieure de a/b
 */
 int i_div_up(int a, int b);

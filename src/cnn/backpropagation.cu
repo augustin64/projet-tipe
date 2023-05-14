@@ -10,11 +10,6 @@
 #include "include/config.h"
 
 
-int not_outside(int x, int y, int lower_bound, int upper_bound) {
-    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
-}
-
-
 /*
 * Softmax backward MSE
 */

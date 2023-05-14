@@ -13,9 +13,6 @@
 #ifdef __CUDACC__
 __host__ __device__
 #endif
-int pooling_not_outside(int x, int y, int lower_bound, int upper_bound) {
-    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
-}
 
 /* 
 * Average Pooling
@@ -40,7 +37,7 @@ __global__ void make_average_pooling_kernel(float*** input, float*** output, int
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, input_width)) {
+            if (not_outside(idy_2, idz_2, 0, input_width)) {
                 sum += input[idx][idy_2][idz_2];
                 nb_elements++;
             }
@@ -75,7 +72,7 @@ void make_average_pooling_cpu(float*** input, float*** output, int size, int out
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, input_width)) {
+                        if (not_outside(j_2, k_2, 0, input_width)) {
                             sum += input[i][j_2][k_2];
                             nb_elements++;
                         }
@@ -125,7 +122,7 @@ __global__ void make_max_pooling_kernel(float*** input, float*** output, int siz
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (pooling_not_outside(idy_2, idz_2, 0, input_width)) {
+            if (not_outside(idy_2, idz_2, 0, input_width)) {
                 temp = input[idx][idy_2][idz_2];
                 m = m > temp ? m : temp; // max(m, temp)
             }
@@ -159,7 +156,7 @@ void make_max_pooling_cpu(float*** input, float*** output, int size, int output_
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (pooling_not_outside(j_2, k_2, 0, input_width)) {
+                        if (not_outside(j_2, k_2, 0, input_width)) {
                             m = fmaxf(m, input[i][j_2][k_2]);
                         }
                     }

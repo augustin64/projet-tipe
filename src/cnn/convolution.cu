@@ -10,13 +10,6 @@
 #ifdef __CUDACC__
 __host__ __device__
 #endif
-int convolution_not_outside(int x, int y, int lower_bound, int upper_bound) {
-    // On renvoie true si et seulement si _ et _:
-    // lower_bound <= x < upper_bound
-    // lower_bound <= y < upper_bound
-    
-    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
-}
 
 void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, int output_width, int stride, int padding) {
     // c'est le kernel de input
@@ -38,7 +31,7 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
                         for (int c=-padding; c < max_move; c++) { // colonne du filtre
                             int x = (stride*j+b);
                             int y = (stride*k+c);
-                            if (convolution_not_outside(x, y, 0, input_width)) {
+                            if (not_outside(x, y, 0, input_width)) {
                                 f += kernel->weights[a][i][b][c]*input[a][stride*j+b][stride*k+c];
                             }
                         }
@@ -71,7 +64,7 @@ __global__ void make_convolution_kernel(Kernel_cnn* kernel, float*** input, floa
             for (int c=-padding; c < max_move; c++) {
                 int idy_2 = idy*stride+b;
                 int idz_2 = idz*stride+c;
-                if (convolution_not_outside(idy_2, idz_2, 0, input_width)) {
+                if (not_outside(idy_2, idz_2, 0, input_width)) {
                     f += kernel->weights[a][idx][b][c]*input[a][idy_2][idz_2];
                 }
             }
