@@ -18,6 +18,7 @@ Network* create_network_lenet5(float learning_rate, int dropout, int activation,
 * Renvoie un réseau suivante l'architecture AlexNet
 * C'est à dire une entrée de 3x227x227 et une sortie de taille 'size_output'
 */
+Network* create_network_alexnet(float learning_rate, int dropout, int activation, int initialisation, int size_output);
 
 /*
 * Renvoie un réseau sans convolution, similaire à celui utilisé dans src/dense
