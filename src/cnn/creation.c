@@ -58,7 +58,7 @@ Network* create_network_alexnet(float learning_rate, int dropout, int activation
     add_average_pooling(network, 3, 2, 0);
     add_dense_linearisation(network, 4096, activation);
     add_dense(network, 4096, activation);
-    add_dense(network, size_output, activation);
+    add_dense(network, size_output, SOFTMAX);
     return network;
 }
 
@@ -144,6 +144,8 @@ void add_max_pooling(Network* network, int kernel_size, int stride, int padding)
 
     network->kernel[k_pos]->cnn = NULL;
     network->kernel[k_pos]->nn = NULL;
+    network->kernel[k_pos]->stride = stride;
+    network->kernel[k_pos]->padding = padding;
     network->kernel[k_pos]->activation = IDENTITY; // Ne contient pas de fonction d'activation
     network->kernel[k_pos]->linearisation = DOESNT_LINEARISE;
     network->kernel[k_pos]->pooling = MAX_POOLING;
