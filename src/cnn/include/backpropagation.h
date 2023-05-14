@@ -68,6 +68,6 @@ extern "C"
 /*
 * Transfert les informations d'erreur à travers un couche de convolution
 */
-void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first);
+void backward_convolution(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first, int kernel_size, int padding, int stride);
 
 #endif
