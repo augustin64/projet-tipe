@@ -40,6 +40,7 @@ int get_memory_blocks_number() {
     return get_length(memory);
 }
 
+
 void print_memory_rec(Memory* mem) {
     if (!mem) {
         return;
@@ -51,11 +52,42 @@ void print_memory_rec(Memory* mem) {
     print_memory_rec(mem->next);
 }
 
-
 void print_memory() {
     printf(BLUE "==== MEMORY ====\n" RESET);
     print_memory_rec(memory);
 }
+
+
+#ifdef __CUDACC__
+extern "C"
+#endif
+void free_all_memory() {
+    pthread_mutex_lock(&memory_lock); // We don't want ANY interruption so we lock here
+
+    free_all_memory_rec(memory);
+    #ifdef MEMORY_TAIL_OPT
+        tail = NULL;
+    #endif
+
+    pthread_mutex_unlock(&memory_lock);
+}
+
+void free_all_memory_rec(Memory* mem) {
+    if (!mem) {
+        return;
+    }
+    Memory* next = mem->next;
+    
+    #ifdef __CUDACC__
+    cudaFree(mem->start);
+    #else
+    free(mem->start);
+    #endif
+    free(mem);
+
+    free_all_memory_rec(next);
+}
+
 
 Memory* create_memory_block(size_t size) {
     Memory* mem = (Memory*)malloc(sizeof(Memory));
@@ -112,8 +144,8 @@ void* allocate_memory(int nb_elements, size_t size, Memory* mem) {
 }
 
 
-Memory* free_memory(void* ptr, Memory* mem) {
-    if (!mem) {
+Memory* free_memory(void* ptr, Memory* mem, bool already_freed) {
+    if (!mem && !already_freed) {
         printf_error((char*)"Le pointeur ");
         printf("%p a déjà été libéré ou n'a jamais été alloué\n", ptr);
         return mem;
@@ -141,7 +173,7 @@ Memory* free_memory(void* ptr, Memory* mem) {
             return mem;
         }
     } else {
-        mem->next = free_memory(ptr, mem->next);
+        mem->next = free_memory(ptr, mem->next, already_freed);
         return mem;
     }
 }
@@ -176,10 +208,10 @@ void* nalloc(int nb_elements, size_t size) {
 #ifdef __CUDACC__
 extern "C"
 #endif
-void gree(void* ptr) {
+void gree(void* ptr, bool already_freed) {
     #if defined(__CUDACC__) || defined(TEST_MEMORY_MANAGEMENT)
         pthread_mutex_lock(&memory_lock);
-        memory = free_memory(ptr, memory);
+        memory = free_memory(ptr, memory, already_freed);
         pthread_mutex_unlock(&memory_lock);
     #else
         free(ptr);

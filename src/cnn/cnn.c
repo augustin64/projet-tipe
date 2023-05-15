@@ -234,7 +234,7 @@ void backward_propagation(Network* network, int wanted_number) {
     // Backward sur la dernière couche qui utilise toujours SOFTMAX
     float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]); // Sortie désirée, permet d'initialiser une erreur
     softmax_backward_cross_entropy(network->input[n-1][0][0], wanted_output, network->width[n-1]);
-    gree(wanted_output);
+    gree(wanted_output, false);
 
     /*
     * On propage à chaque étape:

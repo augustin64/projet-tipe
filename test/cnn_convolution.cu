@@ -72,11 +72,11 @@ float*** create_empty_matrix(int n, int p, int q) {
 void free_matrix(float*** matrix, int n, int p) {
     for (int i=0; i < n; i++) {
         for (int j=0; j < p; j++) {
-            gree(matrix[i][j]);
+            gree(matrix[i][j], false);
         }
-        gree(matrix[i]);
+        gree(matrix[i], false);
     }
-    gree(matrix);
+    gree(matrix, false);
 }
 
 bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int acceptation) {
@@ -177,11 +177,11 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
         free_matrix(kernel->v_d_weights[i], kernel->columns, kernel->k_size);
         #endif
     }
-    gree(kernel->weights);
-    gree(kernel->d_weights);
+    gree(kernel->weights, false);
+    gree(kernel->d_weights, false);
     #ifdef ADAM_CNN_WEIGHTS
-    gree(kernel->s_d_weights);
-    gree(kernel->v_d_weights);
+    gree(kernel->s_d_weights, false);
+    gree(kernel->v_d_weights, false);
     #endif
 
     free_matrix(input, kernel->rows, input_width);

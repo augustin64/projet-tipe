@@ -28,7 +28,7 @@ int main() {
         printf_error((char*)"Plus d'un élément de mémoire alloué en une seule allocation\n");
         exit(1);
     }
-    gree(ptr);
+    gree(ptr, false);
     if (! (get_memory_blocks_number() == blocks_used)) {
         printf_error((char*)"La mémoire n'a pas été libérée correctement\n");
         exit(1);
@@ -56,11 +56,11 @@ int main() {
             // We test that the memory does not overlap itself
             assert(pointeurs[i][j] == i);
         }
-        gree(pointeurs[i]);
+        gree(pointeurs[i], false);
     }
 
-    gree(ptr1);
-    gree(ptr2);
+    gree(ptr1, false);
+    gree(ptr2, false);
     if (! (get_memory_distinct_allocations() == 0 && get_memory_blocks_number() == 0)) {
         printf_error((char*)"La mémoire n'a pas été libérée correctement\n");
         exit(1);

@@ -76,13 +76,13 @@ void test1(int activation, bool use_local_kernel) {
                     exit(1);
                 }
             }
-            gree(input[i][j]);
+            gree(input[i][j], false);
             free(input_initial[i][j]);
         }
-        gree(input[i]);
+        gree(input[i], false);
         free(input_initial[i]);
     }
-    gree(input);
+    gree(input, false);
     free(input_initial);
 
     printf("\t" GREEN "OK\n" RESET);

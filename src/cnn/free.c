@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -8,25 +9,25 @@
 void free_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
     for (int i=0; i < depth; i++) {
         for (int j=0; j < dim; j++) {
-            gree(network->input[pos][i][j]);
-            gree(network->input_z[pos][i][j]);
+            gree(network->input[pos][i][j], true);
+            gree(network->input_z[pos][i][j], true);
         }
-        gree(network->input[pos][i]);
-        gree(network->input_z[pos][i]);
+        gree(network->input[pos][i], true);
+        gree(network->input_z[pos][i], true);
     }
-    gree(network->input[pos]);
-    gree(network->input_z[pos]);
+    gree(network->input[pos], true);
+    gree(network->input_z[pos], true);
 }
 
 void free_a_line_input_layer(Network* network, int pos) {
     // Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
     // lorsque ces couches sont denses (donc sont des matrice de dimension 1)
-    gree(network->input[pos][0][0]);
-    gree(network->input_z[pos][0][0]);
-    gree(network->input[pos][0]);
-    gree(network->input_z[pos][0]);
-    gree(network->input[pos]);
-    gree(network->input_z[pos]);
+    gree(network->input[pos][0][0], true);
+    gree(network->input_z[pos][0][0], true);
+    gree(network->input[pos][0], true);
+    gree(network->input_z[pos][0], true);
+    gree(network->input[pos], true);
+    gree(network->input_z[pos], true);
 }
 
 void free_pooling(Network* network, int pos) {
@@ -43,59 +44,59 @@ void free_convolution(Network* network, int pos) {
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
     for (int i=0; i < c; i++) {
         for (int j=0; j < bias_size; j++) {
-            gree(k_pos->bias[i][j]);
-            gree(k_pos->d_bias[i][j]);
+            gree(k_pos->bias[i][j], true);
+            gree(k_pos->d_bias[i][j], true);
             #ifdef ADAM_CNN_BIAS
-            gree(k_pos->s_d_bias[i][j]);
-            gree(k_pos->v_d_bias[i][j]);
+            gree(k_pos->s_d_bias[i][j], true);
+            gree(k_pos->v_d_bias[i][j], true);
             #endif
         }
-        gree(k_pos->bias[i]);
-        gree(k_pos->d_bias[i]);
+        gree(k_pos->bias[i], true);
+        gree(k_pos->d_bias[i], true);
         #ifdef ADAM_CNN_BIAS
-        gree(k_pos->s_d_bias[i]);
-        gree(k_pos->v_d_bias[i]);
+        gree(k_pos->s_d_bias[i], true);
+        gree(k_pos->v_d_bias[i], true);
         #endif
     }
-    gree(k_pos->bias);
-    gree(k_pos->d_bias);
+    gree(k_pos->bias, true);
+    gree(k_pos->d_bias, true);
     #ifdef ADAM_CNN_BIAS
-    gree(k_pos->s_d_bias);
-    gree(k_pos->v_d_bias);
+    gree(k_pos->s_d_bias, true);
+    gree(k_pos->v_d_bias, true);
     #endif
 
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
-                gree(k_pos->weights[i][j][k]);
-                gree(k_pos->d_weights[i][j][k]);
+                gree(k_pos->weights[i][j][k], true);
+                gree(k_pos->d_weights[i][j][k], true);
                 #ifdef ADAM_CNN_WEIGHTS
-                gree(k_pos->s_d_weights[i][j][k]);
-                gree(k_pos->v_d_weights[i][j][k]);
+                gree(k_pos->s_d_weights[i][j][k], true);
+                gree(k_pos->v_d_weights[i][j][k], true);
                 #endif
             }
-            gree(k_pos->weights[i][j]);
-            gree(k_pos->d_weights[i][j]);
+            gree(k_pos->weights[i][j], true);
+            gree(k_pos->d_weights[i][j], true);
             #ifdef ADAM_CNN_WEIGHTS
-            gree(k_pos->s_d_weights[i][j]);
-            gree(k_pos->v_d_weights[i][j]);
+            gree(k_pos->s_d_weights[i][j], true);
+            gree(k_pos->v_d_weights[i][j], true);
             #endif
         }
-        gree(k_pos->weights[i]);
-        gree(k_pos->d_weights[i]);
+        gree(k_pos->weights[i], true);
+        gree(k_pos->d_weights[i], true);
         #ifdef ADAM_CNN_WEIGHTS
-        gree(k_pos->s_d_weights[i]);
-        gree(k_pos->v_d_weights[i]);
+        gree(k_pos->s_d_weights[i], true);
+        gree(k_pos->v_d_weights[i], true);
         #endif
     }
-    gree(k_pos->weights);
-    gree(k_pos->d_weights);
+    gree(k_pos->weights, true);
+    gree(k_pos->d_weights, true);
     #ifdef ADAM_CNN_WEIGHTS
-    gree(k_pos->s_d_weights);
-    gree(k_pos->v_d_weights);
+    gree(k_pos->s_d_weights, true);
+    gree(k_pos->v_d_weights, true);
     #endif
 
-    gree(k_pos);
+    gree(k_pos, true);
 }
 
 void free_dense(Network* network, int pos) {
@@ -103,28 +104,28 @@ void free_dense(Network* network, int pos) {
     Kernel_nn* k_pos = network->kernel[pos]->nn;
     int dim = k_pos->size_input;
     for (int i=0; i < dim; i++) {
-        gree(k_pos->weights[i]);
-        gree(k_pos->d_weights[i]);
+        gree(k_pos->weights[i], true);
+        gree(k_pos->d_weights[i], true);
         #ifdef ADAM_DENSE_WEIGHTS
-        gree(k_pos->s_d_weights[i]);
-        gree(k_pos->v_d_weights[i]);
+        gree(k_pos->s_d_weights[i], true);
+        gree(k_pos->v_d_weights[i], true);
         #endif
     }
-    gree(k_pos->weights);
-    gree(k_pos->d_weights);
+    gree(k_pos->weights, true);
+    gree(k_pos->d_weights, true);
     #ifdef ADAM_DENSE_WEIGHTS
-    gree(k_pos->s_d_weights);
-    gree(k_pos->v_d_weights);
+    gree(k_pos->s_d_weights, true);
+    gree(k_pos->v_d_weights, true);
     #endif
 
-    gree(k_pos->bias);
-    gree(k_pos->d_bias);
+    gree(k_pos->bias, true);
+    gree(k_pos->d_bias, true);
     #ifdef ADAM_DENSE_BIAS
-    gree(k_pos->s_d_bias);
-    gree(k_pos->v_d_bias);
+    gree(k_pos->s_d_bias, true);
+    gree(k_pos->v_d_bias, true);
     #endif
 
-    gree(k_pos);
+    gree(k_pos, true);
 }
 
 void free_dense_linearisation(Network* network, int pos) {
@@ -132,28 +133,28 @@ void free_dense_linearisation(Network* network, int pos) {
     Kernel_nn* k_pos = network->kernel[pos]->nn;
     int dim = k_pos->size_input;
     for (int i=0; i < dim; i++) {
-        gree(k_pos->weights[i]);
-        gree(k_pos->d_weights[i]);
+        gree(k_pos->weights[i], true);
+        gree(k_pos->d_weights[i], true);
         #ifdef ADAM_DENSE_WEIGHTS
-        gree(k_pos->s_d_weights[i]);
-        gree(k_pos->v_d_weights[i]);
+        gree(k_pos->s_d_weights[i], true);
+        gree(k_pos->v_d_weights[i], true);
         #endif
     }
-    gree(k_pos->weights);
-    gree(k_pos->d_weights);
+    gree(k_pos->weights, true);
+    gree(k_pos->d_weights, true);
     #ifdef ADAM_DENSE_WEIGHTS
-    gree(k_pos->s_d_weights);
-    gree(k_pos->v_d_weights);
+    gree(k_pos->s_d_weights, true);
+    gree(k_pos->v_d_weights, true);
     #endif
 
-    gree(k_pos->bias);
-    gree(k_pos->d_bias);
+    gree(k_pos->bias, true);
+    gree(k_pos->d_bias, true);
     #ifdef ADAM_DENSE_BIAS
-    gree(k_pos->s_d_bias);
-    gree(k_pos->v_d_bias);
+    gree(k_pos->s_d_bias, true);
+    gree(k_pos->v_d_bias, true);
     #endif
 
-    gree(k_pos);
+    gree(k_pos, true);
 }
 
 void free_network_creation(Network* network) {
@@ -161,36 +162,44 @@ void free_network_creation(Network* network) {
     free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
 
     for (int i=0; i < network->max_size-1; i++) {
-        gree(network->kernel[i]);
+        gree(network->kernel[i], true);
     }
-    gree(network->width);
-    gree(network->depth);
-    gree(network->kernel);
-    gree(network->input);
-    gree(network->input_z);
+    gree(network->width, true);
+    gree(network->depth, true);
+    gree(network->kernel, true);
+    gree(network->input, true);
+    gree(network->input_z, true);
 
-    gree(network);
+    gree(network, true);
 }
 
 void free_network(Network* network) {
-    for (int i=network->size-2; i>=0; i--) {
-        if (network->kernel[i]->cnn != NULL) {
-            // Convolution
-            free_convolution(network, i);
-        } 
-        else if (network->kernel[i]->nn != NULL) {
-            // Dense
-            if (network->kernel[i]->linearisation == DOESNT_LINEARISE) {
-                // Dense normale
-                free_dense(network, i);
+    #if defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)
+        // Supprimer toute la mémoire allouée avec nalloc directement
+        // Il n'y a alors plus besoin de parcourir tout le réseau,
+        // mais il faut que TOUTE la mémoire du réseau ait été allouée de cette manière
+        // et que cela soit le cas UNIQUEMENT pour la mémoire allouée au réseau
+        free_all_memory();
+    #else
+        for (int i=network->size-2; i>=0; i--) {
+            if (network->kernel[i]->cnn != NULL) {
+                // Convolution
+                free_convolution(network, i);
+            } 
+            else if (network->kernel[i]->nn != NULL) {
+                // Dense
+                if (network->kernel[i]->linearisation == DOESNT_LINEARISE) {
+                    // Dense normale
+                    free_dense(network, i);
+                } else {
+                    // Dense qui linéarise
+                    free_dense_linearisation(network, i);
+                }
             } else {
-                // Dense qui linéarise
-                free_dense_linearisation(network, i);
+                // Pooling
+                free_pooling(network, i);
             }
-        } else {
-            // Pooling
-            free_pooling(network, i);
         }
-    }
-    free_network_creation(network);
+        free_network_creation(network);
+    #endif
 }

@@ -64,6 +64,20 @@ void print_memory_rec(Memory* mem);
 void print_memory();
 
 
+#ifdef __CUDACC__
+extern "C"
+#endif
+/*
+* Supprime tous les blocs de mémoire
+*/
+void free_all_memory();
+
+/*
+* Fonction récursive correspondante
+*/
+void free_all_memory_rec(Memory* mem);
+
+
 /*
 * Créer un bloc de mémoire de taille size
 */
@@ -76,8 +90,11 @@ void* allocate_memory(int nb_elements, size_t size, Memory* mem);
 
 /*
 * Essayer de libérer le pointeur représenté par ptr dans mem
+* Si `already_freed`, le programme ne renvoiera pas d'erreur si
+* le bloc correspondant à l'élément est déjà libéré
+* (dans l'utilisation de `free_all_memory()` par exemple)
 */
-Memory* free_memory(void* ptr, Memory* mem);
+Memory* free_memory(void* ptr, Memory* mem, bool already_freed);
 
 #ifdef __CUDACC__
 extern "C"
@@ -92,7 +109,10 @@ extern "C"
 #endif
 /*
 * Libérer le mémoire allouée avec nalloc
+* Si `already_freed`, le programme ne renvoiera pas d'erreur si
+* le bloc correspondant à l'élément est déjà libéré
+* (dans l'utilisation de `free_all_memory()` par exemple)
 */
-void gree(void* ptr);
+void gree(void* ptr, bool already_freed);
 
 #endif

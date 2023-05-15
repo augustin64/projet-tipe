@@ -104,24 +104,24 @@ void run_matrices_test(int n, int p, int q) {
 
     // On libère l'espace mémoire alloué
     for (int i=0; i < n; i++) {
-        gree(matrix1[i]);
+        gree(matrix1[i], false);
     }
-    gree(matrix1);
+    gree(matrix1, false);
 
     for (int i=0; i < p; i++) {
-        gree(matrix2[i]);
+        gree(matrix2[i], false);
     }
-    gree(matrix2);
+    gree(matrix2, false);
 
     for (int i=0; i < n; i++) {
-        gree(result_cpu[i]);
+        gree(result_cpu[i], false);
     }
-    gree(result_cpu);
+    gree(result_cpu, false);
 
     for (int i=0; i < n; i++) {
-        gree(result_gpu[i]);
+        gree(result_gpu[i], false);
     }
-    gree(result_gpu);
+    gree(result_gpu, false);
 }
 
 
