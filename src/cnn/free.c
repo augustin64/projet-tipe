@@ -179,6 +179,8 @@ void free_network(Network* network) {
         // Il n'y a alors plus besoin de parcourir tout le réseau,
         // mais il faut que TOUTE la mémoire du réseau ait été allouée de cette manière
         // et que cela soit le cas UNIQUEMENT pour la mémoire allouée au réseau
+
+        // Représente un gain de 45mn sur VGG16
         free_all_memory();
     #else
         for (int i=network->size-2; i>=0; i--) {
