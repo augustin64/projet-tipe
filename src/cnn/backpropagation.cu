@@ -416,7 +416,7 @@ __global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, 
     if (idx >= input_depth || idy >= input_width || idz >= input_width) {
         return;
     }
-    int id = idx*input_width*input_width + idy*input_width + idz;
+    int id = (idx*input_width+idy)*input_width + idz;
 
     float tmp=0;
     for (int j=0; j < size_output; j++) {
@@ -498,7 +498,7 @@ void backward_linearisation(Kernel_nn* ker, float*** input, float*** input_z, fl
 * Backward convolution
 */
 #ifdef __CUDACC__
-__global__ void backward_convolution_dbias_kernel(Kernel_cnn* ker, float*** output, int output_depth, int output_width) {
+__global__ void backward_convolution_dbias_kernel(float*** d_bias, float*** output, int output_depth, int output_width) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
@@ -506,10 +506,10 @@ __global__ void backward_convolution_dbias_kernel(Kernel_cnn* ker, float*** outp
     if (idx >= output_depth || idy >= output_width || idz >= output_width) {
         return;
     }
-    ker->d_bias[idx][idy][idz] += output[idx][idy][idz];
+    d_bias[idx][idy][idz] += output[idx][idy][idz];
 }
 
-__global__ void backward_convolution_dweight_kernel(Kernel_cnn* ker, float*** input, float*** output, int input_depth, int output_depth, int output_width, int kernel_size) {
+__global__ void backward_convolution_dweight_kernel(float**** d_weights, float*** input, float*** output, int input_depth, int output_depth, int output_width, int kernel_size) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
@@ -527,10 +527,10 @@ __global__ void backward_convolution_dweight_kernel(Kernel_cnn* ker, float*** in
             tmp += input[idx][l+idz1][m+idz2]*output[idy][l][m];
         }
     }
-    ker->d_weights[idx][idy][idz1][idz2] += tmp;
+    d_weights[idx][idy][idz1][idz2] += tmp;
 }
 
-__global__ void backward_convolution_propagate_kernel(Kernel_cnn* ker, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int k_size, funcPtr d_f) {
+__global__ void backward_convolution_propagate_kernel(float**** weights, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int k_size, funcPtr d_f) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     int idy = threadIdx.y + blockDim.y*blockIdx.y;
     int idz = threadIdx.z + blockDim.z*blockIdx.z;
@@ -548,7 +548,7 @@ __global__ void backward_convolution_propagate_kernel(Kernel_cnn* ker, float*** 
         max_n = min(k_size, input_width-idz);
         for (int m=min_m; m < max_m; m++) {
             for (int n=min_n; n < max_n; n++) {
-                tmp += output[l][idy-k_size+m+1][idz-k_size+n+1]*ker->weights[idx][l][m][n];
+                tmp += output[l][idy-k_size+m+1][idz-k_size+n+1]*weights[idx][l][m][n];
             }
         }
     }
@@ -560,7 +560,7 @@ void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** in
     dim3 gridSize1(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_y));
     dim3 blockSize1(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(kernel, output, output_depth, output_width);
+    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(kernel->d_bias, output, output_depth, output_width);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -568,7 +568,7 @@ void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** in
     dim3 gridSize2(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(output_depth, BLOCKSIZE_y), i_div_up(kernel_size*kernel_size, BLOCKSIZE_y));
     dim3 blockSize2(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(kernel, input, output, input_depth, output_depth, output_width, kernel_size);
+    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(kernel->d_weights, input, output, input_depth, output_depth, output_width, kernel_size);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -580,7 +580,7 @@ void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** in
 
         funcPtr d_function = get_activation_function_cuda(activation);
 
-        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(kernel, input, input_z, output, input_depth, input_width, output_depth, kernel_size, d_function);
+        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(kernel->weights, input, input_z, output, input_depth, input_width, output_depth, kernel_size, d_function);
     
         gpuErrchk( cudaPeekAtLastError() );
         gpuErrchk( cudaDeviceSynchronize() );
