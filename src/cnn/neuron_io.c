@@ -10,7 +10,8 @@
 
 #include "include/neuron_io.h"
 
-#define MAGIC_NUMBER 1012
+#define INITIAL_MAGIC_NUMBER 1010
+#define MAGIC_NUMBER 1013 // Increment this whenever you change the code
 
 #define CNN 0
 #define NN 1
@@ -114,13 +115,11 @@ void write_couche(Network* network, int indice_couche, int type_couche, FILE* pt
         Kernel_nn* nn = kernel->nn;
 
         // Écriture du pré-corps
-        uint32_t pre_buffer[6];
+        uint32_t pre_buffer[4];
         pre_buffer[0] = kernel->activation;
         pre_buffer[1] = kernel->linearisation;
         pre_buffer[2] = nn->size_input;
         pre_buffer[3] = nn->size_output;
-        pre_buffer[4] = kernel->stride;
-        pre_buffer[5] = kernel->padding;
         fwrite(pre_buffer, sizeof(pre_buffer), 1, ptr);
 
         // Écriture du corps
@@ -163,7 +162,12 @@ Network* read_network(char* filename) {
 
     (void) !fread(&magic, sizeof(uint32_t), 1, ptr);
     if (magic != MAGIC_NUMBER) {
-        printf_error("Incorrect magic number !\n");
+        printf_error((char*)"Incorrect magic number !\n");
+        if (INITIAL_MAGIC_NUMBER < magic && magic >= INITIAL_MAGIC_NUMBER) {
+            printf("\tThis backup is no longer supported\n");
+            printf("\tnPlease update it manually or re-train the network.\n");
+            printf("\t(You can update it with a script or manually with a Hex Editor)\n");
+        }
         exit(1);
     }
 
@@ -330,15 +334,15 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
         // Lecture du "Pré-corps"
         kernel->nn = (Kernel_nn*)nalloc(1, sizeof(Kernel_nn));
         kernel->cnn = NULL;
-        uint32_t buffer[6];
+        uint32_t buffer[4];
         (void) !fread(&buffer, sizeof(buffer), 1, ptr);
 
         kernel->activation = buffer[0];
         kernel->linearisation = buffer[1];
         kernel->nn->size_input = buffer[2];
         kernel->nn->size_output = buffer[3];
-        kernel->stride = buffer[4];
-        kernel->padding = buffer[5];
+        kernel->padding = -1;
+        kernel->stride = -1;
 
         // Lecture du corps
         Kernel_nn* nn = kernel->nn;

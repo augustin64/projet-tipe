@@ -38,6 +38,8 @@ uint32_t|linearisation|
 uint32_t|k_size|
 uint32_t|rows|
 uint32_t|columns|
+uint32_t|stride|
+uint32_t|padding|
 
 #### Si la couche est un nn:
 type | nom de la variable | commentaire
@@ -52,6 +54,8 @@ type | nom de la variable | commentaire
 :---:|:---:|:---:
 uint32_t|linearisation|
 uint32_t|pooling|
+uint32_t|stride|
+uint32_t|padding|
 
 
 ### Corps
