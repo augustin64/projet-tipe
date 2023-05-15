@@ -214,6 +214,7 @@ void gree(void* ptr, bool already_freed) {
         memory = free_memory(ptr, memory, already_freed);
         pthread_mutex_unlock(&memory_lock);
     #else
+        (void)already_freed;
         free(ptr);
     #endif
 }
