@@ -8,8 +8,12 @@
 #include "include/utils.h"
 
 
-Memory* memory = NULL;
 pthread_mutex_t memory_lock = PTHREAD_MUTEX_INITIALIZER;
+Memory* memory = NULL;
+#ifdef MEMORY_TAIL_OPT
+    Memory* tail = NULL;
+#endif
+
 
 
 int get_distinct_allocations(Memory* mem) {
@@ -68,6 +72,9 @@ Memory* create_memory_block(size_t size) {
     mem->nb_alloc = 0;
     mem->next = NULL;
     mem->id = rand() %100000;
+    #ifdef MEMORY_TAIL_OPT
+    tail = mem;
+    #endif
     
     return mem;
 }
@@ -116,6 +123,13 @@ Memory* free_memory(void* ptr, Memory* mem) {
         // printf(GREEN "%p <= %p < %p\n" RESET, mem->start, ptr, (void*)((intptr_t)mem->start + mem->size));
         if (mem->nb_alloc == 0) {
             Memory* mem_next = mem->next;
+
+            #ifdef MEMORY_TAIL_OPT
+            if (tail == mem) {
+                tail = memory;
+            }
+            #endif
+
             #ifdef __CUDACC__
             cudaFree(mem->start);
             #else
@@ -145,7 +159,11 @@ void* nalloc(int nb_elements, size_t size) {
         }
         //printf("Distinct allocations: %d Blocks: %d\n", get_distinct_allocations(memory), get_length(memory));
         //printf("Requested memory of size %ld\n", sz);
+        #ifdef MEMORY_TAIL_OPT
+        void* ptr = allocate_memory(nb_elements, size, tail);
+        #else
         void* ptr = allocate_memory(nb_elements, size, memory);
+        #endif
 
         pthread_mutex_unlock(&memory_lock);
         return ptr;
