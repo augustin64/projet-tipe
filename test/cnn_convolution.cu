@@ -140,7 +140,7 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
     double cpu_time_used, gpu_time_used;
 
     start_time = omp_get_wtime();
-    make_convolution_device(kernel, input, output_gpu, output_width, 1);
+    make_convolution_device(kernel, input, output_gpu, output_width, 1, 0);
     end_time = omp_get_wtime();
 
 
@@ -149,7 +149,7 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
 
 
     start_time = omp_get_wtime();
-    make_convolution_cpu(kernel, input, output_cpu, output_width, 1);
+    make_convolution_cpu(kernel, input, output_cpu, output_width, 1, 0);
     end_time = omp_get_wtime();
 
     cpu_time_used = end_time - start_time;
