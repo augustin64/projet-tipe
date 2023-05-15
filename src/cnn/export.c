@@ -126,7 +126,7 @@ void visual_propagation(char* modele_file, char* mnist_images_file, char* out_ba
         free(mnist_parameters);
 
         if (numero < 0 || numero >= nb_elem) {
-            printf_error("Numéro d'image spécifié invalide.");
+            printf_error((char*)"Numéro d'image spécifié invalide.");
             printf(" Le fichier contient %d images.\n", nb_elem);
             exit(1);
         }
@@ -145,7 +145,7 @@ void visual_propagation(char* modele_file, char* mnist_images_file, char* out_ba
     } else {
         imgRawImage* image = loadJpegImageFile(jpeg_file);
 
-        write_image_in_network_260(image->lpData, image->height, image->width, network->input[0]);
+        write_256_image_in_network(image->lpData, image->width, image->numComponents, network->width[0], network->input[0]);
 
         // Free allocated memory from image reading
         free(image->lpData);

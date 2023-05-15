@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
@@ -17,8 +18,6 @@
 
 #include "include/cnn.h"
 
-// Augmente les dimensions de l'image d'entrée
-#define PADDING_INPUT 2
 
 int indice_max(float* tab, int n) {
     int indice = -1;
@@ -131,25 +130,27 @@ void write_image_in_network_32(int** image, int height, int width, float** input
     }
 }
 
-void write_image_in_network_260(unsigned char* image, int height, int width, float*** input) {
-    int size_input = 260;
-    int padding = (size_input - height)/2;
+void write_256_image_in_network(unsigned char* image, int img_width, int img_depth, int input_width, float*** input) {
+    assert(img_width <= input_width);
+    assert((input_width - img_width)%2 == 0);
+
+    int padding = (input_width - img_width)/2;
 
     for (int i=0; i < padding; i++) {
-        for (int j=0; j < size_input; j++) {
-            for (int composante=0; composante < 3; composante++) {
+        for (int j=0; j < input_width; j++) {
+            for (int composante=0; composante < img_depth; composante++) {
                 input[composante][i][j] = 0.;
-                input[composante][size_input-1-i][j] = 0.;
+                input[composante][input_width-1-i][j] = 0.;
                 input[composante][j][i] = 0.;
-                input[composante][j][size_input-1-i] = 0.;
+                input[composante][j][input_width-1-i] = 0.;
             }
         }
     }
 
-    for (int i=0; i < width; i++) {
-        for (int j=0; j < height; j++) {
-            for (int composante=0; composante < 3; composante++) {
-                input[composante][i+2][j+2] = (float)image[(i*height+j)*3 + composante] / 255.0f;
+    for (int i=0; i < img_width; i++) {
+        for (int j=0; j < img_width; j++) {
+            for (int composante=0; composante < img_depth; composante++) {
+                input[composante][i+padding][j+padding] = (float)image[(i*img_width+j)*img_depth + composante] / 255.0f;
             }
         }
     }
@@ -219,7 +220,7 @@ void forward_propagation(Network* network) {
                     make_max_pooling(input, output, kernel_size, output_depth, output_width, stride, padding);
                 } 
                 else {
-                    printf_error("Impossible de reconnaître le type de couche de pooling: ");
+                    printf_error((char*)"Impossible de reconnaître le type de couche de pooling: ");
                     printf("identifiant: %d, position: %d\n", pooling, i);
                 }
             }

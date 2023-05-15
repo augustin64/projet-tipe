@@ -103,7 +103,7 @@ void* train_thread(void* parameters) {
                 load_image_param->index = index[i+1];
                 pthread_create(&tid, NULL, load_image, (void*) load_image_param);
             }
-            write_image_in_network_260(param->dataset->images[index[i]], height, width, network->input[0]);
+            write_256_image_in_network(param->dataset->images[index[i]], width, param->dataset->numComponents, network->width[0], network->input[0]);
             forward_propagation(network);
             maxi = indice_max(network->input[network->size-1][0][0], param->dataset->numCategories);
             backward_propagation(network, param->dataset->labels[index[i]]);

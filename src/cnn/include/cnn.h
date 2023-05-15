@@ -20,9 +20,12 @@ int will_be_drop(int dropout_prob);
 void write_image_in_network_32(int** image, int height, int width, float** input, bool random_offset);
 
 /*
-* Écrit une image linéarisée de 256*256*3 pixels dans un tableau de taille 260*260*3
+* Écrit une image linéarisée de img_width*img_width*img_depth pixels dans un tableau de taille size_input*size_input*3
+* Les conditions suivantes doivent être respectées:
+* - l'image est au plus de la même taille que input
+* - la différence de taille entre input et l'image doit être un multiple de 2 (pour centrer l'image)
 */
-void write_image_in_network_260(unsigned char* image, int height, int width, float*** input);
+void write_256_image_in_network(unsigned char* image, int img_width, int img_depth, int input_width, float*** input);
 
 /*
 * Propage en avant le cnn. Le dropout est actif que si le réseau est en phase d'apprentissage.

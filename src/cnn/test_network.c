@@ -79,7 +79,7 @@ float* test_network_jpg(Network* network, char* data_dir, bool preview_fails, bo
             printf("Avancement: %.1f%%\r",  1000*i/(float)dataset->numImages);
             fflush(stdout);
         }
-        write_image_in_network_260(dataset->images[i], dataset->height, dataset->height, network->input[0]);
+        write_256_image_in_network(dataset->images[i], dataset->height, dataset->numComponents, network->width[0], network->input[0]);
         forward_propagation(network);
         maxi = indice_max(network->input[network->size-1][0][0], 50);
 
@@ -196,7 +196,7 @@ void recognize_jpg(Network* network, char* input_file, char* out) {
     }
 
     // Load image in the first layer of the Network
-    write_image_in_network_260(image->lpData, height, width, network->input[0]);
+    write_256_image_in_network(image->lpData, width, image->numComponents, network->width[0], network->input[0]);
     forward_propagation(network);
 
 
