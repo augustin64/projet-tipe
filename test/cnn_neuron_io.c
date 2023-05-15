@@ -6,6 +6,7 @@
 #include "../src/common/include/colors.h"
 #include "../src/cnn/include/neuron_io.h"
 #include "../src/cnn/include/creation.h"
+#include "../src/cnn/include/models.h"
 #include "../src/cnn/include/utils.h"
 #include "../src/cnn/include/free.h"
 

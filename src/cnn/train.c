@@ -8,15 +8,15 @@
 #include <omp.h>
 
 #include "../common/include/memory_management.h"
+#include "../common/include/colors.h"
+#include "../common/include/utils.h"
 #include "../common/include/mnist.h"
 #include "include/initialisation.h"
 #include "include/test_network.h"
 #include "include/neuron_io.h"
-#include "../common/include/colors.h"
-#include "../common/include/utils.h"
 #include "include/function.h"
-#include "include/creation.h"
 #include "include/update.h"
+#include "include/models.h"
 #include "include/utils.h"
 #include "include/free.h"
 #include "include/jpeg.h"
