@@ -257,7 +257,7 @@ __global__ void make_dense_linearized_kernel(float** weights, float* bias, float
     for (int i=0; i < input_depth; i++) {
         for (int j=0; j < input_width; j++) {
             for (int k=0; k < input_width; k++) {
-                f += input[i][j][k]*weights[k + j*input_width + i*input_depth][idx];
+                f += input[i][j][k]*weights[k + (i*input_width+j)*input_width][idx];
             }
         }
     }
@@ -285,7 +285,7 @@ void make_dense_linearized_cpu(Kernel_nn* kernel, float*** input, float* output,
         for (int i=0; i < input_depth; i++) {
             for (int j=0; j < input_width; j++) {
                 for (int k=0; k < input_width; k++) {
-                    f += input[i][j][k]*kernel->weights[k + j*input_width + i*input_depth][l];
+                    f += input[i][j][k]*kernel->weights[k + (i*input_width+j)*input_width][l];
                 }
             }
         }
