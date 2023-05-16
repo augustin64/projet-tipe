@@ -1,7 +1,8 @@
+#include <stdbool.h>
+#include <assert.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 
 #include "../common/include/memory_management.h"
 #include "../common/include/mnist.h"
@@ -183,12 +184,13 @@ void recognize_mnist(Network* network, char* input_file, char* out) {
 }
 
 void recognize_jpg(Network* network, char* input_file, char* out) {
-    int width, height; // Dimensions de l'image
+    int width; // Dimensions de l'image, qui doit être carrée
     int maxi;
 
     imgRawImage* image = loadJpegImageFile(input_file);
     width = image->width;
-    height = image->height;
+
+    assert(image->width == image->height);
 
     if (! strcmp(out, "json")) {
         printf("{\n");

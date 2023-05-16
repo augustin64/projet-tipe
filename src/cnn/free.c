@@ -181,6 +181,7 @@ void free_network(Network* network) {
         // et que cela soit le cas UNIQUEMENT pour la mémoire allouée au réseau
 
         // Représente un gain de 45mn sur VGG16
+        (void)network;
         free_all_memory();
     #else
         for (int i=network->size-2; i>=0; i--) {
