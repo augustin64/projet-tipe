@@ -127,7 +127,7 @@ void* train_thread(void* parameters) {
 
 void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover) {
     #ifdef USE_CUDA
-    bool compatibility = check_cuda_compatibility();
+    bool compatibility = cuda_setup(true);
     if (!compatibility) {
         printf("Exiting.\n");
         exit(1);

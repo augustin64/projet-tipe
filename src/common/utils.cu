@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #ifdef USE_CUDA
     #ifndef __CUDACC__
         #include "cuda_runtime.h"
@@ -42,39 +43,65 @@ int i_div_up(int a, int b) { // Partie entière supérieure de a/b
 #ifdef __CUDACC__
 extern "C"
 #endif
-bool check_cuda_compatibility() {
+bool cuda_setup(bool verbose) {
     #ifdef __CUDACC__
     int nDevices;
+    int selected_device = 0;
+    cudaDeviceProp selected_prop;
     cudaDeviceProp prop;
 
     cudaGetDeviceCount(&nDevices);
-    if (nDevices == 0) {
-        printf("Pas d'utilisation du GPU\n\n");
+    if (nDevices <= 0) { // I've seen weird issues when there is no GPU at all
+        if (verbose) {
+            printf("Pas d'utilisation du GPU\n\n");
+        }
         return false;
     }
 
-    printf("GPUs disponibles:\n");
+    if (verbose) {
+        printf("GPUs disponibles:\n");
+    }
+
+    cudaGetDeviceProperties(&selected_prop, selected_device);
 
     for (int i=0; i < nDevices; i++) {
         cudaGetDeviceProperties(&prop, i);
-        printf(" - %s\n\t - Compute Capability: %d.%d\n\t - Memory available: ", prop.name, prop.major, prop.minor);
-        printf_memory(prop.totalGlobalMem);
-        printf("\n\t - Shared Memory per block: ");
-        printf_memory(prop.sharedMemPerBlock);
-        printf("\n\n");
+
+        if (verbose) {
+            printf(" - %s\n\t - Compute Capability: %d.%d\n\t - Memory available: ", prop.name, prop.major, prop.minor);
+            printf_memory(prop.totalGlobalMem);
+            printf("\n\t - Shared Memory per block: ");
+            printf_memory(prop.sharedMemPerBlock);
+            printf("\n\n");
+        }
+
+        if (prop.clockRate*prop.multiProcessorCount >= selected_prop.clockRate*selected_prop.multiProcessorCount) { // This criteria approximately matches the best device
+            selected_prop = prop;
+            selected_device = i;
+        }
     }
 
-    cudaGetDeviceProperties(&prop, 0);
-    printf("Utilisation du GPU: " BLUE "%s" RESET "\n\n", prop.name);
+    cudaSetDevice(selected_device); // Select the best device for computation
+    if (verbose) {
+        printf("Utilisation du GPU: " BLUE "%s" RESET "\n\n", selected_prop.name);
+    }
 
-    if (prop.sharedMemPerBlock != MEMORY_BLOCK) {
+    if (BLOCKSIZE_x*BLOCKSIZE_y*BLOCKSIZE_z > prop.maxThreadsPerBlock) {
+        printf_error((char*)"La taille de bloc sélectionnée est trop grande.\n");
+        printf("\tMaximum accepté: %d\n", selected_prop.maxThreadsPerBlock);
+        exit(1);
+    }
+    if (selected_prop.sharedMemPerBlock != MEMORY_BLOCK) { // C'est un warning, on l'affiche dans tous les cas
         printf_warning((char*)"La taille des blocs mémoire du GPU et celle utilisée dans le code diffèrent.\n");
         printf("\tCela peut mener à une utilisation supplémentaire de VRAM.\n");
-        printf("\tChanger MEMORY_BLOCK à %ld dans src/include/memory_management.h\n", prop.sharedMemPerBlock);
+        printf("\tChanger MEMORY_BLOCK à %ld dans src/include/memory_management.h\n", selected_prop.sharedMemPerBlock);
     }
     return true;
     #else
-    printf("Pas d'utilisation du GPU\n\n");
+    if (verbose) {
+        printf("Pas d'utilisation du GPU\n\n");
+    }
+
     return false;
     #endif
 }

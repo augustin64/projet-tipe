@@ -18,7 +18,7 @@ __global__ void check_access(int* array, int range) {
 
 int main() {
     printf("Checking CUDA compatibility.\n");
-    bool cuda_compatible = check_cuda_compatibility();
+    bool cuda_compatible = cuda_setup(true);
     if (!cuda_compatible) {
         printf(RED "CUDA not compatible, skipping tests.\n" RESET);
         return 0;

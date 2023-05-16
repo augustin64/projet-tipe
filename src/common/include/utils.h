@@ -60,8 +60,10 @@ extern "C"
 #endif
 /*
 * Vérification de la compatibilité CUDA
+* spécifier avec "verbose" si il faut afficher
+* la carte utilisée notamment
 */
-bool check_cuda_compatibility();
+bool cuda_setup(bool verbose);
 
 #ifdef __CUDACC__
 extern "C"
