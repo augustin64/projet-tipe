@@ -106,8 +106,8 @@ void write_image_in_network_32(int** image, int height, int width, float** input
             max_col--;
         }
 
-        i_offset = rand()%(27-max_ligne+min_ligne);
-        j_offset = rand()%(27-max_col+min_col);
+        i_offset = 27-max_ligne+min_ligne == 0 ? 0 : rand()%(27-max_ligne+min_ligne);
+        j_offset = 27 - max_col + min_col == 0 ? 0 : rand()%(27-max_col+min_col);
     }
 
     int padding = (32 - height)/2;
