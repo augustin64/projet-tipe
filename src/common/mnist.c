@@ -33,6 +33,10 @@ int* read_mnist_images_parameters(char* filename) {
     FILE *ptr;
     
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t number_of_images;
@@ -64,6 +68,10 @@ uint32_t read_mnist_labels_nb_images(char* filename) {
     FILE *ptr;
     
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t number_of_images;
@@ -87,6 +95,10 @@ int*** read_mnist_images(char* filename) {
     FILE *ptr;
     
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t number_of_images;
@@ -123,6 +135,10 @@ unsigned int* read_mnist_labels(char* filename) {
     FILE* ptr;
 
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t number_of_items;

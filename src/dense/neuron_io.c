@@ -55,6 +55,10 @@ Network* read_network(char* filename) {
     Network* network = (Network*)malloc(sizeof(Network));
 
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t nb_layers;
@@ -110,6 +114,10 @@ void write_network(char* filename, Network* network) {
     int nb_neurons[nb_layers+1];
 
     ptr = fopen(filename, "wb");
+    if (!ptr) {
+        printf("Impossible d'ouvrir le fichier %s en écriture\n", filename);
+        exit(1);
+    }
 
     uint32_t buffer[nb_layers+2];
 
@@ -174,6 +182,10 @@ Network* read_delta_network(char* filename) {
     Network* network = (Network*)malloc(sizeof(Network));
 
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic_number;
     uint32_t nb_layers;
@@ -229,6 +241,10 @@ void write_delta_network(char* filename, Network* network) {
     int nb_neurons[nb_layers+1];
 
     ptr = fopen(filename, "wb");
+    if (!ptr) {
+        printf("Impossible d'ouvrir le fichier %s en écriture\n", filename);
+        exit(1);
+    }
 
     uint32_t buffer[nb_layers+2];
 

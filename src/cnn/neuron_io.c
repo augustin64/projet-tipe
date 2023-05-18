@@ -26,6 +26,10 @@ void write_network(char* filename, Network* network) {
     int indice_buffer = 0;
 
     ptr = fopen(filename, "wb");
+    if (!ptr) {
+        printf("Impossible d'ouvrir le fichier %s en écriture\n", filename);
+        exit(1);
+    }
 
     // Le buffer est composé de:
     // - MAGIC_NUMBER (1)
@@ -153,6 +157,10 @@ Network* read_network(char* filename) {
     Network* network = (Network*)nalloc(1, sizeof(Network));
 
     ptr = fopen(filename, "rb");
+    if (!ptr) {
+        printf("Impossible de lire le fichier %s\n", filename);
+        exit(1);
+    }
 
     uint32_t magic;
     uint32_t size;
