@@ -136,8 +136,7 @@ void* allocate_memory(int nb_elements, size_t size, Memory* mem) {
         //printf("Mémoire disponible: %ld. Nécessaire: %ld\n", mem->size - ((intptr_t)mem->cursor - (intptr_t)mem->start), nb_elements*size);
         // Sinon on continue sur l'élément suivant de la liste
         if (!mem->next) {
-            //! WARNING: May cause Infinite allocations when trying to allocate more than MEMORY_BLOCK size at once that is not naturally aligned (CUDA only)
-            mem->next = create_memory_block(MEMORY_BLOCK < nb_elements*size ? nb_elements*size : MEMORY_BLOCK);
+            mem->next = create_memory_block(MEMORY_BLOCK < (nb_elements+1)*size ? (nb_elements+1)*size : MEMORY_BLOCK);
         }
         return allocate_memory(nb_elements, size, mem->next);
     }
