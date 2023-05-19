@@ -8,6 +8,8 @@
 #define LEARNING_RATE 3e-4 // Taux d'apprentissage
 #define USE_MULTITHREADING // Commenter pour utiliser un seul coeur durant l'apprentissage (meilleur pour des tailles de batchs traités rapidement)
 
+//#define DETAILED_TRAIN_TIMINGS // Afficher le temps de forward/ backward
+
 //* Paramètres d'ADAM optimizer
 #define ALPHA 3e-4
 #define BETA_1 0.9
