@@ -22,6 +22,13 @@ Network* create_network_alexnet(float learning_rate, int dropout, int activation
 */
 Network* create_network_VGG16(float learning_rate, int dropout, int activation, int initialisation, int size_output);
 
+
+/*
+* Renvoie un réseau suivant l'architecture VGG16 originel pour prendre en entrée 3x227x227
+* et une sortie de taille 1 000
+*/
+Network* create_network_VGG16_227(float learning_rate, int dropout, int activation, int initialisation);
+
 /*
 * Renvoie un réseau sans convolution, similaire à celui utilisé dans src/dense
 */
