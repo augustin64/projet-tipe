@@ -69,6 +69,7 @@ void free_all_memory() {
         tail = NULL;
     #endif
 
+    memory = NULL;
     pthread_mutex_unlock(&memory_lock);
 }
 

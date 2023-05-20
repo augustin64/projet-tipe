@@ -174,7 +174,7 @@ void free_network_creation(Network* network) {
 }
 
 void free_network(Network* network) {
-    #if defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)
+    #if (defined(USE_CUDA) || defined(TEST_MEMORY_MANAGEMENT)) && defined(FREE_ALL_OPT)
         // Supprimer toute la mémoire allouée avec nalloc directement
         // Il n'y a alors plus besoin de parcourir tout le réseau,
         // mais il faut que TOUTE la mémoire du réseau ait été allouée de cette manière
