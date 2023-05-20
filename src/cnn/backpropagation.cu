@@ -287,7 +287,7 @@ void backward_max_pooling(float*** input, float*** output, int input_width, int 
 * Backward Dense
 */
 #ifdef __CUDACC__
-__global__ void backward_dense_kernel_1(Kernel_nn* ker, float* input, float* output, int size_input, int size_output) {
+__global__ void backward_dense_kernel_1(float** d_weights, float* d_bias, float* input, float* output, int size_input, int size_output) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < size_input
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < size_output
@@ -297,9 +297,9 @@ __global__ void backward_dense_kernel_1(Kernel_nn* ker, float* input, float* out
     }
 
     if (idx == 0) {
-        ker->d_bias[idy] += output[idy];
+        d_bias[idy] += output[idy];
     }
-    ker->d_weights[idx][idy] += input[idx]*output[idy];
+    d_weights[idx][idy] += input[idx]*output[idy];
 }
 
 __global__ void backward_dense_kernel_2(float** weights, float* input, float* input_z, float* output, int size_input, int size_output, funcPtr d_f) {
@@ -321,7 +321,7 @@ void backward_dense_device(Kernel_nn* ker, float* input, float* input_z, float* 
     dim3 gridSize1(i_div_up(size_input, BLOCKSIZE_x), i_div_up(size_output, BLOCKSIZE_y));
     dim3 blockSize1(BLOCKSIZE_x, BLOCKSIZE_y);
 
-    backward_dense_kernel_1<<<gridSize1, blockSize1>>>(ker, input, output, size_input, size_output);
+    backward_dense_kernel_1<<<gridSize1, blockSize1>>>(ker->d_weights, ker->d_bias, input, output, size_input, size_output);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -387,7 +387,7 @@ void backward_dense(Kernel_nn* ker, float* input, float* input_z, float* output,
 * Backward linearisation
 */
 #ifdef __CUDACC__
-__global__ void backward_linearisation_kernel_1(Kernel_nn* ker, float*** input, float* output, int input_depth, int input_width, int size_output) {
+__global__ void backward_linearisation_kernel_1(float** d_weights, float* d_bias, float*** input, float* output, int input_depth, int input_width, int size_output) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < input_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < input_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < input_width
@@ -399,16 +399,16 @@ __global__ void backward_linearisation_kernel_1(Kernel_nn* ker, float*** input, 
     int id = idx*input_width*input_width + idy*input_width + idz;
     
     for (int j=0; j < size_output; j++) {
-        ker->d_weights[id][j] += input[idx][idy][idz]*output[j];
+        d_weights[id][j] += input[idx][idy][idz]*output[j];
     }
     if (id == 0) {
         for (int j=0; j < size_output;  j++) {
-            ker->d_bias[j] += output[j];
+            d_bias[j] += output[j];
         }
     }
 }
 
-__global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, funcPtr d_f) {
+__global__ void backward_linearisation_kernel_2(float** weights, float*** input, float*** input_z, float* output, int input_depth, int input_width, int size_output, funcPtr d_f) {
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < input_depth
     int idy = threadIdx.y + blockDim.y*blockIdx.y; // < input_width
     int idz = threadIdx.z + blockDim.z*blockIdx.z; // < input_width
@@ -420,7 +420,7 @@ __global__ void backward_linearisation_kernel_2(Kernel_nn* ker, float*** input, 
 
     float tmp=0;
     for (int j=0; j < size_output; j++) {
-        tmp += output[j]*ker->weights[id][j];
+        tmp += output[j]*weights[id][j];
     }
     input[idx][idy][idz] = tmp*( (*d_f)(input_z[idx][idy][idz]) );
 }
@@ -430,7 +430,7 @@ void backward_linearisation_device(Kernel_nn* ker, float*** input, float*** inpu
     dim3 gridSize(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(input_width, BLOCKSIZE_y), i_div_up(input_width, BLOCKSIZE_y));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_linearisation_kernel_1<<<gridSize, blockSize>>>(ker, input, output, input_depth, input_width, size_output);
+    backward_linearisation_kernel_1<<<gridSize, blockSize>>>(ker->d_weights, ker->d_bias, input, output, input_depth, input_width, size_output);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -438,7 +438,7 @@ void backward_linearisation_device(Kernel_nn* ker, float*** input, float*** inpu
     // Second kernel
     funcPtr d_function = get_activation_function_cuda(activation);
 
-    backward_linearisation_kernel_2<<<gridSize, blockSize>>>(ker, input, input_z, output, input_depth, input_width, size_output, d_function);
+    backward_linearisation_kernel_2<<<gridSize, blockSize>>>(ker->weights, input, input_z, output, input_depth, input_width, size_output, d_function);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
