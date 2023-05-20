@@ -509,50 +509,64 @@ __global__ void backward_convolution_dbias_kernel(float*** d_bias, float*** outp
     d_bias[idx][idy][idz] += output[idx][idy][idz];
 }
 
-__global__ void backward_convolution_dweight_kernel(float**** d_weights, float*** input, float*** output, int input_depth, int output_depth, int output_width, int kernel_size) {
-    int idx = threadIdx.x + blockDim.x*blockIdx.x;
-    int idy = threadIdx.y + blockDim.y*blockIdx.y;
-    int idz = threadIdx.z + blockDim.z*blockIdx.z;
+__global__ void backward_convolution_dweight_kernel(float**** d_weights, float*** input, float*** output, int input_depth, int output_depth, int input_width, int output_width, int k_size, int stride, int padding) {
+    /*
+    * L'ordre des boucles a été changé par rapport à l'implémentation sur CPU
+    * afin d'utiliser possiblement plus de coeurs à la fois (car en général, depth << width)
+    * En gardant les indices des boucles sur CPU notées h,i,j,k,l,m; on fait donc l,m,i,h,j,k 
+    */
+    int idx = threadIdx.x + blockDim.x*blockIdx.x; // l
+    int idy = threadIdx.y + blockDim.y*blockIdx.y; // m
+    int idz = threadIdx.z + blockDim.z*blockIdx.z; // i
 
-    int idz1 = idz / kernel_size;
-    int idz2 = idz % kernel_size;
-    
-    if (idx >= input_depth || idy >= output_depth || idz1 >= kernel_size || idz2 >= kernel_size) {
-        return;
-    }
-    
-    float tmp = 0;
-    for (int l=0; l < output_width; l++) {
-        for (int m=0; m < output_width; m++) {
-            tmp += input[idx][l+idz1][m+idz2]*output[idy][l][m];
-        }
-    }
-    d_weights[idx][idy][idz1][idz2] += tmp;
-}
-
-__global__ void backward_convolution_propagate_kernel(float**** weights, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int k_size, funcPtr d_f) {
-    int idx = threadIdx.x + blockDim.x*blockIdx.x;
-    int idy = threadIdx.y + blockDim.y*blockIdx.y;
-    int idz = threadIdx.z + blockDim.z*blockIdx.z;
-
-    if (idx >= input_depth || idy >= input_width || idz >= input_width) {
+    if (idx >= output_width || idy >= output_width || idz >= output_depth) {
         return;
     }
 
-    int min_m, max_m, min_n, max_n;
-    float tmp = 0;
-    for (int l=0; l < output_depth; l++) {
-        min_m = max(0, k_size-1-idy);
-        max_m = min(k_size, input_width - idy);
-        min_n = max(0, k_size-1-idz);
-        max_n = min(k_size, input_width-idz);
-        for (int m=min_m; m < max_m; m++) {
-            for (int n=min_n; n < max_n; n++) {
-                tmp += output[l][idy-k_size+m+1][idz-k_size+n+1]*weights[idx][l][m][n];
+    int max_move = k_size - padding;
+    for (int h=0; h < input_depth; h++) {
+        for (int j=-padding; j < max_move; j++) {
+            for (int k=-padding; k < max_move; k++) {
+                if (not_outside(idx*stride+j, idy*stride+k, 0, input_width)) {
+                    atomicAdd(&d_weights[h][idz][j+padding][k+padding], input[h][idx*stride+j][idy*stride+k]*output[idz][idx][idy]);
+                }
             }
         }
     }
-    input[idx][idy][idz] = tmp*( (*d_f)(input_z[idx][idy][idz]) );
+}
+
+__global__ void backward_convolution_propagate_kernel(float**** weights, float*** input, float*** output, int input_depth, int input_width, int output_width, int output_depth, int k_size, int stride, int padding) {
+    int idx = threadIdx.x + blockDim.x*blockIdx.x;
+    int idy = threadIdx.y + blockDim.y*blockIdx.y;
+
+    if (idx >= input_depth || idy >= output_depth) {
+        return;
+    }
+    int max_move = k_size - padding;
+    for (int j=-padding; j < max_move; j++) {
+        for (int k=-padding; k < max_move; k++) {
+            for (int l=0; l < output_width; l++) {
+                for (int m=0; m < output_width; m++) {
+                    if (not_outside(l*stride+j, m*stride+k, 0, input_width)) {
+                        atomicAdd(&input[idx][l*stride+j][m*stride+k], output[idy][l][m]*weights[idx][idy][j+padding][k+padding]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+__global__ void backward_convolution_apply_propagate_kernel(float*** input, float*** input_z, int input_depth, int input_width, funcPtr d_f) {
+    int idx = threadIdx.x + blockDim.x*blockIdx.x;
+    int idy = threadIdx.y + blockDim.y*blockIdx.y;
+
+    if (idx >= input_depth || idy >= input_width) {
+        return;
+    }
+
+    for (int k=0; k < input_width; k++) {
+        input[idx][idy][k] = input[idx][idy][k]*d_f(input_z[idx][idy][k]);
+    }
 }
 
 void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first, int kernel_size, int padding, int stride) {
@@ -565,23 +579,30 @@ void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** in
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 
-    dim3 gridSize2(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(output_depth, BLOCKSIZE_y), i_div_up(kernel_size*kernel_size, BLOCKSIZE_y));
+    dim3 gridSize2(i_div_up(output_width, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_depth, BLOCKSIZE_y));
     dim3 blockSize2(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(kernel->d_weights, input, output, input_depth, output_depth, output_width, kernel_size);
+    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(kernel->d_weights, input, output, input_depth, output_depth, input_width, output_width, kernel_size, stride, padding);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 
     // input propagation Kernel
     if (is_first != 1) {
-        dim3 gridSize3(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(input_width, BLOCKSIZE_y), i_div_up(input_width, BLOCKSIZE_y));
-        dim3 blockSize3(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
+        reset_3d_array(input, input_depth, input_width, input_width);
+
+        dim3 gridSize3(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(output_depth, BLOCKSIZE_y));
+        dim3 blockSize3(BLOCKSIZE_x, BLOCKSIZE_y);
+
+        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(kernel->weights, input, output, input_depth, input_width, output_width, output_depth, kernel_size, stride, padding);
+
+        dim3 gridSize4(i_div_up(input_depth, BLOCKSIZE_x), i_div_up(input_width, BLOCKSIZE_y));
+        dim3 blockSize4(BLOCKSIZE_x, BLOCKSIZE_y);
 
         funcPtr d_function = get_activation_function_cuda(activation);
 
-        backward_convolution_propagate_kernel<<<gridSize3, blockSize3>>>(kernel->weights, input, input_z, output, input_depth, input_width, output_depth, kernel_size, d_function);
-    
+        backward_convolution_apply_propagate_kernel<<<gridSize4, blockSize4>>>(input, input_z, input_depth, input_width, d_function);
+
         gpuErrchk( cudaPeekAtLastError() );
         gpuErrchk( cudaDeviceSynchronize() );
     }
@@ -616,7 +637,7 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
                             }
                         }
                     }
-                    ker->d_weights[h][i][j][k] += tmp;
+                    ker->d_weights[h][i][j+padding][k+padding] += tmp;
                 }
             }
         }
