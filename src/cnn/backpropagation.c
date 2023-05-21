@@ -643,7 +643,7 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
         }
     }
 
-    // Input TODO
+    // Input
     if (is_first==1) // Pas besoin de backpropager dans l'input
         return;
     for (int i=0; i < input_depth; i++) {
