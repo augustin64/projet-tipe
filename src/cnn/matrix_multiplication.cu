@@ -9,24 +9,24 @@
 #define BLOCKSIZE_y 16
 
 #ifdef __CUDACC__
-__global__ void matrix_mul_kernel(float** Md, float** Nd, float** Pd, int n, int p, int q) {
-    // Chaque thread calcule toutes les multiplications utilisant l'élément Nd[tx][ty]
-    int tx = (blockIdx.x*blockDim.x) + threadIdx.x; // Indice de colonne
-    int ty = (blockIdx.y*blockDim.y) + threadIdx.y; // Indice de ligne
+__global__ void matrix_mul_kernel(float** M, float** N, float** P, int n, int p, int q) {
+    // Ce fil calcule toutes les multiplications utilisant l'élément N[idx][idy]
+    int idx = (blockIdx.x*blockDim.x) + threadIdx.x; // Indice de colonne
+    int idy = (blockIdx.y*blockDim.y) + threadIdx.y; // Indice de ligne
 
-    if (tx >= p || ty >= q) {
-        return;
+    if (idx >= p || idy >= q) {
+        return; // On vérifie que l'on est bien à un emplacement valide
     }
 
     for (int i = 0; i < n; i++) {
-        atomicAdd(&(Pd[i][ty]), Md[i][tx]*Nd[tx][ty]);
-        // P[i][ty] += P[i][tx] * N[tx][ty]
+        atomicAdd(&(P[i][idy]), M[i][idx]*N[idx][idy]);
+        // P[i][idy] += M[i][idx] * N[idx][idy]
     }
 }
 
-
 void matrix_multiplication_device(float** m1, float** m2, float** result, int n, int p, int q) {
-    // Traitement
+    // On découpe la tâche en un certain nombre de blocs,
+    // la taille d'un bloc étant limitée par CUDA à 1024
     dim3 gridSize(i_div_up(p, BLOCKSIZE_x), i_div_up(q, BLOCKSIZE_y));
     dim3 blockSize(BLOCKSIZE_x, BLOCKSIZE_y);
 
