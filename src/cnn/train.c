@@ -57,6 +57,7 @@ void* train_thread(void* parameters) {
     int dataset_type = param->dataset_type;
     int start = param->start;
     int nb_images = param->nb_images;
+    int finetuning = param->finetuning;
 
     float* wanted_output;
     float accuracy = 0.;
@@ -103,7 +104,7 @@ void* train_thread(void* parameters) {
             loss += compute_mean_squared_error(network->input[network->size-1][0][0], wanted_output, 10);
             gree(wanted_output, false);
 
-            backward_propagation(network, labels[index[i]]);
+            backward_propagation(network, labels[index[i]], finetuning);
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de backward: ");
@@ -143,7 +144,7 @@ void* train_thread(void* parameters) {
             #endif
 
             maxi = indice_max(network->input[network->size-1][0][0], param->dataset->numCategories);
-            backward_propagation(network, param->dataset->labels[index[i]]);
+            backward_propagation(network, param->dataset->labels[index[i]], finetuning);
             
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de backward: ");
@@ -170,7 +171,7 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover, bool offset) {
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover, bool offset, int finetuning) {
     #ifdef USE_CUDA
     bool compatibility = cuda_setup(true);
     if (!compatibility) {
@@ -289,6 +290,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             param->index = shuffle_index;
             param->network = copy_network(network);
             param->offset = offset;
+            param->finetuning = finetuning;
         }
     #else
         // Création des paramètres donnés à l'unique
@@ -315,6 +317,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         train_params->nb_images = BATCHES;
         train_params->index = shuffle_index;
         train_params->offset = offset;
+        train_params->finetuning = finetuning;
     #endif
 
     end_time = omp_get_wtime();

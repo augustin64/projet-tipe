@@ -229,7 +229,7 @@ void forward_propagation(Network* network) {
     }
 }
 
-void backward_propagation(Network* network, int wanted_number) {
+void backward_propagation(Network* network, int wanted_number, int finetuning) {
     int n = network->size; // Nombre de couches du réseau
 
     // Backward sur la dernière couche qui utilise toujours SOFTMAX
@@ -264,12 +264,18 @@ void backward_propagation(Network* network, int wanted_number) {
 
 
         if (k_i->cnn) { // Convolution
+            if (finetuning == NN_AND_LINEARISATION || finetuning == NN_ONLY) {
+                return; // On arrête la backpropagation
+            }
             int kernel_size = k_i->cnn->k_size;
             backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, -activation, is_last_layer, kernel_size, padding, stride);
         } else if (k_i->nn) { // Full connection
             if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
                 backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, -activation, is_last_layer);
             } else { // Matrice -> vecteur
+                if (finetuning == NN_ONLY) {
+                    return; // On arrête la backpropagation
+                }
                 backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, -activation);
             }
         } else { // Pooling

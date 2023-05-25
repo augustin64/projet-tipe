@@ -28,6 +28,7 @@ void help(char* call) {
     printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--epochs  | -e [int]\t\tNombre d'époques.\n");
+    printf("\t\t--finetuning  | -f [int]\t\tDistance de backpropagation (0: tout; 1: dense et linéarisation; 2:dense).\n");
     printf("\t\t--out     | -o [FILENAME]\tFichier où écrire le réseau de neurones.\n");
     printf("\trecognize:\n");
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat de l'image à reconnaître.\n");
@@ -58,6 +59,7 @@ int main(int argc, char* argv[]) {
         char* labels_file = NULL;
         char* data_dir = NULL;
         int epochs = EPOCHS;
+        int finetuning = 0;
         int dataset_type = 0;
         char* out = NULL;
         char* recover = NULL;
@@ -84,7 +86,10 @@ int main(int argc, char* argv[]) {
                 epochs = strtol(argv[i+1], NULL, 10);
                 i += 2;
             }
-            else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
+            else if ((! strcmp(argv[i], "--finetuning"))||(! strcmp(argv[i], "-f"))) {
+                finetuning = strtol(argv[i+1], NULL, 10);
+                i += 2;
+            } else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
                 i += 2;
             } else if ((! strcmp(argv[i], "--recover"))||(! strcmp(argv[i], "-r"))) {
@@ -125,7 +130,12 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier de sortie spécifié, défaut: out.bin\n");
             out = "out.bin";
         }
-        train(dataset_type, images_file, labels_file, data_dir, epochs, out, recover, offset);
+
+        if (finetuning < 0 || finetuning > 2) {
+            printf_error("Mauvais paramètre pour '--finetuning'\n");
+            return 1;
+        }
+        train(dataset_type, images_file, labels_file, data_dir, epochs, out, recover, offset, finetuning);
         return 0;
     }
     if (! strcmp(argv[1], "test")) {

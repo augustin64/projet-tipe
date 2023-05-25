@@ -5,6 +5,10 @@
 #ifndef DEF_MAIN_H
 #define DEF_MAIN_H
 
+#define EVERYTHING 0
+#define NN_ONLY 1
+#define NN_AND_LINEARISATION 2
+
 /*
 * Renvoie l'indice de l'élément de valeur maximale dans un tableau de flottants
 * Utilisé pour trouver le neurone le plus activé de la dernière couche (résultat de la classification)
@@ -38,7 +42,7 @@ void forward_propagation(Network* network);
 /*
 * Propage en arrière le cnn
 */
-void backward_propagation(Network* network, int wanted_number);
+void backward_propagation(Network* network, int wanted_number, int finetuning);
 
 /*
 * Implémente le dropout durant l'apprentissage en suivant le papier de recherche suivant:
