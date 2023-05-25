@@ -23,6 +23,8 @@ typedef struct TrainParameters {
     int nb_images; // Nombre d'images à traiter
     float accuracy; // Accuracy (à renvoyer)
     float loss; // Loss (à renvoyer)
+
+    bool offset; // Décalage aléatoire de l'image
 } TrainParameters;
 
 /*
@@ -52,6 +54,6 @@ void* train_thread(void* parameters);
 /*
  * Fonction principale d'entraînement du réseau neuronal convolutif
 */
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover);
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover, bool with_offset);
 
 #endif

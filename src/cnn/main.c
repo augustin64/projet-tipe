@@ -24,6 +24,7 @@ void help(char* call) {
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat du set de données.\n");
     printf("\t(mnist)\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t(mnist)\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
+    printf("\t(mnist)\t--no-offset              \tDésactiver le décalage aléatoire des images.\n");
     printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
     printf("\t\t--recover | -r [FILENAME]\tRécupérer depuis un modèle existant.\n");
     printf("\t\t--epochs  | -e [int]\t\tNombre d'époques.\n");
@@ -38,6 +39,7 @@ void help(char* call) {
     printf("\t\t--dataset | -d (mnist|jpg)\tFormat du set de données.\n");
     printf("\t(mnist)\t--images  | -i [FILENAME]\tFichier contenant les images.\n");
     printf("\t(mnist)\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
+    printf("\t(mnist)\t--no-offset              \tDésactiver le décalage aléatoire des images.\n");
     printf("\t (jpg) \t--datadir | -dd [FOLDER]\tDossier contenant les images.\n");
     printf("\t\t--preview-fails | -p\t\tAfficher les images ayant échoué.\n");
 }
@@ -59,6 +61,7 @@ int main(int argc, char* argv[]) {
         int dataset_type = 0;
         char* out = NULL;
         char* recover = NULL;
+        bool offset = true;
         int i = 2;
         while (i < argc) {
             if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
@@ -87,6 +90,9 @@ int main(int argc, char* argv[]) {
             } else if ((! strcmp(argv[i], "--recover"))||(! strcmp(argv[i], "-r"))) {
                 recover = argv[i+1];
                 i += 2;
+            } else if (! strcmp(argv[i], "--no-offset")) {
+                offset = false;
+                i++;
             } else {
                 printf_warning("Option choisie inconnue: ");
                 printf("%s\n", argv[i]);
@@ -119,7 +125,7 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier de sortie spécifié, défaut: out.bin\n");
             out = "out.bin";
         }
-        train(dataset_type, images_file, labels_file, data_dir, epochs, out, recover);
+        train(dataset_type, images_file, labels_file, data_dir, epochs, out, recover, offset);
         return 0;
     }
     if (! strcmp(argv[1], "test")) {
@@ -130,33 +136,32 @@ int main(int argc, char* argv[]) {
         char* data_dir = NULL; // Dossier d'images (jpg)
         int dataset_type; // Type de dataset (0 pour mnist, 1 pour jpg)
         bool preview_fails = false;
+        bool offset = true;
+
         int i = 2;
         while (i < argc) {
             if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
                 dataset = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
+            } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
                 modele = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
+            } else if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
                 images_file = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--labels"))||(! strcmp(argv[i], "-l"))) {
+            } else if ((! strcmp(argv[i], "--labels"))||(! strcmp(argv[i], "-l"))) {
                 labels_file = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--datadir"))||(! strcmp(argv[i], "-dd"))) {
+            } else if ((! strcmp(argv[i], "--datadir"))||(! strcmp(argv[i], "-dd"))) {
                 data_dir = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
+            } else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
                 preview_fails = true;
                 i++;
-            }
-            else {
+            } else if (! strcmp(argv[i], "--no-offset")) {
+                offset = false;
+                i++;
+            } else {
                 printf_warning("Option choisie inconnue: ");
                 printf("%s\n", argv[i]);
                 i++;
@@ -189,7 +194,7 @@ int main(int argc, char* argv[]) {
             printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;
         }
-        (void)test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails, true, false);
+        (void)test_network(dataset_type, modele, images_file, labels_file, data_dir, preview_fails, true, offset);
         return 0;
     }
     if (! strcmp(argv[1], "recognize")) {
@@ -203,16 +208,13 @@ int main(int argc, char* argv[]) {
             if ((! strcmp(argv[i], "--dataset"))||(! strcmp(argv[i], "-d"))) {
                 dataset = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
+            } else if ((! strcmp(argv[i], "--modele"))||(! strcmp(argv[i], "-m"))) {
                 modele = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
+            } else if ((! strcmp(argv[i], "--out"))||(! strcmp(argv[i], "-o"))) {
                 out = argv[i+1];
                 i += 2;
-            }
-            else if ((! strcmp(argv[i], "--input"))||(! strcmp(argv[i], "-i"))) {
+            } else if ((! strcmp(argv[i], "--input"))||(! strcmp(argv[i], "-i"))) {
                 input_file = argv[i+1];
                 i += 2;
             } else {
@@ -225,18 +227,20 @@ int main(int argc, char* argv[]) {
             dataset_type = 0;
         } else if ((dataset!=NULL) && !strcmp(dataset, "jpg")) {
             dataset_type = 1;
-        }
-        else {
+        } else {
             printf_error("Pas de type de dataset spécifié.\n");
             return 1;
         }
+
         if (!input_file) {
             printf_error("Pas de fichier d'entrée spécifié, rien à faire.\n");
             return 1;
         }
+
         if (!out) {
             out = "text";
         }
+        
         if (!modele) {
             printf_error("Pas de modèle à utiliser spécifié.\n");
             return 1;

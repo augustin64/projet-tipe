@@ -77,7 +77,7 @@ void* train_thread(void* parameters) {
 
     for (int i=start;  i < start+nb_images; i++) {
         if (dataset_type == 0) {
-            write_image_in_network_32(images[index[i]], height, width, network->input[0][0], true);
+            write_image_in_network_32(images[index[i]], height, width, network->input[0][0], param->offset);
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 start_time = omp_get_wtime();
@@ -170,7 +170,7 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover) {
+void train(int dataset_type, char* images_file, char* labels_file, char* data_dir, int epochs, char* out, char* recover, bool offset) {
     #ifdef USE_CUDA
     bool compatibility = cuda_setup(true);
     if (!compatibility) {
@@ -288,6 +288,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             param->nb_images = BATCHES / nb_threads;
             param->index = shuffle_index;
             param->network = copy_network(network);
+            param->offset = offset;
         }
     #else
         // Création des paramètres donnés à l'unique
@@ -313,6 +314,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         }
         train_params->nb_images = BATCHES;
         train_params->index = shuffle_index;
+        train_params->offset = offset;
     #endif
 
     end_time = omp_get_wtime();
@@ -432,7 +434,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         write_network(out, network);
         // If you want to test the network between each epoch, uncomment the following lines:
         /*
-        float* test_results = test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false, false, true);
+        float* test_results = test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false, false, offset);
         printf("Tests: Accuracy: %0.2lf%%\tLoss: %lf\n", test_results[0], test_results[1]);
         if (test_results[0] < test_accuracy) {
             network->learning_rate *= 0.1;
@@ -443,10 +445,6 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             printf("Increased learning rate to %0.2e\n", network->learning_rate);
         }
         test_accuracy = test_results[0];
-        free(test_results);
-
-        test_results = test_network(0, out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", NULL, false, false, false);
-        printf("Tests sans offset: Accuracy: %0.2lf%%\tLoss: %lf\n", test_results[0], test_results[1]);
         free(test_results);
         */
     }
