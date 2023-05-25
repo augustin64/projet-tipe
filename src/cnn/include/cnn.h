@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "struct.h"
 
 #ifndef DEF_MAIN_H

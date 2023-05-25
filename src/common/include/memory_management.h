@@ -14,13 +14,16 @@
 // L'initialisation passe de 1h02 à 2.4s sur mon matériel
 #define MEMORY_TAIL_OPT
 
-// We define our memory with a linked list of memory blocks
+// Liste chaînée de blocs de mémoire
 typedef struct Memory {
-   void* start; // Start of the allocated memory
-   void* cursor; // Current cursor
+   void* start; // Début du bloc de mémoire alloué
+   void* cursor; // Curseur actuel
+
    size_t size; // Taille de la mémoire allouée
-   int nb_alloc; // Nombre d'allocations dans le bloc
-   unsigned int id; // Nombre aléatoire permettant d'identifier le bloc plus facilement lors du débogage
+   int nb_alloc; // Nombre d'allocations actives dans le bloc
+
+   unsigned int id; // Nombre aléatoire permettant d'identifier le bloc
+                    // plus facilement lors du débogage
    struct Memory* next; // Élément suivant
 } Memory;
 

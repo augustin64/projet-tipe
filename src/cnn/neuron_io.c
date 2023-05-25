@@ -173,7 +173,7 @@ Network* read_network(char* filename) {
         printf_error((char*)"Incorrect magic number !\n");
         if (INITIAL_MAGIC_NUMBER < magic && magic >= INITIAL_MAGIC_NUMBER) {
             printf("\tThis backup is no longer supported\n");
-            printf("\tnPlease update it manually or re-train the network.\n");
+            printf("\tPlease update it manually or re-train the network.\n");
             printf("\t(You can update it with a script or manually with a Hex Editor)\n");
         }
         exit(1);
