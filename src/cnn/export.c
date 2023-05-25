@@ -94,9 +94,16 @@ void write_image(float** data, int width, int height, char* base_filename, int l
     image->height = height;
     image->lpData = (unsigned char*)malloc(sizeof(unsigned char)*width*height*3);
 
+    float maxi = 1e-7;
     for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
-            float color = fmax(fmin(data[i][j], 1.), 0.)*255;
+            maxi = fmax(maxi ,data[i][j]);
+        }
+    }
+
+    for (int i=0; i < height; i++) {
+        for (int j=0; j < width; j++) {
+            float color = fmax(data[i][j]/maxi, 0.)*255;
 
             image->lpData[(i*width+j)*3] = color;
             image->lpData[(i*width+j)*3 + 1] = color;
