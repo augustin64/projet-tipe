@@ -29,6 +29,7 @@ typedef struct TrainParameters {
     int height;
     int width;
     float accuracy;
+    bool offset;
 } TrainParameters;
 
 
@@ -71,6 +72,7 @@ void help(char* call) {
     printf("\t\t--delta   | -d [FILENAME]\tFichier où écrire le réseau différentiel.\n");
     printf("\t\t--nb-images | -N [int]\tNombres d'images à traiter.\n");
     printf("\t\t--start   | -s [int]\tPremière image à traiter.\n");
+    printf("\t\t--offset            \tActiver le décalage aléatoire.\n");
     printf("\trecognize:\n");
     printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--in      | -i [FILENAME]\tFichier contenant les images à reconnaître.\n");
@@ -80,16 +82,67 @@ void help(char* call) {
     printf("\t\t--labels  | -l [FILENAME]\tFichier contenant les labels.\n");
     printf("\t\t--modele  | -m [FILENAME]\tFichier contenant le réseau de neurones.\n");
     printf("\t\t--preview-fails | -p\tAfficher les images ayant échoué.\n");
+    printf("\t\t--offset            \tActiver le décalage aléatoire.\n");
 }
 
 
-void write_image_in_network(int** image, Network* network, int height, int width) {
-    for (int i=0; i < height; i++) {
-        for (int j=0; j < width; j++) {
-            if (!drop(ENTRY_DROPOUT)) {
-                network->layers[0]->neurons[i*height+j]->z = (float)image[i][j] / 255.0f;
+void write_image_in_network(int** image, Network* network, int height, int width, bool random_offset) {
+    int i_offset = 0;
+    int j_offset = 0;
+    int min_col = 0;
+    int min_ligne = 0;
+
+    if (random_offset) {
+        int sum_colonne[width];
+        int sum_ligne[height];
+
+        for (int i=0; i < width; i++) {
+            sum_colonne[i] = 0;
+        }
+        for (int j=0; j < height; j++) {
+            sum_ligne[j] = 0;
+        }
+
+        for (int i=0; i < width; i++) {
+            for (int j=0; j < height; j++) {
+                sum_ligne[i] += image[i][j];
+                sum_colonne[j] += image[i][j];
+            }
+        }
+
+        min_ligne = -1;
+        while (sum_ligne[min_ligne+1] == 0 && min_ligne < width+1) {
+            min_ligne++;
+        }
+
+        int max_ligne = width;
+        while (sum_ligne[max_ligne-1] == 0 && max_ligne > 0) {
+            max_ligne--;
+        }
+
+        min_col = -1;
+        while (sum_colonne[min_col+1] == 0 && min_col < height+1) {
+            min_col++;
+        }
+
+        int max_col = height;
+        while (sum_colonne[max_col-1] == 0 && max_col > 0) {
+            max_col--;
+        }
+
+        i_offset = 27-max_ligne+min_ligne == 0 ? 0 : rand()%(27-max_ligne+min_ligne);
+        j_offset = 27 - max_col + min_col == 0 ? 0 : rand()%(27-max_col+min_col);
+    }
+
+    for (int i=0; i < width; i++) {
+        for (int j=0; j < height; j++) {
+            int adjusted_i = i + min_ligne - i_offset;
+            int adjusted_j = j + min_col - j_offset;
+            // Make sure not to be out of the image
+            if (!drop(ENTRY_DROPOUT) && adjusted_i < height && adjusted_j < width && adjusted_i >= 0 && adjusted_j >= 0) {
+                network->layers[0]->neurons[i*height+j]->z = (float)image[adjusted_i][adjusted_j] / 255.0f;
             } else {
-                network->layers[0]->neurons[i*height+j]->z = 0;
+                network->layers[0]->neurons[i*height+j]->z = 0.;
             }
         }
     }
@@ -114,7 +167,7 @@ void* train_thread(void* parameters) {
     int* desired_output;
 
     for (int i=start; i < start+nb_images; i++) {
-        write_image_in_network(images[shuffle[i]], network, height, width);
+        write_image_in_network(images[shuffle[i]], network, height, width, param->offset);
         desired_output = desired_output_creation(network, labels[shuffle[i]]);
         forward_propagation(network, true);
         backward_propagation(network, desired_output);
@@ -134,7 +187,7 @@ void* train_thread(void* parameters) {
 }
 
 
-void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start) {
+void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start, bool offset) {
     // Entraînement du réseau sur le set de données MNIST
     Network* network;
     Network* delta_network;
@@ -207,6 +260,7 @@ void train(int epochs, char* recovery, char* image_file, char* label_file, char*
         train_parameters[j]->width = width;
         train_parameters[j]->nb_images = BATCHES / nb_threads;
         train_parameters[j]->shuffle_indices = shuffle_indices;
+        train_parameters[j]->offset = offset;
     }
 
     for (int i=0; i < epochs; i++) {
@@ -245,7 +299,7 @@ void train(int epochs, char* recovery, char* image_file, char* label_file, char*
         if (delta != NULL)
             write_delta_network(delta, delta_network);
 
-        test(out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", false);
+        test(out, "data/mnist/t10k-images-idx3-ubyte", "data/mnist/t10k-labels-idx1-ubyte", false, offset);
     }
     write_network(out, network);
     if (delta != NULL) {
@@ -283,7 +337,7 @@ void knuth_shuffle(int* tab, int n) {
     }
 }
 
-float** recognize(char* modele, char* entree) {
+float** recognize(char* modele, char* entree, bool offset) {
     Network* network = read_network(modele);
     Layer* last_layer = network->layers[network->nb_layers-1];
 
@@ -299,7 +353,7 @@ float** recognize(char* modele, char* entree) {
     for (int i=0; i < nb_images; i++) {
         results[i] = (float*)malloc(sizeof(float)*last_layer->nb_neurons);
 
-        write_image_in_network(images[i], network, height, width);
+        write_image_in_network(images[i], network, height, width, offset);
         forward_propagation(network, false);
 
         for (int j=0; j < last_layer->nb_neurons; j++) {
@@ -310,7 +364,7 @@ float** recognize(char* modele, char* entree) {
     return results;
 }
 
-void print_recognize(char* modele, char* entree, char* sortie) {
+void print_recognize(char* modele, char* entree, char* sortie, bool offset) {
     Network* network = read_network(modele);
     int nb_last_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
@@ -319,7 +373,7 @@ void print_recognize(char* modele, char* entree, char* sortie) {
     int* parameters = read_mnist_images_parameters(entree);
     int nb_images = parameters[0];
 
-    float** results = recognize(modele, entree);
+    float** results = recognize(modele, entree, offset);
 
     if (! strcmp(sortie, "json")) {
         printf("{\n");
@@ -356,7 +410,7 @@ void print_recognize(char* modele, char* entree, char* sortie) {
     }
 }
 
-void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails) {
+void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails, bool offset) {
     Network* network = read_network(modele);
     int nb_last_layer = network->layers[network->nb_layers-1]->nb_neurons;
 
@@ -368,7 +422,7 @@ void test(char* modele, char* fichier_images, char* fichier_labels, bool preview
     int height = parameters[2];
     int*** images = read_mnist_images(fichier_images);
 
-    float** results = recognize(modele, fichier_images);
+    float** results = recognize(modele, fichier_images, offset);
     unsigned int* labels = read_mnist_labels(fichier_labels);
     float accuracy = 0.;
 
@@ -402,6 +456,8 @@ int main(int argc, char* argv[]) {
         char* recovery = NULL;
         char* out = NULL;
         char* delta = NULL;
+        bool offset = false;
+
         int i = 2;
         while (i < argc) {
             // Utiliser un switch serait sans doute plus élégant
@@ -429,6 +485,9 @@ int main(int argc, char* argv[]) {
             } else if ((! strcmp(argv[i], "--start"))||(! strcmp(argv[i], "-s"))) {
                 start = strtol(argv[i+1], NULL, 10);
                 i += 2;
+            } else if (! strcmp(argv[i], "--offset")) {
+                offset = true;
+                i++;
             } else {
                 printf("%s : Argument non reconnu\n", argv[i]);
                 i++;
@@ -446,8 +505,8 @@ int main(int argc, char* argv[]) {
             printf("Pas de fichier de sortie spécifié, default: out.bin\n");
             out = "out.bin";
         }
-        // Entraînement en sourçant neural_network.c
-        train(epochs, recovery, images, labels, out, delta, nb_images, start);
+        // Entraînement (dans neural_network.c)
+        train(epochs, recovery, images, labels, out, delta, nb_images, start, offset);
         return 0;
     }
     if (! strcmp(argv[1], "recognize")) {
@@ -481,7 +540,7 @@ int main(int argc, char* argv[]) {
         if (! out) {
             out = "text";
         }
-        print_recognize(modele, in, out);
+        print_recognize(modele, in, out, false);
         // Reconnaissance puis affichage des données sous le format spécifié
         return 0;
     }
@@ -490,6 +549,7 @@ int main(int argc, char* argv[]) {
         char* images = NULL;
         char* labels = NULL;
         bool preview_fails = false;
+        bool offset = false;
         int i = 2;
         while (i < argc) {
             if ((! strcmp(argv[i], "--images"))||(! strcmp(argv[i], "-i"))) {
@@ -504,9 +564,15 @@ int main(int argc, char* argv[]) {
             } else if ((! strcmp(argv[i], "--preview-fails"))||(! strcmp(argv[i], "-p"))) {
                 preview_fails = true;
                 i++;
+            } else if (! strcmp(argv[i], "--offset")) {
+                offset = true;
+                i++;
+            } else {
+                printf("%s : Argument non reconnu\n", argv[i]);
+                i++;
             }
         }
-        test(modele, images, labels, preview_fails);
+        test(modele, images, labels, preview_fails, offset);
         return 0;
     }
     printf("Option choisie non reconnue: %s\n", argv[1]);

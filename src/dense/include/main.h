@@ -28,7 +28,7 @@ void help(char* call);
 * network: réseau neuronal
 * height, width: dimensions de l'image
 */
-void write_image_in_network(int** image, Network* network, int height, int width);
+void write_image_in_network(int** image, Network* network, int height, int width, bool random_offset);
 
 /*
 * Sous fonction de 'train' assignée à un thread
@@ -49,7 +49,7 @@ void* train_thread(void* parameters);
 * nb_images_to_process: nombre d'images sur lesquelles entraîner le réseau  (-1 si non utilisé)
 * start: index auquel démarrer si nb_images_to_process est utilisé (0 si non utilisé)
 */
-void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start);
+void train(int epochs, char* recovery, char* image_file, char* label_file, char* out, char* delta, int nb_images_to_process, int start, bool random_offset);
 
 /*
 * Échange deux éléments d'un tableau
@@ -66,7 +66,7 @@ void knuth_shuffle(int* tab, int n);
 * modele: nom du fichier contenant le réseau neuronal
 * entree: nom du fichier contenant les images à reconnaître
 */
-float** recognize(char* modele, char* entree);
+float** recognize(char* modele, char* entree, bool random_offset);
 
 /*
 * Renvoie les prédictions d'images sur stdout
@@ -74,7 +74,7 @@ float** recognize(char* modele, char* entree);
 * entree: fichier contenant les images
 * sortie: vaut 'text' ou 'json', spécifie le format auquel afficher les prédictions
 */
-void print_recognize(char* modele, char* entree, char* sortie);
+void print_recognize(char* modele, char* entree, char* sortie, bool random_offset);
 
 /*
 * Teste un réseau neuronal avec un fichier d'images ainsi que leurs propriétés
@@ -83,7 +83,7 @@ void print_recognize(char* modele, char* entree, char* sortie);
 * fichier_labels: nom du fichier contenant les labels
 * preview_fails: faut-il afficher les images qui ne sont pas correctement reconnues ?
 */
-void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails);
+void test(char* modele, char* fichier_images, char* fichier_labels, bool preview_fails, bool random_offset);
 
 int main(int argc, char* argv[]);
 

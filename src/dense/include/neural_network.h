@@ -22,8 +22,8 @@
 #define PRINT_BIAIS false
 
 // Mettre à 1 pour désactiver
-#define DROPOUT 0.7
-#define ENTRY_DROPOUT 0.85
+#define DROPOUT 1
+#define ENTRY_DROPOUT 1
 
 
 bool drop(float prob);
