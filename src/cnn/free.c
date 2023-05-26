@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "../common/include/memory_management.h"
+#include "include/cnn.h"
 
 #include "include/free.h"
 
@@ -42,59 +43,76 @@ void free_convolution(Network* network, int pos) {
     int r = k_pos->rows;
     int bias_size = network->width[pos+1];
     free_a_cube_input_layer(network, pos+1, network->depth[pos+1], network->width[pos+1]);
+
+    // Partie toujours initialisée (donc à libérer)
     for (int i=0; i < c; i++) {
         for (int j=0; j < bias_size; j++) {
             gree(k_pos->bias[i][j], true);
-            gree(k_pos->d_bias[i][j], true);
-            #ifdef ADAM_CNN_BIAS
-            gree(k_pos->s_d_bias[i][j], true);
-            gree(k_pos->v_d_bias[i][j], true);
-            #endif
         }
         gree(k_pos->bias[i], true);
-        gree(k_pos->d_bias[i], true);
-        #ifdef ADAM_CNN_BIAS
-        gree(k_pos->s_d_bias[i], true);
-        gree(k_pos->v_d_bias[i], true);
-        #endif
     }
     gree(k_pos->bias, true);
-    gree(k_pos->d_bias, true);
-    #ifdef ADAM_CNN_BIAS
-    gree(k_pos->s_d_bias, true);
-    gree(k_pos->v_d_bias, true);
-    #endif
 
     for (int i=0; i < r; i++) {
         for (int j=0; j < c; j++) {
             for (int k=0; k < k_size; k++) {
                 gree(k_pos->weights[i][j][k], true);
-                gree(k_pos->d_weights[i][j][k], true);
-                #ifdef ADAM_CNN_WEIGHTS
-                gree(k_pos->s_d_weights[i][j][k], true);
-                gree(k_pos->v_d_weights[i][j][k], true);
-                #endif
             }
             gree(k_pos->weights[i][j], true);
-            gree(k_pos->d_weights[i][j], true);
-            #ifdef ADAM_CNN_WEIGHTS
-            gree(k_pos->s_d_weights[i][j], true);
-            gree(k_pos->v_d_weights[i][j], true);
-            #endif
         }
         gree(k_pos->weights[i], true);
-        gree(k_pos->d_weights[i], true);
-        #ifdef ADAM_CNN_WEIGHTS
-        gree(k_pos->s_d_weights[i], true);
-        gree(k_pos->v_d_weights[i], true);
-        #endif
     }
     gree(k_pos->weights, true);
-    gree(k_pos->d_weights, true);
-    #ifdef ADAM_CNN_WEIGHTS
-    gree(k_pos->s_d_weights, true);
-    gree(k_pos->v_d_weights, true);
-    #endif
+
+    // Partie initialisée que sous certaines conditions (donc ne pas toujours libérer)
+    if (network->finetuning == EVERYTHING) {
+        for (int i=0; i < c; i++) {
+            for (int j=0; j < bias_size; j++) {
+                gree(k_pos->d_bias[i][j], true);
+                #ifdef ADAM_CNN_BIAS
+                gree(k_pos->s_d_bias[i][j], true);
+                gree(k_pos->v_d_bias[i][j], true);
+                #endif
+            }
+            gree(k_pos->d_bias[i], true);
+            #ifdef ADAM_CNN_BIAS
+            gree(k_pos->s_d_bias[i], true);
+            gree(k_pos->v_d_bias[i], true);
+            #endif
+        }
+        gree(k_pos->d_bias, true);
+        #ifdef ADAM_CNN_BIAS
+        gree(k_pos->s_d_bias, true);
+        gree(k_pos->v_d_bias, true);
+        #endif
+
+        for (int i=0; i < r; i++) {
+            for (int j=0; j < c; j++) {
+                for (int k=0; k < k_size; k++) {
+                    gree(k_pos->d_weights[i][j][k], true);
+                    #ifdef ADAM_CNN_WEIGHTS
+                    gree(k_pos->s_d_weights[i][j][k], true);
+                    gree(k_pos->v_d_weights[i][j][k], true);
+                    #endif
+                }
+                gree(k_pos->d_weights[i][j], true);
+                #ifdef ADAM_CNN_WEIGHTS
+                gree(k_pos->s_d_weights[i][j], true);
+                gree(k_pos->v_d_weights[i][j], true);
+                #endif
+            }
+            gree(k_pos->d_weights[i], true);
+            #ifdef ADAM_CNN_WEIGHTS
+            gree(k_pos->s_d_weights[i], true);
+            gree(k_pos->v_d_weights[i], true);
+            #endif
+        }
+        gree(k_pos->d_weights, true);
+        #ifdef ADAM_CNN_WEIGHTS
+        gree(k_pos->s_d_weights, true);
+        gree(k_pos->v_d_weights, true);
+        #endif
+    }
 
     gree(k_pos, true);
 }
@@ -103,22 +121,26 @@ void free_dense(Network* network, int pos) {
     free_a_line_input_layer(network, pos+1);
     Kernel_nn* k_pos = network->kernel[pos]->nn;
     int dim = k_pos->size_input;
+
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i], true);
+    }
+    gree(k_pos->weights, true);
+    gree(k_pos->bias, true);
+
+    for (int i=0; i < dim; i++) {
         gree(k_pos->d_weights[i], true);
         #ifdef ADAM_DENSE_WEIGHTS
         gree(k_pos->s_d_weights[i], true);
         gree(k_pos->v_d_weights[i], true);
         #endif
     }
-    gree(k_pos->weights, true);
     gree(k_pos->d_weights, true);
     #ifdef ADAM_DENSE_WEIGHTS
     gree(k_pos->s_d_weights, true);
     gree(k_pos->v_d_weights, true);
     #endif
 
-    gree(k_pos->bias, true);
     gree(k_pos->d_bias, true);
     #ifdef ADAM_DENSE_BIAS
     gree(k_pos->s_d_bias, true);
@@ -132,27 +154,35 @@ void free_dense_linearisation(Network* network, int pos) {
     free_a_line_input_layer(network, pos+1);
     Kernel_nn* k_pos = network->kernel[pos]->nn;
     int dim = k_pos->size_input;
+
+    // Partie toujours initialisée (donc à libérer)
     for (int i=0; i < dim; i++) {
         gree(k_pos->weights[i], true);
-        gree(k_pos->d_weights[i], true);
-        #ifdef ADAM_DENSE_WEIGHTS
-        gree(k_pos->s_d_weights[i], true);
-        gree(k_pos->v_d_weights[i], true);
-        #endif
     }
     gree(k_pos->weights, true);
-    gree(k_pos->d_weights, true);
-    #ifdef ADAM_DENSE_WEIGHTS
-    gree(k_pos->s_d_weights, true);
-    gree(k_pos->v_d_weights, true);
-    #endif
-
     gree(k_pos->bias, true);
-    gree(k_pos->d_bias, true);
-    #ifdef ADAM_DENSE_BIAS
-    gree(k_pos->s_d_bias, true);
-    gree(k_pos->v_d_bias, true);
-    #endif
+
+    // Partie initialisée que sous certaines conditions (donc ne pas toujours libérer)
+    if (network->finetuning <= NN_AND_LINEARISATION) {
+        for (int i=0; i < dim; i++) {
+            gree(k_pos->d_weights[i], true);
+            #ifdef ADAM_DENSE_WEIGHTS
+            gree(k_pos->s_d_weights[i], true);
+            gree(k_pos->v_d_weights[i], true);
+            #endif
+        }
+        gree(k_pos->d_weights, true);
+        #ifdef ADAM_DENSE_WEIGHTS
+        gree(k_pos->s_d_weights, true);
+        gree(k_pos->v_d_weights, true);
+        #endif
+
+        gree(k_pos->d_bias, true);
+        #ifdef ADAM_DENSE_BIAS
+        gree(k_pos->s_d_bias, true);
+        gree(k_pos->v_d_bias, true);
+        #endif
+    }
 
     gree(k_pos, true);
 }

@@ -67,6 +67,7 @@ typedef struct Network{
     int dropout; // Probabilité d'abandon d'un neurone dans [0, 100] (entiers)
     float learning_rate; // Taux d'apprentissage du réseau
     int initialisation; // Id du type d'initialisation
+    int finetuning; // backpropagation: 0 sur tout; 1 sur dense et linéarisation; 2 sur dense
 
     int max_size; // Taille du tableau contenant le réseau
     int size; // Taille actuelle du réseau (size ≤ max_size)

@@ -4,6 +4,7 @@
 
 #include "include/update.h"
 #include "include/struct.h"
+#include "include/cnn.h"
 
 #include "include/config.h"
 
@@ -31,6 +32,9 @@ void update_weights(Network* network, Network* d_network) {
         int output_width = network->width[i+1];
 
         if (k_i->cnn) { // Convolution
+            if (network->finetuning != EVERYTHING) {
+                return; // Alors on a finit de backpropager
+            }
             Kernel_cnn* cnn = k_i->cnn;
             Kernel_cnn* d_cnn = dk_i->cnn;
             int k_size = cnn->k_size;
@@ -70,6 +74,9 @@ void update_weights(Network* network, Network* d_network) {
                     }
                 }
             } else { // Matrice -> vecteur
+                if (network->finetuning == NN_ONLY) {
+                    return; // Alors on a finit de backpropager
+                }
                 Kernel_nn* nn = k_i->nn;
                 Kernel_nn* d_nn = dk_i->nn;
 
@@ -105,6 +112,9 @@ void update_bias(Network* network, Network* d_network) {
         int output_depth = network->depth[i+1];
 
         if (k_i->cnn) { // Convolution
+            if (network->finetuning != EVERYTHING) {
+                return; // Alors on a finit de backpropager
+            }
             Kernel_cnn* cnn = k_i->cnn;
             Kernel_cnn* d_cnn = dk_i->cnn;
 
@@ -124,6 +134,11 @@ void update_bias(Network* network, Network* d_network) {
                 }
             }
         } else if (k_i->nn) { // Full connection
+            if (k_i->linearisation == DO_LINEARISE) {// Matrice -> vecteur
+                if (network->finetuning == NN_ONLY) {
+                    return; // Alors on a finit de backpropager
+                }
+            }
             Kernel_nn* nn = k_i->nn;
             Kernel_nn* d_nn = dk_i->nn;
 
@@ -157,6 +172,9 @@ void reset_d_weights(Network* network) {
         int output_width = network->width[i+1];
 
         if (k_i->cnn) { // Convolution
+            if (network->finetuning != EVERYTHING) {
+                continue; // On n'a pas initialisé donc on n'a pas besoin de reset
+            }
             Kernel_cnn* cnn = k_i_1->cnn;
 
             int k_size = cnn->k_size;
@@ -180,6 +198,9 @@ void reset_d_weights(Network* network) {
                     }
                 }
             } else { // Matrice -> vecteur
+                if (network->finetuning == NN_ONLY) {
+                    continue; // On n'a pas initialisé donc on n'a pas besoin de reset
+                }
                 Kernel_nn* nn = k_i_1->nn;
 
                 int size_input = input_width*input_width*input_depth;
@@ -206,6 +227,9 @@ void reset_d_bias(Network* network) {
         int output_depth = network->depth[i+1];
 
         if (k_i->cnn) { // Convolution
+            if (network->finetuning != EVERYTHING) {
+                continue; // On n'a pas initialisé donc on n'a pas besoin de reset
+            }
             Kernel_cnn* cnn = k_i_1->cnn;
 
             for (int a=0; a < output_depth; a++) {
@@ -216,6 +240,11 @@ void reset_d_bias(Network* network) {
                 }
             }
         } else if (k_i->nn) { // Full connection
+            if (k_i->linearisation == DO_LINEARISE) {
+                if (network->finetuning == NN_ONLY) {
+                    continue; // On n'a pas initialisé donc on n'a pas besoin de reset
+                }
+            }
             Kernel_nn* nn = k_i_1->nn;
 
             for (int a=0; a < output_width; a++) {

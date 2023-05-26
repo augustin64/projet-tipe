@@ -232,10 +232,10 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     Network* network;
     if (!recover) {
         if (dataset_type == 0) {
-            network = create_network_lenet5(LEARNING_RATE, 0, LEAKY_RELU, HE, input_width, input_depth);
+            network = create_network_lenet5(LEARNING_RATE, 0, LEAKY_RELU, HE, input_width, input_depth, finetuning);
             //network = create_simple_one(LEARNING_RATE, 0, RELU, GLOROT, input_width, input_depth);    
         } else {
-            network = create_network_VGG16(LEARNING_RATE, 0, RELU, HE, dataset->numCategories);
+            network = create_network_VGG16(LEARNING_RATE, 0, RELU, HE, dataset->numCategories, finetuning);
 
             #ifdef USE_MULTITHREADING
                 printf_warning("Utilisation de VGG16 avec multithreading. La quantité de RAM utilisée peut devenir excessive\n");

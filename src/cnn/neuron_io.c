@@ -187,6 +187,7 @@ Network* read_network(char* filename) {
     network->initialisation = initialisation;
     (void) !fread(&dropout, sizeof(uint32_t), 1, ptr);
     network->dropout = dropout;
+    network->finetuning = 0;
 
     // Lecture de la taille de l'entrée des différentes matrices
     network->width = (int*)nalloc(size, sizeof(int));
@@ -268,28 +269,35 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
         float tmp;
 
         cnn->bias = (float***)nalloc(cnn->columns, sizeof(float**));
+        for (int i=0; i < cnn->columns; i++) {
+            cnn->bias[i] = (float**)nalloc(output_width, sizeof(float*));
+            for (int j=0; j < output_width; j++) {
+                cnn->bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                for (int k=0; k < output_width; k++) {
+                    (void) !fread(&tmp, sizeof(tmp), 1, ptr);
+                    cnn->bias[i][j][k] = tmp;
+                }
+            }
+        }
+
         cnn->d_bias = (float***)nalloc(cnn->columns, sizeof(float**));
         #ifdef ADAM_CNN_BIAS
         cnn->s_d_bias = (float***)nalloc(cnn->columns, sizeof(float**));
         cnn->v_d_bias = (float***)nalloc(cnn->columns, sizeof(float**));
         #endif
         for (int i=0; i < cnn->columns; i++) {
-            cnn->bias[i] = (float**)nalloc(output_width, sizeof(float*));
             cnn->d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
             #ifdef ADAM_CNN_BIAS
             cnn->s_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
             cnn->v_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
             #endif
             for (int j=0; j < output_width; j++) {
-                cnn->bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 cnn->d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 #ifdef ADAM_CNN_BIAS
                 cnn->s_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 cnn->v_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
                 #endif
                 for (int k=0; k < output_width; k++) {
-                    (void) !fread(&tmp, sizeof(tmp), 1, ptr);
-                    cnn->bias[i][j][k] = tmp;
                     cnn->d_bias[i][j][k] = 0.;
                     #ifdef ADAM_CNN_BIAS
                     cnn->s_d_bias[i][j][k] = 0.;
@@ -299,36 +307,46 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
             }
         }
 
+
         cnn->weights = (float****)nalloc(cnn->rows, sizeof(float***));
+        for (int i=0; i < cnn->rows; i++) {
+            cnn->weights[i] = (float***)nalloc(cnn->columns, sizeof(float**));
+            for (int j=0; j < cnn->columns; j++) {
+                cnn->weights[i][j] = (float**)nalloc(cnn->k_size, sizeof(float*));
+                for (int k=0; k < cnn->k_size; k++) {
+                    cnn->weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
+                    for (int l=0; l < cnn->k_size; l++) {
+                        (void) !fread(&tmp, sizeof(tmp), 1, ptr);
+                        cnn->weights[i][j][k][l] = tmp;
+                    }
+                }
+            }
+        }
+
         cnn->d_weights = (float****)nalloc(cnn->rows, sizeof(float***));
         #ifdef ADAM_CNN_WEIGHTS
         cnn->s_d_weights = (float****)nalloc(cnn->rows, sizeof(float***));
         cnn->v_d_weights = (float****)nalloc(cnn->rows, sizeof(float***));
         #endif
         for (int i=0; i < cnn->rows; i++) {
-            cnn->weights[i] = (float***)nalloc(cnn->columns, sizeof(float**));
             cnn->d_weights[i] = (float***)nalloc(cnn->columns, sizeof(float**));
             #ifdef ADAM_CNN_WEIGHTS
             cnn->s_d_weights[i] = (float***)nalloc(cnn->columns, sizeof(float**));
             cnn->v_d_weights[i] = (float***)nalloc(cnn->columns, sizeof(float**));
             #endif
             for (int j=0; j < cnn->columns; j++) {
-                cnn->weights[i][j] = (float**)nalloc(cnn->k_size, sizeof(float*));
                 cnn->d_weights[i][j] = (float**)nalloc(cnn->k_size, sizeof(float*));
                 #ifdef ADAM_CNN_WEIGHTS
                 cnn->s_d_weights[i][j] = (float**)nalloc(cnn->k_size, sizeof(float*));
                 cnn->v_d_weights[i][j] = (float**)nalloc(cnn->k_size, sizeof(float*));
                 #endif
                 for (int k=0; k < cnn->k_size; k++) {
-                    cnn->weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     cnn->d_weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     #ifdef ADAM_CNN_WEIGHTS
                     cnn->s_d_weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     cnn->v_d_weights[i][j][k] = (float*)nalloc(cnn->k_size, sizeof(float));
                     #endif
                     for (int l=0; l < cnn->k_size; l++) {
-                        (void) !fread(&tmp, sizeof(tmp), 1, ptr);
-                        cnn->weights[i][j][k][l] = tmp;
                         cnn->d_weights[i][j][k][l] = 0.;
                         #ifdef ADAM_CNN_WEIGHTS
                         cnn->s_d_weights[i][j][k][l] = 0.;
@@ -357,14 +375,17 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
         float tmp;
 
         nn->bias = (float*)nalloc(nn->size_output, sizeof(float));
+        for (int i=0; i < nn->size_output; i++) {
+            (void) !fread(&tmp, sizeof(tmp), 1, ptr);
+            nn->bias[i] = tmp;
+        }
+
         nn->d_bias = (float*)nalloc(nn->size_output, sizeof(float));
         #ifdef ADAM_DENSE_BIAS
         nn->s_d_bias = (float*)nalloc(nn->size_output, sizeof(float));
         nn->v_d_bias = (float*)nalloc(nn->size_output, sizeof(float));
         #endif
         for (int i=0; i < nn->size_output; i++) {
-            (void) !fread(&tmp, sizeof(tmp), 1, ptr);
-            nn->bias[i] = tmp;
             nn->d_bias[i] = 0.;
             #ifdef ADAM_DENSE_BIAS
             nn->s_d_bias[i] = 0.;
@@ -373,21 +394,26 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
         }
 
         nn->weights = (float**)nalloc(nn->size_input, sizeof(float*));
+        for (int i=0; i < nn->size_input; i++) {
+            nn->weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
+            for (int j=0; j < nn->size_output; j++) {
+                (void) !fread(&tmp, sizeof(tmp), 1, ptr);
+                nn->weights[i][j] = tmp;
+            }
+        }
+
         nn->d_weights = (float**)nalloc(nn->size_input, sizeof(float*));
         #ifdef ADAM_DENSE_WEIGHTS
         nn->s_d_weights = (float**)nalloc(nn->size_input, sizeof(float*));
         nn->v_d_weights = (float**)nalloc(nn->size_input, sizeof(float*));
         #endif
         for (int i=0; i < nn->size_input; i++) {
-            nn->weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             nn->d_weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             #ifdef ADAM_DENSE_WEIGHTS
             nn->s_d_weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             nn->v_d_weights[i] = (float*)nalloc(nn->size_output, sizeof(float));
             #endif
             for (int j=0; j < nn->size_output; j++) {
-                (void) !fread(&tmp, sizeof(tmp), 1, ptr);
-                nn->weights[i][j] = tmp;
                 nn->d_weights[i][j] = 0.;
                 #ifdef ADAM_DENSE_WEIGHTS
                 nn->s_d_weights[i][j] = 0.;
@@ -395,6 +421,7 @@ Kernel* read_kernel(int type_couche, int output_width, FILE* ptr) {
                 #endif
             }
         }
+
     } else if (type_couche == POOLING) { // Cas du Pooling Layer
         uint32_t pooling, linearisation, stride, padding;
         (void) !fread(&linearisation, sizeof(linearisation), 1, ptr);
