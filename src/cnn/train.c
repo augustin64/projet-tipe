@@ -128,7 +128,7 @@ void* train_thread(void* parameters) {
                 load_image_param->index = index[i+1];
                 pthread_create(&tid, NULL, load_image, (void*) load_image_param);
             }
-            write_256_image_in_network(param->dataset->images[index[i]], width, param->dataset->numComponents, network->width[0], network->input[0]);
+            write_256_image_in_network(param->dataset->images[index[i]], width, height, param->dataset->numComponents, network->width[0], network->input[0]);
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 start_time = omp_get_wtime();

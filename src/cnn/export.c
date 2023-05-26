@@ -152,7 +152,7 @@ void visual_propagation(char* modele_file, char* mnist_images_file, char* out_ba
     } else {
         imgRawImage* image = loadJpegImageFile(jpeg_file);
 
-        write_256_image_in_network(image->lpData, image->width, image->numComponents, network->width[0], network->input[0]);
+        write_256_image_in_network(image->lpData, image->width, image->height, image->numComponents, network->width[0], network->input[0]);
 
         // Free allocated memory from image reading
         free(image->lpData);

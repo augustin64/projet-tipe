@@ -6,8 +6,8 @@
 #define DEF_MAIN_H
 
 #define EVERYTHING 0
-#define NN_ONLY 1
-#define NN_AND_LINEARISATION 2
+#define NN_AND_LINEARISATION 1
+#define NN_ONLY 2
 
 /*
 * Renvoie l'indice de l'élément de valeur maximale dans un tableau de flottants
@@ -26,12 +26,15 @@ int will_be_drop(int dropout_prob);
 void write_image_in_network_32(int** image, int height, int width, float** input, bool random_offset);
 
 /*
-* Écrit une image linéarisée de img_width*img_width*img_depth pixels dans un tableau de taille size_input*size_input*3
+* Écrit une image linéarisée de img_width*img_height*img_depth pixels dans un tableau de taille size_input*size_input*3
 * Les conditions suivantes doivent être respectées:
-* - l'image est au plus de la même taille que input
-* - la différence de taille entre input et l'image doit être un multiple de 2 (pour centrer l'image)
+ 
+* Soit l'image est plus petite que l'input, et est carrée, alors
+* la différence de taille entre input et l'image doit être un multiple de 2 (pour centrer l'image)
+ 
+* Soit l'image est de taille au moins la taille de l'input, et elle sera décalée de manière aléatoire
 */
-void write_256_image_in_network(unsigned char* image, int img_width, int img_depth, int input_width, float*** input);
+void write_256_image_in_network(unsigned char* image, int img_width, int img_height, int img_depth, int input_width, float*** input);
 
 /*
 * Propage en avant le cnn. Le dropout est actif que si le réseau est en phase d'apprentissage.

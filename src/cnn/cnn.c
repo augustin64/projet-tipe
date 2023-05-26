@@ -130,11 +130,29 @@ void write_image_in_network_32(int** image, int height, int width, float** input
     }
 }
 
-void write_256_image_in_network(unsigned char* image, int img_width, int img_depth, int input_width, float*** input) {
-    assert(img_width <= input_width);
-    assert((input_width - img_width)%2 == 0);
+void write_256_image_in_network(unsigned char* image, int img_width, int img_height, int img_depth, int input_width, float*** input) {
+    int padding = 0;
+    int decalage_x = 0; // Si l'input est plus petit que img_height, décalage de l'input par rapport à l'image selon 1e coord
+    int decalage_y = 0; // Pareil avec width et 2e coord
 
-    int padding = (input_width - img_width)/2;
+    if (img_width < input_width) { // Avec padding, l'image est carrée
+        assert(img_height == img_width);
+        assert((input_width - img_width)%2 == 0);
+
+        padding = (input_width - img_width)/2;
+    } else { // Sans padding, l'image est au minimum de la taille de l'input
+        assert(img_height >= input_width);
+
+        int decalage_possible_x = input_width - img_height;
+        if (decalage_possible_x > 0) {
+            decalage_x = rand() %decalage_possible_x;
+        }
+
+        int decalage_possible_y = input_width - img_width;
+        if (decalage_possible_y > 0) {
+            decalage_y = rand() %decalage_possible_y;
+        }
+    }
 
     for (int i=0; i < padding; i++) {
         for (int j=0; j < input_width; j++) {
@@ -147,10 +165,14 @@ void write_256_image_in_network(unsigned char* image, int img_width, int img_dep
         }
     }
 
-    for (int i=0; i < img_width; i++) {
-        for (int j=0; j < img_width; j++) {
+    int min_width = min(img_width, input_width);
+    int min_height = min(img_height, input_width);
+    for (int i=0; i < min_height; i++) {
+        for (int j=0; j < min_width; j++) {
             for (int composante=0; composante < img_depth; composante++) {
-                input[composante][i+padding][j+padding] = (float)image[(i*img_width+j)*img_depth + composante] / 255.0f;
+                int x = i + decalage_x;
+                int y = j + decalage_y;
+                input[composante][i+padding][j+padding] = (float)image[(x*img_width+y)*img_depth + composante] / 255.0f;
             }
         }
     }
