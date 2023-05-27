@@ -147,6 +147,7 @@ $(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c \
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
 
 
+ifdef NVCC_INSTALLED
 $(BUILDDIR)/cnn-export-cuda: $(CNN_SRCDIR)/export.c \
 		$(BUILDDIR)/cnn_cuda_backpropagation.o \
 		$(BUILDDIR)/cnn_cuda_convolution.o \
@@ -163,7 +164,10 @@ $(BUILDDIR)/cnn-export-cuda: $(CNN_SRCDIR)/export.c \
 		$(BUILDDIR)/mnist.o \
 		$(BUILDDIR)/cuda_utils.o
 	$(NVCC)  $^ -o $@  $(NVCCFLAGS) $(LD_NVCCFLAGS)
-
+else
+$(BUILDDIR)/cnn-export-cuda: $(CNN_SRCDIR)/export.c
+	@echo "$(NVCC) not found, skipping"
+endif
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
 	$(CC)  -c $< -o $@  $(CFLAGS)
