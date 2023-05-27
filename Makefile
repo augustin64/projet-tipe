@@ -70,7 +70,7 @@ $(BUILDDIR)/dense_%.o: $(DENSE_SRCDIR)/%.c $(DENSE_SRCDIR)/include/%.h
 #
 # Build cnn
 #
-cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview $(BUILDDIR)/cnn-export;
+cnn: $(BUILDDIR)/cnn-main $(BUILDDIR)/cnn-main-cuda $(BUILDDIR)/cnn-preview $(BUILDDIR)/cnn-export $(BUILDDIR)/cnn-export-cuda;
 
 $(BUILDDIR)/cnn-main: $(CNN_SRCDIR)/main.c \
 		$(BUILDDIR)/cnn_backpropagation.o \
@@ -145,6 +145,24 @@ $(BUILDDIR)/cnn-export: $(CNN_SRCDIR)/export.c \
 		$(BUILDDIR)/mnist.o \
 		$(BUILDDIR)/utils.o
 	$(CC)  $^ -o $@  $(CFLAGS) $(LD_CFLAGS)
+
+
+$(BUILDDIR)/cnn-export-cuda: $(CNN_SRCDIR)/export.c \
+		$(BUILDDIR)/cnn_cuda_backpropagation.o \
+		$(BUILDDIR)/cnn_cuda_convolution.o \
+		$(BUILDDIR)/cnn_neuron_io.cuda.o \
+		$(BUILDDIR)/cnn_cuda_function.o \
+		$(BUILDDIR)/cnn_free.cuda.o \
+		$(BUILDDIR)/cnn_cuda_make.o \
+		$(BUILDDIR)/cnn_cnn.cuda.o \
+		$(BUILDDIR)/cnn_utils.cuda.o \
+		$(BUILDDIR)/cnn_jpeg.cuda.o \
+		\
+		$(BUILDDIR)/cuda_memory_management.o \
+		$(BUILDDIR)/colors.cuda.o \
+		$(BUILDDIR)/mnist.o \
+		$(BUILDDIR)/cuda_utils.o
+	$(NVCC)  $^ -o $@  $(NVCCFLAGS) $(LD_NVCCFLAGS)
 
 
 $(BUILDDIR)/cnn_%.o: $(CNN_SRCDIR)/%.c $(CNN_SRCDIR)/include/%.h
