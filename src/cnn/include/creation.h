@@ -10,6 +10,13 @@
 Network* create_network(int max_size, float learning_rate, int dropout, int initialisation, int input_width, int input_depth, int finetuning);
 
 /*
+* Créer un réseau associé à 'network' pour la backpropagation en suivant la même
+* architecture que 'network'
+* Pour cela, la fonction alloue le réseau et ses couches
+*/
+D_Network* create_d_network(Network* network);
+
+/*
 * Créé et alloue de la mémoire à une couche de type input cube
 */
 void create_a_cube_input_layer(Network* network, int pos, int depth, int dim);

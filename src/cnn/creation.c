@@ -15,6 +15,7 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
         printf_error("La probabilité de dropout n'est pas respecté, elle doit être comprise entre 0 et 100\n");
     }
     Network* network = (Network*)nalloc(1, sizeof(Network));
+    network->d_network = NULL;
     network->learning_rate = learning_rate;
     network->max_size = max_size;
     network->dropout = dropout;
@@ -34,6 +35,141 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     create_a_cube_input_layer(network, 0, input_depth, input_width);
     create_a_cube_input_z_layer(network, 0, input_depth, input_width);
     return network;
+}
+
+D_Network* create_d_network(Network* network) {
+    
+    // On initialise le réseau
+    int max_size = network->max_size;
+    D_Network* d_network = (D_Network*)nalloc(1, sizeof(D_Network));
+    if (pthread_mutex_init(&(d_network->lock), NULL) != 0)
+    {
+        printf_error("Le mutex ne s'est pas initialisé correctement \n");
+    }
+    d_network->kernel = (D_Kernel**)nalloc(max_size-1, sizeof(D_Kernel*));
+    for (int i=0; i < max_size-1; i++) {
+        d_network->kernel[i] = (D_Kernel*)nalloc(1, sizeof(D_Kernel));
+    }
+
+    // Puis toutes ses couches
+    int n = network->size;
+    for (int i=0; i<(n-1); i++) {
+        Kernel* k_i = network->kernel[i];
+        D_Kernel* d_k_i = d_network->kernel[i];
+
+        if (k_i->cnn) { // Convolution
+            int k_size = k_i->cnn->k_size;
+            int rows = k_i->cnn->rows;
+            int columns = k_i->cnn->columns;
+            int output_width = network->width[i+1];
+            d_k_i->cnn = (D_Kernel_cnn*)nalloc(1, sizeof(D_Kernel_cnn));
+            D_Kernel_cnn* cnn = d_k_i->cnn;
+            // Weights
+            cnn->d_weights = (float****)nalloc(rows, sizeof(float***));
+            #ifdef ADAM_CNN_WEIGHTS
+            cnn->s_d_weights = (float****)nalloc(rows, sizeof(float***));
+            cnn->v_d_weights = (float****)nalloc(rows, sizeof(float***));
+            #endif
+            for (int i=0; i < rows; i++) {
+                cnn->d_weights[i] = (float***)nalloc(columns, sizeof(float**));
+                #ifdef ADAM_CNN_WEIGHTS
+                cnn->s_d_weights[i] = (float***)nalloc(columns, sizeof(float**));
+                cnn->v_d_weights[i] = (float***)nalloc(columns, sizeof(float**));
+                #endif
+                for (int j=0; j < columns; j++) {
+                    cnn->d_weights[i][j] = (float**)nalloc(k_size, sizeof(float*));
+                    #ifdef ADAM_CNN_WEIGHTS
+                    cnn->s_d_weights[i][j] = (float**)nalloc(k_size, sizeof(float*));
+                    cnn->v_d_weights[i][j] = (float**)nalloc(k_size, sizeof(float*));
+                    #endif
+                    for (int k=0; k < k_size; k++) {
+                        cnn->d_weights[i][j][k] = (float*)nalloc(k_size, sizeof(float));
+                        #ifdef ADAM_CNN_WEIGHTS
+                        cnn->s_d_weights[i][j][k] = (float*)nalloc(k_size, sizeof(float));
+                        cnn->v_d_weights[i][j][k] = (float*)nalloc(k_size, sizeof(float));
+                        #endif
+                        for (int l=0; l < k_size; l++) {
+                            cnn->d_weights[i][j][k][l] = 0.;
+                            #ifdef ADAM_CNN_WEIGHTS
+                            cnn->s_d_weights[i][j][k][l] = 0.;
+                            cnn->v_d_weights[i][j][k][l] = 0.;
+                            #endif
+                        }
+
+                    }
+                }
+            }
+            //Bias
+            cnn->d_bias = (float***)nalloc(columns, sizeof(float**));
+            #ifdef ADAM_CNN_BIAS
+            cnn->s_d_bias = (float***)nalloc(columns, sizeof(float**));
+            cnn->v_d_bias = (float***)nalloc(columns, sizeof(float**));
+            #endif
+            for (int i=0; i < columns; i++) {
+                cnn->d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
+                #ifdef ADAM_CNN_BIAS
+                cnn->s_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
+                cnn->v_d_bias[i] = (float**)nalloc(output_width, sizeof(float*));
+                #endif
+                for (int j=0; j < output_width; j++) {
+                    cnn->d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                    #ifdef ADAM_CNN_BIAS
+                    cnn->s_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                    cnn->v_d_bias[i][j] = (float*)nalloc(output_width, sizeof(float));
+                    #endif
+                    for (int k=0; k < output_width; k++) {
+                        cnn->d_bias[i][j][k] = 0.;
+                        #ifdef ADAM_CNN_BIAS
+                        cnn->s_d_bias[i][j][k] = 0.;
+                        cnn->v_d_bias[i][j][k] = 0.;
+                        #endif
+                    }
+                }
+            }
+        } else if (k_i->nn) {
+            d_k_i->nn = (D_Kernel_nn*)nalloc(1, sizeof(D_Kernel_nn));
+            D_Kernel_nn* nn = d_k_i->nn;
+            int size_input = k_i->nn->size_input;
+            int size_output = k_i->nn->size_output;
+            // Weights
+            nn->d_weights = (float**)nalloc(size_input, sizeof(float*));
+            #ifdef ADAM_DENSE_WEIGHTS
+            nn->s_d_weights = (float**)nalloc(size_input, sizeof(float*));
+            nn->v_d_weights = (float**)nalloc(size_input, sizeof(float*));
+            #endif
+            for (int i=0; i < size_input; i++) {
+                nn->d_weights[i] = (float*)nalloc(size_output, sizeof(float));
+                #ifdef ADAM_DENSE_WEIGHTS
+                nn->s_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
+                nn->v_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
+                #endif
+                for (int j=0; j < size_output; j++) {
+                    nn->d_weights[i][j] = 0.;
+                    #ifdef ADAM_DENSE_WEIGHTS
+                    nn->s_d_weights[i][j] = 0.;
+                    nn->v_d_weights[i][j] = 0.;
+                    #endif
+                }
+            }
+            // Bias
+            nn->d_bias = (float*)nalloc(size_output, sizeof(float));
+            #ifdef ADAM_DENSE_BIAS
+            nn->s_d_bias = (float*)nalloc(size_output, sizeof(float));
+            nn->v_d_bias = (float*)nalloc(size_output, sizeof(float));
+            #endif
+            for (int i=0; i < size_output; i++) {
+                nn->d_bias[i] = 0.;
+                #ifdef ADAM_DENSE_BIAS
+                nn->s_d_bias[i] = 0.;
+                nn->v_d_bias[i] = 0.;
+                #endif
+            }
+        }
+        // Sinon c'est un pooling donc on ne fait rien
+
+    }
+
+    return d_network;
 }
 
 void create_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
@@ -150,7 +286,6 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
     cnn->rows = input_depth;
     cnn->columns = output_depth;
 
-    // Partie toujours initialisée
     cnn->weights = (float****)nalloc(input_depth, sizeof(float***));
     for (int i=0; i < input_depth; i++) {
         cnn->weights[i] = (float***)nalloc(output_depth, sizeof(float**));
@@ -167,71 +302,6 @@ void add_convolution(Network* network, int kernel_size, int number_of_kernels, i
         cnn->bias[i] = (float**)nalloc(bias_size, sizeof(float*));
         for (int j=0; j < bias_size; j++) {
             cnn->bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-        }
-    }
-
-    // Partie initialisée que sous certaines conditions
-    if (network->finetuning == EVERYTHING) {
-        cnn->d_weights = (float****)nalloc(input_depth, sizeof(float***));
-        #ifdef ADAM_CNN_WEIGHTS
-        cnn->s_d_weights = (float****)nalloc(input_depth, sizeof(float***));
-        cnn->v_d_weights = (float****)nalloc(input_depth, sizeof(float***));
-        #endif
-        for (int i=0; i < input_depth; i++) {
-            cnn->d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
-            #ifdef ADAM_CNN_WEIGHTS
-            cnn->s_d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
-            cnn->v_d_weights[i] = (float***)nalloc(output_depth, sizeof(float**));
-            #endif
-            for (int j=0; j < output_depth; j++) {
-                cnn->d_weights[i][j] = (float**)nalloc(kernel_size, sizeof(float*));
-                #ifdef ADAM_CNN_WEIGHTS
-                cnn->s_d_weights[i][j] = (float**)nalloc(kernel_size, sizeof(float*));
-                cnn->v_d_weights[i][j] = (float**)nalloc(kernel_size, sizeof(float*));
-                #endif
-                for (int k=0; k < kernel_size; k++) {
-                    cnn->d_weights[i][j][k] = (float*)nalloc(kernel_size, sizeof(float));
-                    #ifdef ADAM_CNN_WEIGHTS
-                    cnn->s_d_weights[i][j][k] = (float*)nalloc(kernel_size, sizeof(float));
-                    cnn->v_d_weights[i][j][k] = (float*)nalloc(kernel_size, sizeof(float));
-                    #endif
-                    for (int l=0; l < kernel_size; l++) {
-                        cnn->d_weights[i][j][k][l] = 0.;
-                        #ifdef ADAM_CNN_WEIGHTS
-                        cnn->s_d_weights[i][j][k][l] = 0.;
-                        cnn->v_d_weights[i][j][k][l] = 0.;
-                        #endif
-                    }
-
-                }
-            }
-        }
-
-        cnn->d_bias = (float***)nalloc(output_depth, sizeof(float**));
-        #ifdef ADAM_CNN_BIAS
-        cnn->s_d_bias = (float***)nalloc(output_depth, sizeof(float**));
-        cnn->v_d_bias = (float***)nalloc(output_depth, sizeof(float**));
-        #endif
-        for (int i=0; i < output_depth; i++) {
-            cnn->d_bias[i] = (float**)nalloc(bias_size, sizeof(float*));
-            #ifdef ADAM_CNN_BIAS
-            cnn->s_d_bias[i] = (float**)nalloc(bias_size, sizeof(float*));
-            cnn->v_d_bias[i] = (float**)nalloc(bias_size, sizeof(float*));
-            #endif
-            for (int j=0; j < bias_size; j++) {
-                cnn->d_bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-                #ifdef ADAM_CNN_BIAS
-                cnn->s_d_bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-                cnn->v_d_bias[i][j] = (float*)nalloc(bias_size, sizeof(float));
-                #endif
-                for (int k=0; k < bias_size; k++) {
-                    cnn->d_bias[i][j][k] = 0.;
-                    #ifdef ADAM_CNN_BIAS
-                    cnn->s_d_bias[i][j][k] = 0.;
-                    cnn->v_d_bias[i][j][k] = 0.;
-                    #endif
-                }
-            }
         }
     }
 
@@ -271,39 +341,6 @@ void add_dense(Network* network, int size_output, int activation) {
 
     nn->bias = (float*)nalloc(size_output, sizeof(float));
 
-    nn->d_weights = (float**)nalloc(size_input, sizeof(float*));
-    #ifdef ADAM_DENSE_WEIGHTS
-    nn->s_d_weights = (float**)nalloc(size_input, sizeof(float*));
-    nn->v_d_weights = (float**)nalloc(size_input, sizeof(float*));
-    #endif
-    for (int i=0; i < size_input; i++) {
-        nn->d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-        #ifdef ADAM_DENSE_WEIGHTS
-        nn->s_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-        nn->v_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-        #endif
-        for (int j=0; j < size_output; j++) {
-            nn->d_weights[i][j] = 0.;
-            #ifdef ADAM_DENSE_WEIGHTS
-            nn->s_d_weights[i][j] = 0.;
-            nn->v_d_weights[i][j] = 0.;
-            #endif
-        }
-    }
-
-    nn->d_bias = (float*)nalloc(size_output, sizeof(float));
-    #ifdef ADAM_DENSE_BIAS
-    nn->s_d_bias = (float*)nalloc(size_output, sizeof(float));
-    nn->v_d_bias = (float*)nalloc(size_output, sizeof(float));
-    #endif
-    for (int i=0; i < size_output; i++) {
-        nn->d_bias[i] = 0.;
-        #ifdef ADAM_DENSE_BIAS
-        nn->s_d_bias[i] = 0.;
-        nn->v_d_bias[i] = 0.;
-        #endif
-    }
- 
 
     initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input, size_output);
     initialisation_2d_matrix(network->initialisation, nn->weights, size_input, size_output, size_input, size_output);
@@ -334,49 +371,12 @@ void add_dense_linearisation(Network* network, int size_output, int activation) 
     nn->size_input = size_input;
     nn->size_output = size_output;
 
-    // Partie toujours initialisée
     nn->weights = (float**)nalloc(size_input, sizeof(float*));
     for (int i=0; i < size_input; i++) {
         nn->weights[i] = (float*)nalloc(size_output, sizeof(float));
     }
 
     nn->bias = (float*)nalloc(size_output, sizeof(float));
-
-    // Partie initialisée que sous certaines conditions
-    if (network->finetuning <= NN_AND_LINEARISATION) {
-        nn->d_weights = (float**)nalloc(size_input, sizeof(float*));
-        #ifdef ADAM_DENSE_WEIGHTS
-        nn->s_d_weights = (float**)nalloc(size_input, sizeof(float*));
-        nn->v_d_weights = (float**)nalloc(size_input, sizeof(float*));
-        #endif
-        for (int i=0; i < size_input; i++) {
-            nn->d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-            #ifdef ADAM_DENSE_WEIGHTS
-            nn->s_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-            nn->v_d_weights[i] = (float*)nalloc(size_output, sizeof(float));
-            #endif
-            for (int j=0; j < size_output; j++) {
-                nn->d_weights[i][j] = 0.;
-                #ifdef ADAM_DENSE_WEIGHTS
-                nn->s_d_weights[i][j] = 0.;
-                nn->v_d_weights[i][j] = 0.;
-                #endif
-            }
-        }
-
-        nn->d_bias = (float*)nalloc(size_output, sizeof(float));
-        #ifdef ADAM_DENSE_BIAS
-        nn->s_d_bias = (float*)nalloc(size_output, sizeof(float));
-        nn->v_d_bias = (float*)nalloc(size_output, sizeof(float));
-        #endif
-        for (int i=0; i < size_output; i++) {
-            nn->d_bias[i] = 0.;
-            #ifdef ADAM_DENSE_BIAS
-            nn->s_d_bias[i] = 0.;
-            nn->v_d_bias[i] = 0.;
-            #endif
-        }
-    }
 
     initialisation_1d_matrix(network->initialisation, nn->bias, size_output, size_input, size_output);
     initialisation_2d_matrix(network->initialisation, nn->weights, size_input, size_output, size_input, size_output);
