@@ -490,7 +490,7 @@ void backward_linearisation(Kernel_nn* ker, D_Kernel_nn* d_ker, float*** input, 
     #ifndef __CUDACC__
     backward_linearisation_cpu(ker, d_ker, input, input_z, output, input_depth, input_width, size_output, activation);
     #else
-    backward_linearisation_device(ker, input, input_z, output, input_depth, input_width, size_output, activation);
+    backward_linearisation_device(ker, d_ker, input, input_z, output, input_depth, input_width, size_output, activation);
     #endif
 }
 
@@ -569,12 +569,12 @@ __global__ void backward_convolution_apply_propagate_kernel(float*** input, floa
     }
 }
 
-void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first, int kernel_size, int padding, int stride) {
+void backward_convolution_device(Kernel_cnn* kernel, D_Kernel_cnn* d_kernel, float*** input, float*** input_z, float*** output, int input_depth, int input_width, int output_depth, int output_width, int activation, int is_first, int kernel_size, int padding, int stride) {
     // Bias Kernel
     dim3 gridSize1(i_div_up(output_depth, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_width, BLOCKSIZE_y));
     dim3 blockSize1(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(kernel->d_bias, output, output_depth, output_width);
+    backward_convolution_dbias_kernel<<<gridSize1, blockSize1>>>(d_kernel->d_bias, output, output_depth, output_width);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
@@ -582,7 +582,7 @@ void backward_convolution_device(Kernel_cnn* kernel, float*** input, float*** in
     dim3 gridSize2(i_div_up(output_width, BLOCKSIZE_x), i_div_up(output_width, BLOCKSIZE_y), i_div_up(output_depth, BLOCKSIZE_y));
     dim3 blockSize2(BLOCKSIZE_x, BLOCKSIZE_y, BLOCKSIZE_z);
 
-    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(kernel->d_weights, input, output, input_depth, output_depth, input_width, output_width, kernel_size, stride, padding);
+    backward_convolution_dweight_kernel<<<gridSize2, blockSize2>>>(d_kernel->d_weights, input, output, input_depth, output_depth, input_width, output_width, kernel_size, stride, padding);
     
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
