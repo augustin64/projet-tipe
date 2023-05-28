@@ -183,17 +183,17 @@ void make_max_pooling(float*** input, float*** output, int size, int output_dept
 * Dense
 */
 #ifdef __CUDACC__
-__global__ void make_dense_kernel(Kernel_nn* kernel, float* input, float* output, int size_input, int size_output) {
+__global__ void make_dense_kernel(float** weights, float* bias, float* input, float* output, int size_input, int size_output) {
     // Équivalents respectifs de i, j et k dans la boucle effectuée par le cpu
     int idx = threadIdx.x + blockDim.x*blockIdx.x; // < size_output
 
     if (idx >= size_output) {
         return;
     }
-    float f = kernel->bias[idx];
+    float f = bias[idx];
 
     for (int j=0; j < size_input; j++) {
-        f += kernel->weights[j][idx]*input[j];
+        f += weights[j][idx]*input[j];
     }
     output[idx] = f;
 }
@@ -203,7 +203,7 @@ void make_dense_device(Kernel_nn* kernel, float* input, float* output, int size_
     dim3 gridSize(i_div_up(size_output, BLOCKSIZE_x*BLOCKSIZE_y), 1, 1);
     dim3 blockSize(BLOCKSIZE_x*BLOCKSIZE_y, 1, BLOCKSIZE_z);
 
-    make_dense_kernel<<<gridSize, blockSize>>>(kernel, input, output, size_input, size_output);
+    make_dense_kernel<<<gridSize, blockSize>>>(kernel->weights, kernel->bias, input, output, size_input, size_output);
     gpuErrchk( cudaPeekAtLastError() );
     gpuErrchk( cudaDeviceSynchronize() );
 }
