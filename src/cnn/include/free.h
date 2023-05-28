@@ -50,17 +50,17 @@ void free_network(Network* network);
 /*
 * Libère l'espace mémoire alloué pour une d_convolution
 */
-void free_d_convolution(Network* network, D_Network* d_network, int pos);
+void free_d_convolution(Network* network, int pos);
 
 /*
 * Libère l'espace mémoire alloué pour une d_dense
 */
-void free_d_dense(Network* network, D_Network* d_network, int pos);
+void free_d_dense(Network* network, int pos);
 
 /*
 * Libère l'espace mémoire alloué pour une d_dense_linearisation
 */
-void free_d_dense_linearisation(Network* network, D_Network* d_network, int pos);
+void free_d_dense_linearisation(Network* network, int pos);
 
 /*
 * Libère entièrement l'espace mémoire alloué dans 'create_d_network' (creation.c)

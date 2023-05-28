@@ -148,8 +148,9 @@ void free_network(Network* network) {
 
 // ----------------------- Pour le d_network -----------------------
 
-void free_d_convolution(Network* network, D_Network* d_network, int pos) {
+void free_d_convolution(Network* network, int pos) {
     Kernel_cnn* k_pos = network->kernel[pos]->cnn;
+    D_Network* d_network = network->d_network;
     D_Kernel_cnn* d_k_pos = d_network->kernel[pos]->cnn;
     int c = k_pos->columns;
     int k_size = k_pos->k_size;
@@ -206,8 +207,9 @@ void free_d_convolution(Network* network, D_Network* d_network, int pos) {
     }
 }
 
-void free_d_dense(Network* network, D_Network* d_network, int pos) {
+void free_d_dense(Network* network, int pos) {
     D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
+    D_Network* d_network = network->d_network;
     int dim = network->kernel[pos]->nn->size_input;
     for (int i=0; i < dim; i++) {
         gree(d_k_pos->d_weights[i], true);
@@ -229,8 +231,9 @@ void free_d_dense(Network* network, D_Network* d_network, int pos) {
     #endif
 }
 
-void free_d_dense_linearisation(Network* network, D_Network* d_network, int pos) {
+void free_d_dense_linearisation(Network* network, int pos) {
     D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
+    D_Network* d_network = network->d_network;
     int dim = network->kernel[pos]->nn->size_input;
 
     if (network->finetuning <= NN_AND_LINEARISATION) {
@@ -261,12 +264,12 @@ void free_d_network_creation(Network* network, D_Network* d_network) {
     for (int i=0; i < network->max_size-1; i++) {
         D_Kernel* d_k_i = d_network->kernel[i];
         if (d_k_i->cnn) { // Convolution
-            free_d_convolution(network, d_network, i);
+            free_d_convolution(network, i);
         } else if (d_k_i->nn) { // Dense
             if (network->kernel[i]->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
-                free_d_dense(network, d_network, i);
+                free_d_dense(network, i);
             } else { // Matrice -> Vecteur
-                free_d_dense_linearisation(network, d_network, i);
+                free_d_dense_linearisation(network, i);
             }
         }
         gree(network->kernel[i], true);
