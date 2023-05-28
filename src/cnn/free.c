@@ -208,8 +208,8 @@ void free_d_convolution(Network* network, int pos) {
 }
 
 void free_d_dense(Network* network, int pos) {
-    D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
     D_Network* d_network = network->d_network;
+    D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
     int dim = network->kernel[pos]->nn->size_input;
     for (int i=0; i < dim; i++) {
         gree(d_k_pos->d_weights[i], true);
@@ -232,8 +232,8 @@ void free_d_dense(Network* network, int pos) {
 }
 
 void free_d_dense_linearisation(Network* network, int pos) {
-    D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
     D_Network* d_network = network->d_network;
+    D_Kernel_nn* d_k_pos = d_network->kernel[pos]->nn;
     int dim = network->kernel[pos]->nn->size_input;
 
     if (network->finetuning <= NN_AND_LINEARISATION) {
@@ -260,7 +260,8 @@ void free_d_dense_linearisation(Network* network, int pos) {
     gree(d_k_pos, true);
 }
 
-void free_d_network_creation(Network* network, D_Network* d_network) {
+void free_d_network(Network* network) {
+    D_Network* d_network = network->d_network;
     for (int i=0; i < network->max_size-1; i++) {
         D_Kernel* d_k_i = d_network->kernel[i];
         if (d_k_i->cnn) { // Convolution

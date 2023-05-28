@@ -65,6 +65,6 @@ void free_d_dense_linearisation(Network* network, int pos);
 /*
 * Libère entièrement l'espace mémoire alloué dans 'create_d_network' (creation.c)
 */
-void free_d_network_creation(Network* network, D_Network* d_network);
+void free_d_network(Network* network);
 
 #endif

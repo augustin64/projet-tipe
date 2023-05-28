@@ -463,6 +463,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         write_network(out, network);
     }
     free(shuffle_index);
+    free_d_network(network);
     free_network(network);
 
     #ifdef USE_MULTITHREADING
