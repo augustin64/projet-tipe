@@ -11,6 +11,13 @@
 void free_a_cube_input_layer(Network* network, int pos, int depth, int dim);
 
 /*
+* Libère l'espace mémoire de network->input[pos]
+* lorsque cette couches est non denses (donc est une matrice de dimension 3)
+* Libère donc l'espace mémoire alloué dans 'create_a_cube_input_layer' (creation.c)
+*/
+void free_a_cube_input_layer_without_z(Network* network, int pos, int depth, int dim);
+
+/*
 * Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
 * lorsque ces couches sont denses (donc sont des matrice de dimension 1)
 * Libère donc l'espace mémoire alloué dans 'create_a_line_input_layer' et create_a_line_input_z_layer' (creation.c)

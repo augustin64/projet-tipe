@@ -33,7 +33,6 @@ Network* create_network(int max_size, float learning_rate, int dropout, int init
     network->width[0] = input_width;
     network->depth[0] = input_depth;
     create_a_cube_input_layer(network, 0, input_depth, input_width);
-    create_a_cube_input_z_layer(network, 0, input_depth, input_width);
     return network;
 }
 

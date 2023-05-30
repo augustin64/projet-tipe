@@ -20,6 +20,16 @@ void free_a_cube_input_layer(Network* network, int pos, int depth, int dim) {
     gree(network->input_z[pos], true);
 }
 
+void free_a_cube_input_layer_without_z(Network* network, int pos, int depth, int dim) {
+    for (int i=0; i < depth; i++) {
+        for (int j=0; j < dim; j++) {
+            gree(network->input[pos][i][j], true);
+        }
+        gree(network->input[pos][i], true);
+    }
+    gree(network->input[pos], true);
+}
+
 void free_a_line_input_layer(Network* network, int pos) {
     // Libère l'espace mémoire de network->input[pos] et network->input_z[pos]
     // lorsque ces couches sont denses (donc sont des matrice de dimension 1)
@@ -97,7 +107,7 @@ void free_dense_linearisation(Network* network, int pos) {
 
 void free_network_creation(Network* network) {
     // On libère l'input correspondant à l'image: input[0] (car elle n'appartient à aucune couche)
-    free_a_cube_input_layer(network, 0, network->depth[0], network->width[0]);
+    free_a_cube_input_layer_without_z(network, 0, network->depth[0], network->width[0]);
 
     for (int i=0; i < network->max_size-1; i++) {
         gree(network->kernel[i], true);
