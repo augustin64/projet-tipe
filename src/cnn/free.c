@@ -283,9 +283,9 @@ void free_d_network(Network* network) {
                 free_d_dense_linearisation(network, i);
             }
         }
-        gree(network->kernel[i], true);
+        gree(d_network->kernel[i], true);
     }
-    gree(network->kernel, true);
+    gree(d_network->kernel, true);
     pthread_mutex_destroy(&(d_network->lock));
-    gree(network, true);
+    gree(d_network, true);
 }
