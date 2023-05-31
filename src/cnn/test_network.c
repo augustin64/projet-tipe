@@ -189,8 +189,7 @@ void recognize_jpg(Network* network, char* input_file, char* out) {
     imgRawImage* image = loadJpegImageFile(input_file);
     int height = image->height;
     int width = image->width;
-
-    assert(image->width == image->height);
+    int nb_categories = network->width[network->size-1];
 
     if (! strcmp(out, "json")) {
         printf("{\n");
@@ -203,15 +202,15 @@ void recognize_jpg(Network* network, char* input_file, char* out) {
 
 
     if (! strcmp(out, "json")) {
-        for (int j=0; j < 50; j++) {
+        for (int j=0; j < nb_categories; j++) {
             printf("%f", network->input[network->size-1][0][0][j]);
 
-            if (j+1 < 10) {
+            if (j+1 < nb_categories) {
                 printf(", ");
             }
         }
     } else {
-        maxi = indice_max(network->input[network->size-1][0][0], 50);
+        maxi = indice_max(network->input[network->size-1][0][0], nb_categories);
         printf("Catégorie reconnue: %d\n", maxi);
     }
 
