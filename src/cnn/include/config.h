@@ -18,10 +18,10 @@
 
 //* Options d'ADAM optimizer
 //* Activer ou désactiver Adam sur les couches dense
-#define ADAM_DENSE_WEIGHTS
+//#define ADAM_DENSE_WEIGHTS
 //#define ADAM_DENSE_BIAS
 //* Activer ou désactiver Adam sur les couches convolutives
-#define ADAM_CNN_WEIGHTS
+//#define ADAM_CNN_WEIGHTS
 //#define ADAM_CNN_BIAS
 
 
