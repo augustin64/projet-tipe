@@ -26,6 +26,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 #endif
 
+#define NOT_OUTSIDE(x, y, lower_bound, upper_bound) !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound)
 
 #ifndef __CUDACC__
 /*
@@ -39,16 +40,6 @@ int min(int a, int b);
 int max(int a, int b);
 #endif
 
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-/*
-* On renvoie true si et seulement si _ et _:
-* lower_bound <= x < upper_bound
-* lower_bound <= y < upper_bound
-*/
-bool not_outside(int x, int y, int lower_bound, int upper_bound);
 
 /*
 * Partie entière supérieure de a/b

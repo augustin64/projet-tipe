@@ -28,7 +28,7 @@ void make_convolution_cpu(Kernel_cnn* kernel, float*** input, float*** output, i
                         for (int c=-padding; c < max_move; c++) { // colonne du filtre
                             int x = (stride*j+b);
                             int y = (stride*k+c);
-                            if (not_outside(x, y, 0, input_width)) {
+                            if (NOT_OUTSIDE(x, y, 0, input_width)) {
                                 f += kernel->weights[a][i][b+padding][c+padding]*input[a][x][y];
                             }
                         }
@@ -61,7 +61,7 @@ __global__ void make_convolution_kernel(float**** weights, float*** bias, int k_
             for (int c=-padding; c < max_move; c++) {
                 int idy_2 = idy*stride+b;
                 int idz_2 = idz*stride+c;
-                if (not_outside(idy_2, idz_2, 0, input_width)) {
+                if (NOT_OUTSIDE(idy_2, idz_2, 0, input_width)) {
                     f += weights[a][idx][b+padding][c+padding]*input[a][idy_2][idz_2];
                 }
             }

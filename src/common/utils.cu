@@ -29,13 +29,6 @@ int max(int a, int b) {
 #endif
 
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-bool not_outside(int x, int y, int lower_bound, int upper_bound) {
-    return !(x < lower_bound || y < lower_bound || x >= upper_bound || y>= upper_bound);
-}
-
 int i_div_up(int a, int b) { // Partie entière supérieure de a/b
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }

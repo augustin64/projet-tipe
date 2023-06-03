@@ -118,7 +118,7 @@ __global__ void backward_average_pooling_kernel(float*** input, float*** output,
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (not_outside(idy_2, idz_2, 0, input_width)) {
+            if (NOT_OUTSIDE(idy_2, idz_2, 0, input_width)) {
                 int y = min(idy_2+1, min(kernel_size, input_width - idy_2));
                 int z = min(idz_2+1, min(kernel_size, input_width - idz_2));
                 input[idx][idy_2][idz_2] += output[idx][idy][idz]/(y*z);
@@ -155,7 +155,7 @@ void backward_average_pooling_cpu(float*** input, float*** output, int input_wid
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k + b;
-                        if (not_outside(j_2, k_2, 0, input_width)){
+                        if (NOT_OUTSIDE(j_2, k_2, 0, input_width)){
                             int j_3 = min(j_2+1, min(kernel_size, input_width - j_2));
                             int k_3 = min(k_2+1, min(kernel_size, input_width - k_2));
                             input[i][j_2][k_2] += output[i][j][k]/(j_3*k_3);
@@ -202,7 +202,7 @@ __global__ void backward_max_pooling_kernel(float*** input, float*** output, int
         for (int b=-padding; b < max_move; b++) {
             int idy_2 = stride*idy +a;
             int idz_2 = stride*idz +b;
-            if (not_outside(idy_2, idz_2, 0, input_width)) {
+            if (NOT_OUTSIDE(idy_2, idz_2, 0, input_width)) {
                 if (input[idx][idy_2][idz_2] > m) {
                     m = input[idx][idy_2][idz_2];
                     a_max = a;
@@ -250,7 +250,7 @@ void backward_max_pooling_cpu(float*** input, float*** output, int input_width, 
                     for (int b=-padding; b < max_move; b++) {
                         int j_2 = stride*j +a;
                         int k_2 = stride*k +b;
-                        if (not_outside(j_2, k_2, 0, input_width)) {
+                        if (NOT_OUTSIDE(j_2, k_2, 0, input_width)) {
                             if (input[i][j_2][k_2] > m) {
                                 m = input[i][j_2][k_2];
                                 a_max = a;
@@ -527,7 +527,7 @@ __global__ void backward_convolution_dweight_kernel(float**** d_weights, float**
     for (int h=0; h < input_depth; h++) {
         for (int j=-padding; j < max_move; j++) {
             for (int k=-padding; k < max_move; k++) {
-                if (not_outside(idx*stride+j, idy*stride+k, 0, input_width)) {
+                if (NOT_OUTSIDE(idx*stride+j, idy*stride+k, 0, input_width)) {
                     atomicAdd(&d_weights[h][idz][j+padding][k+padding], input[h][idx*stride+j][idy*stride+k]*output[idz][idx][idy]);
                 }
             }
@@ -547,7 +547,7 @@ __global__ void backward_convolution_propagate_kernel(float**** weights, float**
         for (int k=-padding; k < max_move; k++) {
             for (int l=0; l < output_width; l++) {
                 for (int m=0; m < output_width; m++) {
-                    if (not_outside(l*stride+j, m*stride+k, 0, input_width)) {
+                    if (NOT_OUTSIDE(l*stride+j, m*stride+k, 0, input_width)) {
                         atomicAdd(&input[idx][l*stride+j][m*stride+k], output[idy][l][m]*weights[idx][idy][j+padding][k+padding]);
                     }
                 }
@@ -632,7 +632,7 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
                     float tmp = 0;
                     for (int l=0; l < output_width; l++) {
                         for (int m=0; m < output_width; m++) {
-                            if (not_outside(l*stride+j, m*stride+k, 0, input_width)) {
+                            if (NOT_OUTSIDE(l*stride+j, m*stride+k, 0, input_width)) {
                                 tmp += input[h][l*stride+j][m*stride+k]*output[i][l][m];
                             }
                         }
@@ -659,7 +659,7 @@ void backward_convolution_cpu(Kernel_cnn* ker, float*** input, float*** input_z,
                 for (int k=-padding; k < max_move; k++) {
                     for (int l=0; l < output_width; l++) {
                         for (int m=0; m < output_width; m++) {
-                            if (not_outside(l*stride+j, m*stride+k, 0, input_width)) {
+                            if (NOT_OUTSIDE(l*stride+j, m*stride+k, 0, input_width)) {
                                 input[h][l*stride+j][m*stride+k] += output[i][l][m]*ker->weights[h][i][j+padding][k+padding];
                             }
                         }
