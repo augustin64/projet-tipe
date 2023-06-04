@@ -14,7 +14,7 @@ Julien CHEMILLIER, Augustin LUCAS
     + [Dépendances](#dépendances)
     + [Compilation](#compilation)
     + [Exécution](#exécution)
-- [Articles de recherche utilisés](#articles-de-recherche-utilisés)
+- [Références bibliographiques](#références-bibliographiques)
 
 # Objectifs
 ## Objectif principal
@@ -29,7 +29,7 @@ Les images de villes sont des photos au sol (Google street view)
 3. Implémenter différentes techniques d'optimisation du temps de calcul (utilisation du GPU) et du nombre d'itérations (Adam Optimizer)
 4. Implémenter les détails nécessaires pour avoir un réseau sous la structure d'AlexNet fonctionnel. Le tester sur les images de villes
 
-Les trois premières étapes se feront sur le jeu de données [MNIST](#articles-de-recherche-utilisés) pour des calculs plus adaptés à une phase de développement. Après avoir validé le fonctionnement de ces réseaux, le réseau créé à l'étape 3 sera utilisé sur le jeu de données [50States10K](#articles-de-recherche-utilisés).
+Les trois premières étapes se feront sur le jeu de données [MNIST](#références-bibliographiques) pour des calculs plus adaptés à une phase de développement. Après avoir validé le fonctionnement de ces réseaux, le réseau créé à l'étape 3 sera utilisé sur le jeu de données [50States10K](#références-bibliographiques).
 
 <br/><br/>
 
@@ -162,37 +162,11 @@ Un des objectifs principaux de ce TIPE étant également de réaliser un réseau
 
 Pour utiliser la carte graphique, toutes les données traitées par le GPU doivent être copiées dans la mémoire de celui-ci, mais la manière dont cela est géré impose d'allouer des blocs de 48kB de mémoire pour en éviter une saturation très rapide. Une "surcouche" à la gestion de la mémoire est donc implémentée dans `src/cnn/memory_management.cu`
 
-Résultats pour un réseau assez conséquent, avec des images de 256x256 pixels:
+Résultats avec VGG16, pour des images de 256x256 pixels (seulement une plus petite image de 227x227 pixels est en réalité utilisée):
 |Tâche|Temps GPU|Temps CPU|
 |---|---|---|
-|Chargement de l'image|20ms|20ms|
-|Forward|220ms|4s 200ms|
-|Backward|370ms|8s 400ms|
-
-<summary>Architecture du réseau</summary>
-<details>
-
-```c
-Network* create_large_network(float learning_rate, int dropout, int activation, int initialisation, int input_width, int input_depth) {
-    Network* network = create_network(16, learning_rate, dropout, activation, initialisation, input_width, input_depth);
-    add_convolution(network, 6, 258, activation);
-    add_convolution(network, 16, 256, activation);
-    add_average_pooling(network, 64);
-    add_convolution(network, 16, 60, activation);
-    add_average_pooling(network, 30);
-    add_convolution(network, 16, 26, activation);
-    add_convolution(network, 16, 22, activation);
-    add_convolution(network, 16, 18, activation);
-    add_dense_linearisation(network, 840, activation);
-    add_dense(network, 520, activation);
-    add_dense(network, 420, activation);
-    add_dense(network, 320, activation);
-    add_dense(network, 220, activation);
-    add_dense(network, 120, activation);
-    add_dense(network, 50, SOFTMAX);
-    return network;
-}
-```
+|Forward|1s 200ms|66s|
+|Backward|22s 400ms|90s|
 
 </details>
 <br/><br/>
@@ -233,15 +207,16 @@ Se référer à `doc/{cnn,dense}` pour avoir des informations plus détaillées.
 
 <br/><br/>
 
-# Articles de recherche utilisés
-|Titre|Auteur|Lien|
-|---|---|---|
-|LeNet-5|Yann Lecun|http://yann.lecun.com/exdb/lenet/index.html|
-|MNIST|Yann Lecun|http://yann.lecun.com/exdb/mnist/index.html|
-|AlexNet|Alex Krizhevsky et al.|https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf|
-|Dropout|Nitish Srivastava et al.|https://www.jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf|
-|Adam Optimizer|Diederik P. Kingma, Jimmy Lei Ba|https://arxiv.org/pdf/1412.6980.pdf|
-|Recent Advances in Convolutional Neural Networks|Jiuxiang Gu, Zhenhua Wang, Jason Kuen et al.|https://arxiv.org/pdf/1512.07108.pdf|
-|DeepGeo & 50States10K Database|Sudharshan Suresh, Nathaniel Chodosh, Montiel Abello|https://arxiv.org/pdf/1810.03077v1.pdf|
-|Img2GPS|James Hays and Alexei A. Efros|http://graphics.cs.cmu.edu/projects/im2gps/im2gps.pdf|
-|PlaNet|Tobias Weyand|https://arxiv.org/pdf/1602.05314.pdf|
+# Références bibliographiques
+|Année|Titre|Auteur|Lien|
+|---|---|---|---|
+|1998|LeNet-5, convolutional neural networks|Yann Lecun et al.|http://yann.lecun.com/exdb/lenet/index.html
+|1998|THE MNIST DATABASE of handwritten digits|Yann LeCun, Corinna Cortes, Christopher J.C. Burges|http://yann.lecun.com/exdb/mnist/
+|2008|IM2GPS: estimating geographic information from a single image|James Hays and Alexei A. Efros|http://graphics.cs.cmu.edu/projects/im2gps/im2gps.pdf
+|2012|ImageNet Classification with Deep Convolutional Neural Networks|Alex Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton|https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf
+|2014|Adam: A Method for Stochastic Optimization|Diederik P. Kingma, Jimmy Ba|https://arxiv.org/abs/1412.6980
+|2014|Very Deep Convolutional Networks for Large-Scale Image Recognition|Karen Simonyan, Andrew Zisserman|https://arxiv.org/abs/1409.1556
+|2016|PlaNet - Photo Geolocation with Convolutional Neural Networks|Tobias Weyand, Ilya Kostrikov, James Philbin|https://arxiv.org/abs/1602.05314
+|2017|Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms|Han Xiao, Kashif Rasul, Roland Vollgraf|https://arxiv.org/abs/1708.07747
+|2017|Recent Advances in Convolutional Neural Network|Jiuxiang Gua, Zhenhua Wangb, Jason Kuen et al.|https://arxiv.org/abs/1512.07108
+|2018|DeepGeo: Photo Localization with Deep Neural Network|Sudharshan Suresh, Nathaniel Chodosh, Montiel Abello|https://arxiv.org/abs/1810.03077
