@@ -3,7 +3,6 @@
 
 // Génère un flottant entre 0 et 1
 #define RAND_FLT() ((float)rand())/((float)RAND_MAX)
-#define TWOPI 6.2831853071795864769252867665
 
 #define ZERO 0
 #define GLOROT 1

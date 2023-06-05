@@ -15,7 +15,7 @@ float randn() {
     while (f1 == 0) {
         f1 = RAND_FLT();
     }
-    return sqrt(-2.0*log(f1))*cos(TWOPI*RAND_FLT());
+    return sqrt(-2.0*log(f1))*cos(2*M_PI*RAND_FLT());
 }
 
 void initialisation_1d_matrix(int initialisation, float* matrix, int dim, int n_in, int n_out) {
