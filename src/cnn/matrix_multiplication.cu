@@ -10,7 +10,7 @@
 
 #ifdef __CUDACC__
 __global__ void matrix_mul_kernel(float** M, float** N, float** P, int n, int p, int q) {
-    // Ce fil calcule toutes les multiplications utilisant l'élément N[idx][idy]
+    // Ce fil effectue toutes les multiplications utilisant l'élément N[idx][idy]
     int idx = (blockIdx.x*blockDim.x) + threadIdx.x; // Indice de colonne
     int idy = (blockIdx.y*blockDim.y) + threadIdx.y; // Indice de ligne
 
