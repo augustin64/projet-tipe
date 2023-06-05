@@ -24,7 +24,7 @@ typedef struct jpegDataset {
     unsigned int height; // Hauteur des images
 
     unsigned int* labels; // Labels
-    unsigned char** images; // Images en cache, vaut NULL si STORE_IMAGES_TO_RAM n'est pas défini
+    unsigned char** images; // Images en cache
 	char** fileNames; // Noms de fichiers
 } jpegDataset;
 

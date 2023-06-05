@@ -19,12 +19,6 @@ int main(int argc, char* argv[]) {
     printf("Nombre de catégories: %d\n", dataset->numCategories);
     printf("Nombre d'images:      %d\n", dataset->numImages);
     printf("Taille des images:    %dx%d\n", dataset->width, dataset->height);
-    #ifdef STORE_IMAGES_TO_RAM
-    if (!dataset->images) {
-        printf_error("Aucune image n'a été chargée\n");
-        return 1;
-    }
-    #endif
 
     // Calcul du temps de chargement des images une à une
     double start_time, end_time;
@@ -47,15 +41,6 @@ int main(int argc, char* argv[]) {
             printf("%d\n", i);
             return 1;
         }
-        #ifdef STORE_IMAGES_TO_RAM
-        if (!dataset->images[i]) {
-            printf_error("Image non chargée à l'index ");
-            printf("%d\n", i);
-            printf_error("Nom du fichier: ");
-            printf("%s\n", dataset->fileNames[i]);
-            return 1;
-        }
-        #endif
     }
 
     free_dataset(dataset);

@@ -157,19 +157,7 @@ jpegDataset* loadJpegDataset(char* folderPath) {
     dataset->images = (unsigned char**)malloc(sizeof(unsigned char*)*dataset->numImages);
     for (int i=0; i < (int)dataset->numImages; i++) {
         dataset->images[i] = NULL;
-        #ifdef STORE_IMAGES_TO_RAM
-        if (i%1000 == 0) {
-            printf("[%d/%d] Chargement des images\r\n", i, dataset->numImages);
-            fflush(stdout);
-        }
-        image = loadJpegImageFile(dataset->fileNames[i]);
-        dataset->images[i] = image->lpData;
-        free(image);
-        #endif
     }
-    #ifdef STORE_IMAGES_TO_RAM
-    printf("Chargement des images terminé          \n");
-    #endif
 
     // Lecture des caractéristiques des images
     image = loadJpegImageFile(dataset->fileNames[0]);
@@ -245,9 +233,6 @@ void addFilenamesToArray(char* path, char** array, int* index) {
 void free_dataset(jpegDataset* dataset) {
     for (int i=0; i < (int)dataset->numImages; i++) {
         free(dataset->fileNames[i]);
-        #ifdef STORE_IMAGES_TO_RAM
-        free(dataset->images[i]);
-        #endif
     }
     free(dataset->fileNames);
     free(dataset->labels);

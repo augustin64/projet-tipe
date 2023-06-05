@@ -42,13 +42,6 @@
 
 
 //** Paramètres d'optimisation
-//* Paramètre d'optimisation pour un dataset Jpeg
-// keep images in ram e.g re-read and decompress each time
-// Enabling this will lead to a large amount of ram used while economizing not that
-// much computing power
-// Note: 50States10K dataset is 90Go once decompressed, use with caution
-//#define STORE_IMAGES_TO_RAM
-
 //* Optimisation de libération de la mémoire pour de larges réseaux
 // En utilisant CUDA, de larges réseaux créés dans src/common/memory_management.cu
 // peuvent prendre jusqu'à plusieurs heures pour être libérés
