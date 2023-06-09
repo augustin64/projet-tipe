@@ -1,6 +1,9 @@
 TIPE en MP2I puis MPI* 2021-2023  
 Julien CHEMILLIER, Augustin LUCAS
 
+![Architecture du code](doc/schema-fichiers.png)
+_Uniquement les dépendances de `src/cnn` sont représentées_
+
 - [Objectifs](#objectifs)
     + [Objectif principal](#objectif-principal)
     + [Découpage du projet](#découpage-du-projet)
