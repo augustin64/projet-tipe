@@ -33,7 +33,9 @@ int main(int argc, char* argv[]) {
     }
     printf("OK\n");
     end_time = clock();
-    printf("Temps par image (calculé sur une moyenne de %d): %lf s\n", N, (end_time - start_time)/N);
+    printf("Temps par image (calculé sur une moyenne de %d): ", N);
+    printf_time((end_time - start_time)/N);
+    printf("\n");
 
     for (int i=0; i < (int)dataset->numImages; i++) {
         if (!dataset->fileNames[i]) {

@@ -1,4 +1,3 @@
-#include <sys/sysinfo.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,6 +5,14 @@
 #include <math.h>
 #include <time.h>
 #include <time.h>
+
+#ifdef __linux__
+    #include <sys/sysinfo.h>
+#elif defined(__APPLE__)
+    #include <sys/sysctl.h>
+#else
+    #error Unknown platform
+#endif
 
 #include "../common/include/memory_management.h"
 #include "../common/include/colors.h"
@@ -261,7 +268,17 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     #ifdef USE_MULTITHREADING
         int nb_remaining_images; // Nombre d'images restantes à lancer pour une série de threads
         // Récupération du nombre de threads disponibles
-        int nb_threads = get_nprocs();
+        #ifdef __linux__
+            int nb_threads = get_nprocs();
+        #elif defined(__APPLE__)
+            int nb_threads;
+            size_t len = sizeof(nb_threads);
+
+            if (sysctlbyname("hw.logicalcpu", &nb_threads, &len, NULL, 0) == -1) {
+                perror("sysctl");
+                exit(1);
+            }
+        #endif
         pthread_t *tid = (pthread_t*)malloc(nb_threads * sizeof(pthread_t));
 
         // Création des paramètres donnés à chaque thread dans le cas du multi-threading

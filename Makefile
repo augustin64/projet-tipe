@@ -1,3 +1,4 @@
+OS           := $(shell uname)
 BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./.cache
@@ -41,6 +42,13 @@ NVCCFLAGS = -g
 # -fsanitize=address -lasan
 #! WARNING: test/cnn-neuron_io fails with this option enabled
 
+# Specify library path of libjpeg on MacOS
+ifeq ($(OS),Darwin)
+	LD_CFLAGS    += -I/opt/homebrew/Cellar/jpeg/9e/include/ -L/opt/homebrew/Cellar/jpeg/9e/lib/
+	LD_NVCCFLAGS += -L/opt/homebrew/Cellar/jpeg/9e/lib/
+
+	CFLAGS       +=  -I/opt/homebrew/Cellar/jpeg/9e/include/
+endif
 
 
 all: dense cnn;
