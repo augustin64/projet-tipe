@@ -27,8 +27,8 @@ TESTS_SRC_CU += $(wildcard $(TEST_SRCDIR)/*.cu)
 TESTS_OBJ     = $(TESTS_SRC:$(TEST_SRCDIR)/%.c=$(BUILDDIR)/$(TEST_SRCDIR)-%) $(TESTS_SRC_CU:$(TEST_SRCDIR)/%.cu=$(BUILDDIR)/$(TEST_SRCDIR)-%)
 
 # Linker only flags
-LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
-LD_NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
+LD_CFLAGS    =  -lm -lpthread -ljpeg
+LD_NVCCFLAGS = -ljpeg
 
 # Compilation flag
 CFLAGS    = -Wall -Wextra -std=gnu99 -g -O3

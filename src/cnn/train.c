@@ -5,7 +5,7 @@
 #include <float.h>
 #include <math.h>
 #include <time.h>
-#include <omp.h>
+#include <time.h>
 
 #include "../common/include/memory_management.h"
 #include "../common/include/colors.h"
@@ -64,7 +64,7 @@ void* train_thread(void* parameters) {
     float loss = 0.;
 
     #ifdef DETAILED_TRAIN_TIMINGS
-        double start_time;
+        clock_t start_time;
     #endif
 
     pthread_t tid;
@@ -81,16 +81,16 @@ void* train_thread(void* parameters) {
             write_image_in_network_32(images[index[i]], height, width, network->input[0][0], param->offset);
 
             #ifdef DETAILED_TRAIN_TIMINGS
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
             forward_propagation(network);
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de forward: ");
-                printf_time(omp_get_wtime() - start_time);
+                printf_time(clock() - start_time);
                 printf("\n");
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
             maxi = indice_max(network->input[network->size-1][0][0], 10);
@@ -108,9 +108,9 @@ void* train_thread(void* parameters) {
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de backward: ");
-                printf_time(omp_get_wtime() - start_time);
+                printf_time(clock() - start_time);
                 printf("\n");
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
             if (maxi == labels[index[i]]) {
@@ -131,16 +131,16 @@ void* train_thread(void* parameters) {
             write_256_image_in_network(param->dataset->images[index[i]], width, height, param->dataset->numComponents, network->width[0], network->input[0]);
 
             #ifdef DETAILED_TRAIN_TIMINGS
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
             forward_propagation(network);
 
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de forward: ");
-                printf_time(omp_get_wtime() - start_time);
+                printf_time(clock() - start_time);
                 printf("\n");
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
             maxi = indice_max(network->input[network->size-1][0][0], param->dataset->numCategories);
@@ -148,9 +148,9 @@ void* train_thread(void* parameters) {
             
             #ifdef DETAILED_TRAIN_TIMINGS
                 printf("Temps de backward: ");
-                printf_time(omp_get_wtime() - start_time);
+                printf_time(clock() - start_time);
                 printf("\n");
-                start_time = omp_get_wtime();
+                start_time = clock();
             #endif
 
 
@@ -179,7 +179,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         exit(1);
     }
     #endif
-    srand(time(NULL));
+    srand(clock());
     float loss;
     float batch_loss; // May be redundant with loss, but gives more informations
     float test_accuracy = 0.; // Used to decrease Learning rate
@@ -190,12 +190,12 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
 
 
     //* Différents timers pour mesurer les performance en terme de vitesse
-    double start_time, end_time;
-    double elapsed_time;
+    clock_t start_time, end_time;
+    clock_t elapsed_time;
 
-    double algo_start = omp_get_wtime();
+    clock_t algo_start = clock();
 
-    start_time = omp_get_wtime();
+    start_time = clock();
 
 
     //* Chargement du dataset
@@ -320,7 +320,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         train_params->finetuning = finetuning;
     #endif
 
-    end_time = omp_get_wtime();
+    end_time = clock();
 
     elapsed_time = end_time - start_time;
     printf("Taux d'apprentissage initial: %0.2e\n", network->learning_rate);
@@ -331,7 +331,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     //* Boucle d'apprentissage
     for (int i=0; i < epochs; i++) {
 
-        start_time = omp_get_wtime();
+        start_time = clock();
         // La variable accuracy permet d'avoir une ESTIMATION
         // du taux de réussite et de l'entraînement du réseau,
         // mais n'est en aucun cas une valeur réelle dans le cas
@@ -423,7 +423,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
             #endif
         }
         //* Fin d'une époque: affichage des résultats et sauvegarde du réseau
-        end_time = omp_get_wtime();
+        end_time = clock();
         elapsed_time = end_time - start_time;
         #ifdef USE_MULTITHREADING
         printf("\rThreads [%d]\tÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " GREEN "%0.4f%%" RESET " \tLoss: %lf\tTemps: ", nb_threads, i, epochs, nb_images_total, nb_images_total, accuracy*100, loss);
@@ -483,7 +483,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         free_dataset(dataset);
     }
 
-    end_time = omp_get_wtime();
+    end_time = clock();
     elapsed_time = end_time - algo_start;
     printf("\nTemps total: ");
     printf_time(elapsed_time);

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
+#include <time.h>
 
 
 #include "../src/common/include/colors.h"
@@ -21,10 +21,10 @@ int main(int argc, char* argv[]) {
     printf("Taille des images:    %dx%d\n", dataset->width, dataset->height);
 
     // Calcul du temps de chargement des images une à une
-    double start_time, end_time;
+    clock_t start_time, end_time;
 
     int N = min(100000, dataset->numImages);
-    start_time = omp_get_wtime();
+    start_time = clock();
     printf("Chargement de %d images\n", N);
     for (int i=0; i < N; i++) {
         imgRawImage* image = loadJpegImageFile(dataset->fileNames[i]);
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         free(image);
     }
     printf("OK\n");
-    end_time = omp_get_wtime();
+    end_time = clock();
     printf("Temps par image (calculé sur une moyenne de %d): %lf s\n", N, (end_time - start_time)/N);
 
     for (int i=0; i < (int)dataset->numImages; i++) {

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "include/colors.h"
 
@@ -15,11 +16,13 @@ void printf_info(char* string) {
     printf(BOLDBLUE "[ INFO  ]" RESET " %s", string);
 }
 
-void printf_time(float time) {
-    int hours = time/3600;
-    int minutes = ((int)time %3600)/60;
-    int seconds = ((int)time) %60;
-    int milliseconds = (time - (int)time)*1000;
+void printf_time(clock_t time) {
+    double real_time = (double) time / CLOCKS_PER_SEC;
+
+    int hours = real_time/3600;
+    int minutes = ((int)real_time %3600)/60;
+    int seconds = ((int)real_time) %60;
+    int milliseconds = (real_time - (int)real_time)*1000;
 
     if (hours != 0) {
         printf("%dh %dmn", hours, minutes);

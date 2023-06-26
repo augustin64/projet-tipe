@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <math.h>
 #include <time.h>
-#include <omp.h>
+#include <time.h>
 
 #include "../src/common/include/memory_management.h"
 #include "../src/cnn/include/convolution.h"
@@ -136,21 +136,21 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
 
 
     // Lancement des calculs
-    double start_time, end_time;
-    double cpu_time_used, gpu_time_used;
+    clock_t start_time, end_time;
+    clock_t cpu_time_used, gpu_time_used;
 
-    start_time = omp_get_wtime();
+    start_time = clock();
     make_convolution_device(kernel, input, output_gpu, output_width, 1, 0);
-    end_time = omp_get_wtime();
+    end_time = clock();
 
 
     gpu_time_used = end_time - start_time;
     printf("(%d, %d, %d, %d) Time used for GPU: %lf seconds\n", rows, columns, input_width, output_width, gpu_time_used);
 
 
-    start_time = omp_get_wtime();
+    start_time = clock();
     make_convolution_cpu(kernel, input, output_cpu, output_width, 1, 0);
-    end_time = omp_get_wtime();
+    end_time = clock();
 
     cpu_time_used = end_time - start_time;
     printf("(%d, %d, %d, %d) Time used for CPU: %lf seconds\n", rows, columns, input_width, output_width, cpu_time_used);    
@@ -199,7 +199,7 @@ int main() {
     }
     printf(GREEN "OK\n" RESET);
     
-    srand(time(NULL));
+    srand(clock());
 
     run_convolution_test(20, 15, 30, 40);
     run_convolution_test(30, 25, 40, 50);
