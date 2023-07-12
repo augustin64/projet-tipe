@@ -16,6 +16,11 @@
 - [ImageNet](https://www.image-net.org/index.php)
 
 ## CUDA
-- [Introduction à CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/) (Documentation Nvidia)
+- Ressources CUDA:
+    + [Documentation Nvidia](https://developer.nvidia.com/blog/easy-introduction-cuda-c-and-c/) (Introduction to cuda C and C++)
+    + [Documentation Nvidia](https://developer.nvidia.com/blog/even-easier-introduction-cuda/) (Even Easier Introduction)
+    + [Présentation Nvidia](https://on-demand.gputechconf.com/gtc-express/2011/presentations/GTC_Express_Sarah_Tariq_June2011.pdf) (Général)
+    + [Présentation Nvidia](https://on-demand.gputechconf.com/supercomputing/2012/presentation/SB021-Ebersole-Intro-CUDA-C-plus-plus.pdf) (threadId, blockId)
 - [Gestion des erreurs](https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/) (Documentation Nvidia)
 - [Unified Memory](https://on-demand.gputechconf.com/gtc/2017/presentation/s7285-nikolay-sakharnykh-unified-memory-on-pascal-and-volta.pdf) (Présentation Nvidia)
+- [Query Device Properties](https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/)
