@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
-#include <omp.h>
+#include <time.h>
 
 #include "../src/cnn/include/matrix_multiplication.h"
 #include "../src/common/include/memory_management.h"
@@ -72,8 +72,8 @@ bool check_matrices_equality(float** m1, float** m2, int n, int p, int acceptati
 }
 
 void run_matrices_test(int n, int p, int q) {
-    double start_time, end_time;
-    double cpu_time_used, gpu_time_used;
+    clock_t start_time, end_time;
+    clock_t cpu_time_used, gpu_time_used;
 
     float** matrix1 = create_matrix(n, p);
     float** matrix2 = create_matrix(p, q);
@@ -81,16 +81,16 @@ void run_matrices_test(int n, int p, int q) {
     float** result_cpu = create_empty_matrix(n, q);
 
     printf("(%d,%d)x(%d,%d) Data generation complete.\n", n, p, p, q);
-    start_time = omp_get_wtime();
+    start_time = clock();
     matrix_multiplication_device(matrix1, matrix2, result_gpu, n, p, q);
-    end_time = omp_get_wtime();
+    end_time = clock();
 
     cpu_time_used = end_time - start_time;
     printf("(%d,%d)x(%d,%d) Time used for GPU: %lf seconds\n", n, p, p, q, cpu_time_used);
     
-    start_time = omp_get_wtime();
+    start_time = clock();
     matrix_multiplication_host(matrix1, matrix2, result_cpu, n, p, q);
-    end_time = omp_get_wtime();
+    end_time = clock();
 
     gpu_time_used = end_time - start_time;
     printf("(%d,%d)x(%d,%d) Time used for CPU: %lf seconds\n", n, p, p, q, gpu_time_used);
@@ -134,7 +134,7 @@ int main() {
     }
     printf(GREEN "OK\n" RESET);
 
-    srand(time(NULL));
+    srand(clock());
     run_matrices_test(200, 1000, 200);
     run_matrices_test(200, 1000, 20);
     run_matrices_test(20, 1000, 200);

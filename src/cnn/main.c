@@ -7,12 +7,8 @@
 
 
 #include "../common/include/colors.h"
-#include "include/initialisation.h"
 #include "include/test_network.h"
-#include "include/function.h"
-#include "include/creation.h"
 #include "include/train.h"
-#include "include/cnn.h"
 
 #include "include/main.h"
 

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #ifndef DEF_COLORS_H
 #define DEF_COLORS_H
@@ -51,7 +52,7 @@ extern "C"
 /*
 * Affiche un timing en heures minutes secondes millisecondes en limitant la précision aux deux unités les plus significatives
 */
-void printf_time(float time);
+void printf_time(clock_t time);
 
 #ifdef __CUDACC__
 extern "C"

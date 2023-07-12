@@ -7,7 +7,6 @@
 #include "../common/include/memory_management.h"
 #include "../common/include/mnist.h"
 #include "include/neuron_io.h"
-#include "include/struct.h"
 #include "include/jpeg.h"
 #include "include/free.h"
 #include "include/cnn.h"

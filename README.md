@@ -178,17 +178,24 @@ Résultats avec VGG16, pour des images de 256x256 pixels (seulement une plus pet
 
 Sur le cloud avec google Colab: bon GPU mais mauvais processeur: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LfwSrQRaoC91yC9mx9BKHzuc7odev5r6?usp=sharing)
 
-Les distributions suivantes ont étés essayées, il sera sans doute nécessaire de modifier le code pour l'exécuter sous Windows/ MacOS:
+## Dépendances
+- `cuda` : pour utiliser la carte graphique (NVIDIA seulement)
+- `libjpeg-dev` : n'est pas nécessairement installé par défaut
+- GNU `make` : installé par défaut sur la majorité des distributions Linux et sur MacOS
+- `gcc` : installé par défaut sur la majorité des distributions Linux et sur MacOS
+
+### Linux
+Les distributions suivantes ont étés essayées, il faudra parfois installer `libjpeg`
 - Arch  
 - Fedora  
 - Manjaro  
-- Ubuntu
+- Ubuntu: `apt install libjpeg-dev`
 
-## Dépendances
-- `cuda` : pour utiliser la carte graphique (NVIDIA seulement)
-- `libjpeg-dev` : n'est pas installé par défaut sur ubuntu notamment
-- GNU `make` : installé par défaut sur la majorité des distributions
-- `gcc` : installé par défaut sur la majorité des distributions
+### MacOS
+Avec [Homebrew](https://brew.sh/):
+```bash
+brew install libjpeg
+```
 
 ## Compilation
 

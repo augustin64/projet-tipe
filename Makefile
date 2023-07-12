@@ -1,3 +1,4 @@
+OS           := $(shell uname)
 BUILDDIR     := ./build
 SRCDIR       := ./src
 CACHE_DIR    := ./.cache
@@ -27,8 +28,8 @@ TESTS_SRC_CU += $(wildcard $(TEST_SRCDIR)/*.cu)
 TESTS_OBJ     = $(TESTS_SRC:$(TEST_SRCDIR)/%.c=$(BUILDDIR)/$(TEST_SRCDIR)-%) $(TESTS_SRC_CU:$(TEST_SRCDIR)/%.cu=$(BUILDDIR)/$(TEST_SRCDIR)-%)
 
 # Linker only flags
-LD_CFLAGS    =  -lm -lpthread -ljpeg -fopenmp
-LD_NVCCFLAGS = -ljpeg -Xcompiler -fopenmp
+LD_CFLAGS    =  -lm -lpthread -ljpeg
+LD_NVCCFLAGS = -ljpeg
 
 # Compilation flag
 CFLAGS    = -Wall -Wextra -std=gnu99 -g -O3
@@ -41,6 +42,13 @@ NVCCFLAGS = -g
 # -fsanitize=address -lasan
 #! WARNING: test/cnn-neuron_io fails with this option enabled
 
+# Specify library path of libjpeg on MacOS
+ifeq ($(OS),Darwin)
+	LD_CFLAGS    += -I/opt/homebrew/Cellar/jpeg/9e/include/ -L/opt/homebrew/Cellar/jpeg/9e/lib/
+	LD_NVCCFLAGS += -L/opt/homebrew/Cellar/jpeg/9e/lib/
+
+	CFLAGS       +=  -I/opt/homebrew/Cellar/jpeg/9e/include/
+endif
 
 
 all: dense cnn;
