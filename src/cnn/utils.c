@@ -115,6 +115,7 @@ Network* copy_network(Network* network) {
     copyVar(initialisation);
     copyVar(max_size);
     copyVar(size);
+    copyVar(d_network); // Les deux réseaux partagent ainsi le même réseau pour la backpropagation
 
     network_cp->width = (int*)nalloc(size, sizeof(int));
     network_cp->depth = (int*)nalloc(size, sizeof(int));
@@ -153,40 +154,15 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->nn->size_output);
 
             network_cp->kernel[i]->nn->bias = (float*)nalloc(size_output, sizeof(float));
-            network_cp->kernel[i]->nn->d_bias = (float*)nalloc(size_output, sizeof(float));
-            #ifdef ADAM_DENSE_BIAS
-            network_cp->kernel[i]->nn->s_d_bias = (float*)nalloc(size_output, sizeof(float));
-            network_cp->kernel[i]->nn->v_d_bias = (float*)nalloc(size_output, sizeof(float));
-            #endif
             for (int j=0; j < size_output; j++) {
                 copyVar(kernel[i]->nn->bias[j]);
-                network_cp->kernel[i]->nn->d_bias[j] = 0.;
-                #ifdef ADAM_DENSE_BIAS
-                network_cp->kernel[i]->nn->s_d_bias[j] = 0.;
-                network_cp->kernel[i]->nn->v_d_bias[j] = 0.;
-                #endif
             }
 
             network_cp->kernel[i]->nn->weights = (float**)nalloc(size_input, sizeof(float*));
-            network_cp->kernel[i]->nn->d_weights = (float**)nalloc(size_input, sizeof(float*));
-            #ifdef ADAM_DENSE_WEIGHTS
-            network_cp->kernel[i]->nn->s_d_weights = (float**)nalloc(size_input, sizeof(float*));
-            network_cp->kernel[i]->nn->v_d_weights = (float**)nalloc(size_input, sizeof(float*));
-            #endif
             for (int j=0; j < size_input; j++) {
                 network_cp->kernel[i]->nn->weights[j] = (float*)nalloc(size_output, sizeof(float));
-                network_cp->kernel[i]->nn->d_weights[j] = (float*)nalloc(size_output, sizeof(float));
-                #ifdef ADAM_DENSE_WEIGHTS
-                network_cp->kernel[i]->nn->s_d_weights[j] = (float*)nalloc(size_output, sizeof(float));
-                network_cp->kernel[i]->nn->v_d_weights[j] = (float*)nalloc(size_output, sizeof(float));
-                #endif
                 for (int k=0; k < size_output; k++) {
                     copyVar(kernel[i]->nn->weights[j][k]);
-                    network_cp->kernel[i]->nn->d_weights[j][k] = 0.;
-                    #ifdef ADAM_DENSE_WEIGHTS
-                    network_cp->kernel[i]->nn->s_d_weights[j][k] = 0.;
-                    network_cp->kernel[i]->nn->v_d_weights[j][k] = 0.;
-                    #endif
                 }
             }
         }
@@ -211,70 +187,25 @@ Network* copy_network(Network* network) {
             copyVar(kernel[i]->cnn->columns);
 
             network_cp->kernel[i]->cnn->bias = (float***)nalloc(columns, sizeof(float**));
-            network_cp->kernel[i]->cnn->d_bias = (float***)nalloc(columns, sizeof(float**));
-            #ifdef ADAM_CNN_BIAS
-            network_cp->kernel[i]->cnn->s_d_bias = (float***)nalloc(columns, sizeof(float**));
-            network_cp->kernel[i]->cnn->v_d_bias = (float***)nalloc(columns, sizeof(float**));
-            #endif
             for (int j=0; j < columns; j++) {
                 network_cp->kernel[i]->cnn->bias[j] = (float**)nalloc(output_width, sizeof(float*));
-                network_cp->kernel[i]->cnn->d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
-                #ifdef ADAM_CNN_BIAS
-                network_cp->kernel[i]->cnn->s_d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
-                network_cp->kernel[i]->cnn->v_d_bias[j] = (float**)nalloc(output_width, sizeof(float*));
-                #endif
                 for (int k=0; k < output_width; k++) {
                     network_cp->kernel[i]->cnn->bias[j][k] = (float*)nalloc(output_width, sizeof(float));
-                    network_cp->kernel[i]->cnn->d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
-                    #ifdef ADAM_CNN_BIAS
-                    network_cp->kernel[i]->cnn->s_d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
-                    network_cp->kernel[i]->cnn->v_d_bias[j][k] = (float*)nalloc(output_width, sizeof(float));
-                    #endif
                     for (int l=0; l < output_width; l++) {
                         copyVar(kernel[i]->cnn->bias[j][k][l]);
-                        network_cp->kernel[i]->cnn->d_bias[j][k][l] = 0.;
-                        #ifdef ADAM_CNN_BIAS
-                        network_cp->kernel[i]->cnn->s_d_bias[j][k][l] = 0.;
-                        network_cp->kernel[i]->cnn->v_d_bias[j][k][l] = 0.;
-                        #endif
                     }
                 }
             }
 
             network_cp->kernel[i]->cnn->weights = (float****)nalloc(rows, sizeof(float***));
-            network_cp->kernel[i]->cnn->d_weights = (float****)nalloc(rows, sizeof(float***));
-            #ifdef ADAM_CNN_WEIGHTS
-            network_cp->kernel[i]->cnn->s_d_weights = (float****)nalloc(rows, sizeof(float***));
-            network_cp->kernel[i]->cnn->v_d_weights = (float****)nalloc(rows, sizeof(float***));
-            #endif
             for (int j=0; j < rows; j++) {
                 network_cp->kernel[i]->cnn->weights[j] = (float***)nalloc(columns, sizeof(float**));
-                network_cp->kernel[i]->cnn->d_weights[j] = (float***)nalloc(columns, sizeof(float**));
-                #ifdef ADAM_CNN_WEIGHTS
-                network_cp->kernel[i]->cnn->s_d_weights[j] = (float***)nalloc(columns, sizeof(float**));
-                network_cp->kernel[i]->cnn->v_d_weights[j] = (float***)nalloc(columns, sizeof(float**));
-                #endif
                 for (int k=0; k < columns; k++) {
                     network_cp->kernel[i]->cnn->weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
-                    network_cp->kernel[i]->cnn->d_weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
-                    #ifdef ADAM_CNN_WEIGHTS
-                    network_cp->kernel[i]->cnn->s_d_weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
-                    network_cp->kernel[i]->cnn->v_d_weights[j][k] = (float**)nalloc(k_size, sizeof(float*));
-                    #endif
                     for (int l=0; l < k_size; l++) {
                         network_cp->kernel[i]->cnn->weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
-                        network_cp->kernel[i]->cnn->d_weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
-                        #ifdef ADAM_CNN_WEIGHTS
-                        network_cp->kernel[i]->cnn->s_d_weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
-                        network_cp->kernel[i]->cnn->v_d_weights[j][k][l] = (float*)nalloc(k_size, sizeof(float));
-                        #endif
                         for (int m=0; m < k_size; m++) {
                             copyVar(kernel[i]->cnn->weights[j][k][l][m]);
-                            network_cp->kernel[i]->cnn->d_weights[j][k][l][m] = 0.;
-                            #ifdef ADAM_CNN_WEIGHTS
-                            network_cp->kernel[i]->cnn->s_d_weights[j][k][l][m] = 0.;
-                            network_cp->kernel[i]->cnn->v_d_weights[j][k][l][m] = 0.;
-                            #endif
                         }
                     }
                 }

@@ -21,6 +21,7 @@
 #include "include/initialisation.h"
 #include "include/test_network.h"
 #include "include/neuron_io.h"
+#include "include/creation.h"
 #include "include/function.h"
 #include "include/update.h"
 #include "include/models.h"
@@ -239,10 +240,10 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
     Network* network;
     if (!recover) {
         if (dataset_type == 0) {
-            network = create_network_lenet5(LEARNING_RATE, 0, LEAKY_RELU, HE, input_width, input_depth);
+            network = create_network_lenet5(LEARNING_RATE, 0, LEAKY_RELU, HE, input_width, input_depth, finetuning);
             //network = create_simple_one(LEARNING_RATE, 0, RELU, GLOROT, input_width, input_depth);    
         } else {
-            network = create_network_VGG16(LEARNING_RATE, 0, RELU, HE, dataset->numCategories);
+            network = create_network_VGG16(LEARNING_RATE, 0, RELU, HE, dataset->numCategories, finetuning);
 
             #ifdef USE_MULTITHREADING
                 printf_warning("Utilisation de VGG16 avec multithreading. La quantité de RAM utilisée peut devenir excessive\n");
@@ -252,6 +253,10 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         network = read_network(recover);
         network->learning_rate = LEARNING_RATE;
     }
+
+    // On ajoute le réseau de backpropagation au réseau précédemment initialisé
+    D_Network* d_network = create_d_network(network);
+    network->d_network = d_network;
 
     /*
        shuffle_index[i] contient le nouvel index de l'élément à l'emplacement i avant mélange
@@ -409,8 +414,8 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 // On attend que tous les fils aient fini avant d'appliquer des modifications au réseau principal
                 for (int k=0; k < nb_threads; k++) {
                     if (train_parameters[k]->network) { // Si le fil a été utilisé
-                        update_weights(network, train_parameters[k]->network);
-                        update_bias(network, train_parameters[k]->network);
+                        update_weights(network); // , train_parameters[k]->network
+                        update_bias(network); // , train_parameters[k]->network
                     }
                 }
                 current_accuracy = accuracy * nb_images_total/((j+1)*BATCHES);
@@ -433,8 +438,8 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
                 loss += train_params->loss/nb_images_total;
                 batch_loss += train_params->loss/BATCHES;
 
-                update_weights(network, network);
-                update_bias(network, network);
+                update_weights(network);
+                update_bias(network);
 
                 printf("\rÉpoque [%d/%d]\tImage [%d/%d]\tAccuracy: " YELLOW "%0.4f%%" RESET "\tBatch Accuracy: " YELLOW "%0.2f%%" RESET, i, epochs, BATCHES*(j+1), nb_images_total, current_accuracy*100, batch_accuracy*100);
             #endif
@@ -475,6 +480,7 @@ void train(int dataset_type, char* images_file, char* labels_file, char* data_di
         write_network(out, network);
     }
     free(shuffle_index);
+    free_d_network(network);
     free_network(network);
 
     #ifdef USE_MULTITHREADING
