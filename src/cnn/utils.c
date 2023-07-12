@@ -15,7 +15,7 @@
 if (network1->var != network2->var) {                                                      \
     printf_error((char*)"network1->" name " et network2->" name " ne sont pas égaux\n");   \
     if (indice != -1) {                                                                    \
-        printf(BOLDBLUE "[ INFO_ ]" RESET " indice: %d\n", indice);                        \
+        printf(BOLD BLUE "[ INFO_ ]" RESET " indice: %d\n", indice);                        \
         }                                                                                  \
     return false;                                                                          \
 }
@@ -48,7 +48,7 @@ bool equals_networks(Network* network1, Network* network2) {
         checkEquals(kernel[i]->stride, "kernel[i]->stride", i);
         checkEquals(kernel[i]->padding, "kernel[i]->padding", i);
         if ((!network1->kernel[i]->cnn ^ !network2->kernel[i]->cnn) || (!network1->kernel[i]->nn ^ !network2->kernel[i]->nn)) {
-            printf(BOLDRED "[ ERROR ]" RESET "network1->kernel[%d] et network1->kernel[%d] diffèrent de type\n", i, i);
+            printf(BOLD RED "[ ERROR ]" RESET "network1->kernel[%d] et network1->kernel[%d] diffèrent de type\n", i, i);
             return false;
         }
         checkEquals(kernel[i]->linearisation, "kernel[i]->linearisation", i);

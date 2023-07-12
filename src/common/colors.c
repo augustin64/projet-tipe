@@ -5,15 +5,15 @@
 #include "include/colors.h"
 
 void printf_error(char* string) {
-    printf(BOLDRED "[ ERROR ]" RESET " %s", string);
+    printf(BOLD RED "[ ERROR ]" RESET " %s", string);
 }
 
 void printf_warning(char* string) {
-    printf(BOLDYELLOW "[WARNING]" RESET " %s", string);
+    printf(BOLD YELLOW "[WARNING]" RESET " %s", string);
 }
 
 void printf_info(char* string) {
-    printf(BOLDBLUE "[ INFO  ]" RESET " %s", string);
+    printf(BOLD BLUE "[ INFO  ]" RESET " %s", string);
 }
 
 void printf_time(clock_t time) {
