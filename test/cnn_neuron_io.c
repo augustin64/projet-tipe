@@ -13,7 +13,7 @@
 
 int main() {
     printf("Création du réseau\n");
-    Network* network = create_network_lenet5(0, 0, 3, GLOROT, 32, 1);
+    Network* network = create_network_lenet5(0, 0, 3, GLOROT, 32, 1, 2); // Pas besoin d'initialiser toute la backprop
     printf(GREEN "OK\n" RESET);
 
     printf("Écriture du réseau\n");
