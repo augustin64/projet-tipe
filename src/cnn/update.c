@@ -89,7 +89,7 @@ void update_weights(Network* network) {
                         #ifdef ADAM_DENSE_WEIGHTS
                         d_nn->v_d_weights[a][b] = BETA_1*d_nn->v_d_weights[a][b] + (1-BETA_1)*d_nn->d_weights[a][b];
                         d_nn->s_d_weights[a][b] = BETA_2*d_nn->s_d_weights[a][b] + (1-BETA_2)*d_nn->d_weights[a][b]*d_nn->d_weights[a][b];
-                        nn->weights[a][b] -= ALPHA*(d_nn->d_weights[a][b]/sqrt(d_nn->s_d_weights[a][b]+Epsilon));
+                        nn->weights[a][b] -= ALPHA*(d_nn->v_d_weights[a][b]/sqrt(d_nn->s_d_weights[a][b]+Epsilon));
                         #else
                         nn->weights[a][b] -= network->learning_rate * d_nn->d_weights[a][b];
                         #endif
@@ -126,8 +126,9 @@ void update_bias(Network* network) {
                 for (int b=0; b < output_width; b++) {
                     for (int c=0; c < output_width; c++) {
                         #ifdef ADAM_CNN_BIAS
+                        d_cnn->v_d_bias[a][b][c] = BETA_1*d_cnn->v_d_bias[a][b][c] + (1-BETA_1)*d_cnn->d_bias[a][b][c];
                         d_cnn->s_d_bias[a][b][c] = BETA_2*d_cnn->s_d_bias[a][b][c] + (1-BETA_2)*d_cnn->d_bias[a][b][c]*d_cnn->d_bias[a][b][c];
-                        cnn->bias[a][b][c] -= ALPHA*(d_cnn->d_bias[a][b][c]/sqrt(d_cnn->s_d_bias[a][b][c]+Epsilon));
+                        cnn->bias[a][b][c] -= ALPHA*(d_cnn->v_d_bias[a][b][c]/sqrt(d_cnn->s_d_bias[a][b][c]+Epsilon));
                         #else
                         cnn->bias[a][b][c] -= network->learning_rate * d_cnn->d_bias[a][b][c];
                         #endif
@@ -148,8 +149,9 @@ void update_bias(Network* network) {
 
             for (int a=0; a < output_width; a++) {
                 #ifdef ADAM_DENSE_BIAS
+                d_nn->v_d_bias[a] = BETA_1*d_nn->v_d_bias[a] + (1-BETA_1)*d_nn->d_bias[a];
                 d_nn->s_d_bias[a] = BETA_2*d_nn->s_d_bias[a] + (1-BETA_2)*d_nn->d_bias[a]*d_nn->d_bias[a];
-                nn->bias[a] -= ALPHA*(d_nn->d_bias[a]/sqrt(d_nn->s_d_bias[a]+Epsilon));
+                nn->bias[a] -= ALPHA*(d_nn->v_d_bias[a]/sqrt(d_nn->s_d_bias[a]+Epsilon));
                 #else
                 nn->bias[a] -= network->learning_rate * d_nn->d_bias[a];
                 #endif
