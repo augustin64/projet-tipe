@@ -8,12 +8,13 @@
 #include "../src/cnn/include/models.h"
 #include "../src/cnn/include/utils.h"
 #include "../src/cnn/include/free.h"
+#include "../src/cnn/include/cnn.h"
 
 
 int main() {
     Kernel* kernel;
     printf("Création du réseau\n");
-    Network* network = create_network_lenet5(0, 0, 3, 2, 32, 1);
+    Network* network = create_network_lenet5(0, 0, 3, 2, 32, 1, NN_ONLY);  // Pas besoin d'initialiser toute la backprop
     printf(GREEN "OK\n" RESET);
 
     printf("Architecture LeNet5:\n");

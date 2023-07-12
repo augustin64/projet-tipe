@@ -9,8 +9,8 @@
 
 int main() {
     printf("Création du réseau\n");
-    Network* network = create_network_lenet5(0, 0, 3, 2, 32, 1);
-    Network* network2 = create_network_lenet5(0, 0, 3, 2, 32, 1);
+    Network* network = create_network_lenet5(0, 0, 3, 2, 32, 1, 0);
+    Network* network2 = create_network_lenet5(0, 0, 3, 2, 32, 1, 0);
     printf(GREEN "OK\n" RESET);
 
     printf("Copie du réseau via copy_network\n");

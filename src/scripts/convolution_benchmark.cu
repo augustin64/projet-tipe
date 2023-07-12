@@ -115,34 +115,14 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
 
     // bias[kernel->columns]
     kernel->bias = (float*)malloc(kernel->columns, sizeof(float));
-    kernel->d_bias = (float*)malloc(kernel->columns, sizeof(float));
-    #ifdef ADAM_CNN_BIAS
-    kernel->s_d_bias = (float*)malloc(kernel->columns, sizeof(float));
-    kernel->v_d_bias = (float*)malloc(kernel->columns, sizeof(float));
-    #endif
     for (int i=0; i<kernel->columns; i++) {
         kernel->bias[i] = random_float(0.0f, 15.0f);
-        kernel->d_bias[i] = random_float(0.0f, 1.5f);
-        #ifdef ADAM_CNN_BIAS
-        kernel->s_d_bias[i] = random_float(0.0f, 1.5f);
-        kernel->v_d_bias[i] = random_float(0.0f, 1.5f);
-        #endif
     }
 
     // weights[rows][columns][k_size][k_size]
     kernel->weights = (float****)malloc(sizeof(float***)*kernel->rows);
-    kernel->d_weights = (float****)malloc(sizeof(float***)*kernel->rows);
-    #ifdef ADAM_CNN_WEIGHTS
-    kernel->s_d_weights = (float****)malloc(sizeof(float***)*kernel->rows);
-    kernel->v_d_weights = (float****)malloc(sizeof(float***)*kernel->rows);
-    #endif
     for (int i=0; i < kernel->rows; i++) {
         kernel->weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 15.0f);
-        kernel->d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
-        #ifdef ADAM_CNN_WEIGHTS
-        kernel->s_d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
-        kernel->v_d_weights[i] = create_matrix(kernel->columns, kernel->k_size, kernel->k_size, 1.5f);
-        #endif
     }
 
     float*** input = create_matrix(kernel->rows, input_width, input_width, 5.0f);
@@ -165,7 +145,7 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
 
 
     start = clock();
-    make_convolution_cpu(kernel, input, output_cpu, output_width, 1);
+    make_convolution_cpu(kernel, input, output_cpu, output_width, 1, 0);
     end = clock();
 
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -179,26 +159,11 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
     //printf(GREEN "OK\n" RESET);
 
     free(kernel->bias);
-    free(kernel->d_bias);
-    #ifdef ADAM_CNN_BIAS
-    free(kernel->s_d_bias);
-    free(kernel->v_d_bias);
-    #endif
 
     for (int i=0; i < kernel->rows; i++) {
         free_matrix(kernel->weights[i], kernel->columns, kernel->k_size);
-        free_matrix(kernel->d_weights[i], kernel->columns, kernel->k_size);
-        #ifdef ADAM_CNN_WEIGHTS
-        free_matrix(kernel->s_d_weights[i], kernel->columns, kernel->k_size);
-        free_matrix(kernel->v_d_weights[i], kernel->columns, kernel->k_size);
-        #endif
     }
     free(kernel->weights);
-    free(kernel->d_weights);
-    #ifdef ADAM_CNN_WEIGHTS
-    free(kernel->s_d_weights);
-    free(kernel->v_d_weights);
-    #endif
 
     free_matrix(input, kernel->rows, input_width);
     free_matrix(output_cpu, kernel->columns, output_width);

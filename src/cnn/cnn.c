@@ -248,6 +248,7 @@ void forward_propagation(Network* network) {
 
 void backward_propagation(Network* network, int wanted_number, int finetuning) {
     int n = network->size; // Nombre de couches du réseau
+    D_Network* d_network = network->d_network;
 
     // Backward sur la dernière couche qui utilise toujours SOFTMAX
     float* wanted_output = generate_wanted_output(wanted_number, network->width[network->size -1]); // Sortie désirée, permet d'initialiser une erreur
@@ -264,6 +265,7 @@ void backward_propagation(Network* network, int wanted_number, int finetuning) {
     for (int i=n-2; i >= 0; i--) {
         // Modifie 'k_i' à partir d'une comparaison d'informations entre 'input' et 'output'
         Kernel* k_i = network->kernel[i];
+        D_Kernel* d_k_i = d_network->kernel[i];
 
         float*** input = network->input[i];
         float*** input_z = network->input_z[i];
@@ -285,15 +287,15 @@ void backward_propagation(Network* network, int wanted_number, int finetuning) {
                 return; // On arrête la backpropagation
             }
             int kernel_size = k_i->cnn->k_size;
-            backward_convolution(k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, -activation, is_last_layer, kernel_size, padding, stride);
+            backward_convolution(k_i->cnn, d_k_i->cnn, input, input_z, output, input_depth, input_width, output_depth, output_width, -activation, is_last_layer, kernel_size, padding, stride);
         } else if (k_i->nn) { // Full connection
             if (k_i->linearisation == DOESNT_LINEARISE) { // Vecteur -> Vecteur
-                backward_dense(k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, -activation, is_last_layer);
+                backward_dense(k_i->nn, d_k_i->nn, input[0][0], input_z[0][0], output[0][0], input_width, output_width, -activation, is_last_layer);
             } else { // Matrice -> vecteur
                 if (finetuning == NN_ONLY) {
                     return; // On arrête la backpropagation
                 }
-                backward_linearisation(k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, -activation);
+                backward_linearisation(k_i->nn, d_k_i->nn, input, input_z, output[0][0], input_depth, input_width, output_width, -activation);
             }
         } else { // Pooling
             int kernel_size = 2*padding + input_width + stride - output_width*stride;
