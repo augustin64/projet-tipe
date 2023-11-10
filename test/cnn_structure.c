@@ -10,12 +10,14 @@
 #include "../src/cnn/include/free.h"
 #include "../src/cnn/include/cnn.h"
 
+#include "include/test.h"
 
 int main() {
+    _TEST_PRESENTATION("Description Architecture LeNet5");
+
     Kernel* kernel;
-    printf("Création du réseau\n");
     Network* network = create_network_lenet5(0, 0, 3, 2, 32, 1, NN_ONLY);  // Pas besoin d'initialiser toute la backprop
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Création du réseau");
 
     printf("Architecture LeNet5:\n");
     for (int i=0; i < network->size-1; i++) {
@@ -48,11 +50,9 @@ int main() {
             printf("activation: %d\n", kernel->activation);
         }
     }
-    printf("\n" GREEN "OK\n" RESET);
 
-    printf("Libération de la mémoire\n");
     free_network(network);
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Libération de la mémoire");
 
     return 0;
 }

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "include/test.h"
+
 #include "../src/dense/include/neural_network.h"
 #include "../src/dense/include/neuron_io.h"
 #include "../src/common/include/colors.h"
@@ -64,22 +66,20 @@ Network* create_network(int nb_layers, int nb_max_neurons, int nb_min_neurons) {
 }
 
 int main() {
-    printf("Création du réseau\n");
+    _TEST_PRESENTATION("Dense: Lecture/Écriture")
+    
     Network* network = create_network(5, 300, 10);
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Création du réseau");
 
-    printf("Écriture du réseau\n");
     write_network((char*)".test-cache/neuron_io.bin", network);
-    printf(GREEN "OK\n" RESET);
-
-    printf("Vérification de l'accès en lecture\n");
+    _TEST_ASSERT(true, "Écriture du réseau");
+    
     Network* network2 = read_network((char*)".test-cache/neuron_io.bin");
-    printf(GREEN "OK\n" RESET);
-
-    printf("Suppression des réseaux\n");
+    _TEST_ASSERT(true, "Accès en lecture");
+    
     deletion_of_network(network);
     deletion_of_network(network2);
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Suppression des réseaux");
 
     return 0;
 }

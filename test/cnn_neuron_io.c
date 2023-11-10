@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "include/test.h"
+
 #include "../src/common/include/colors.h"
 #include "../src/cnn/include/neuron_io.h"
 #include "../src/cnn/include/creation.h"
@@ -12,35 +14,25 @@
 
 
 int main() {
-    printf("Création du réseau\n");
+    _TEST_PRESENTATION("CNN Lecture/Écriture")
+
     Network* network = create_network_lenet5(0, 0, 3, GLOROT, 32, 1, 2); // Pas besoin d'initialiser toute la backprop
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Création du réseau");
 
-    printf("Écriture du réseau\n");
     write_network((char*)".test-cache/cnn_neuron_io.bin", network);
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Écriture du réseau");
 
-    printf("Vérification de l'accès en lecture\n");
     Network* network2 = read_network((char*)".test-cache/cnn_neuron_io.bin");
     Network* network3 = read_network((char*)".test-cache/cnn_neuron_io.bin");
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Vérification de l'accès en lecture");
 
-    printf("Vérification de l'égalité des réseaux\n");
-    if (! equals_networks(network, network2)) {
-        printf_error(RED "Le réseau lu ne contient pas les mêmes données.\n" RESET);
-        exit(1);
-    }
-    if (! equals_networks(network2, network3)) {
-        printf_error(RED "La lecture du réseau donne des résultats différents.\n" RESET);
-        exit(1);
-    }
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(equals_networks(network, network2), "Égalité des réseaux");
+    _TEST_ASSERT(equals_networks(network2, network3), "Égalité de deux lectures");
 
-    printf("Libération de la mémoire\n");
     free_network(network);
     free_network(network2);
     free_network(network3);
-    printf(GREEN "OK\n" RESET);
+    _TEST_ASSERT(true, "Libération de la mémoire");
 
     return 0;
 }

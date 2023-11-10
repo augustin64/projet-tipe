@@ -6,6 +6,8 @@
 #include <time.h>
 #include <time.h>
 
+#include "include/test.h"
+
 #include "../src/common/include/memory_management.h"
 #include "../src/cnn/include/convolution.h"
 #include "../src/common/include/colors.h"
@@ -142,10 +144,7 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
 
     // Vérification de l'égalité des matrices
     printf("(%d, %d, %d, %d) Checking equality.\n", rows, columns, input_width, output_width);
-    if (!check_matrices_equality(output_gpu, output_cpu, kernel->columns, output_width, output_width, kernel->k_size)) {// TODO: change acceptation
-        exit(1);
-    }
-    printf(GREEN "OK\n" RESET);
+    bool valid = check_matrices_equality(output_gpu, output_cpu, kernel->columns, output_width, output_width, kernel->k_size);
 
     free_matrix(kernel->bias, kernel->columns, output_width);
 
@@ -157,10 +156,14 @@ void run_convolution_test(int input_width, int output_width, int rows, int colum
     free_matrix(input, kernel->rows, input_width);
     free_matrix(output_cpu, kernel->columns, output_width);
     free_matrix(output_gpu, kernel->columns, output_width);
+
+    return valid;
 }
 
 
 int main() {
+    _TEST_PRESENTATION("Cuda Convolution");
+
     printf("Checking CUDA compatibility.\n");
     bool cuda_compatible = cuda_setup(true);
     if (!cuda_compatible) {
@@ -171,9 +174,9 @@ int main() {
     
     srand(clock());
 
-    run_convolution_test(20, 15, 30, 40);
-    run_convolution_test(30, 25, 40, 50);
-    run_convolution_test(250, 200, 3, 3);
+    _TEST_ASSERT(run_convolution_test(20, 15, 30, 40), "Small");
+    _TEST_ASSERT(run_convolution_test(30, 25, 40, 50), "Medium");
+    _TEST_ASSERT(run_convolution_test(250, 200, 3, 3), "Big");
     
     return 0;
 }

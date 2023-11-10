@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "include/test.h"
+
 #include "../src/common/include/memory_management.h"
 #include "../src/common/include/colors.h"
 #include "../src/common/include/utils.h"
@@ -25,7 +27,6 @@ __global__ void local_kernel(funcPtr f, float*** input, int depth, int rows, int
 
 void test1(int activation, bool use_local_kernel) {
     printf("Test sur la fonction %d\n", activation);
-    printf("\tInitialisation OK\n");
     // Initialise values
     int depth = 10;
     int rows = 10;
@@ -45,7 +46,6 @@ void test1(int activation, bool use_local_kernel) {
             }
         }
     }
-    printf("\t" GREEN "OK\n" RESET);
 
     funcPtr func_cpu = get_activation_function(activation);
 
@@ -64,16 +64,13 @@ void test1(int activation, bool use_local_kernel) {
         gpuErrchk( cudaPeekAtLastError() );
         gpuErrchk( cudaDeviceSynchronize() );
     }
-    printf("\t" GREEN "OK\n" RESET);
 
-    printf("\tVérification des résultats\n");
     for (int i=0; i < depth; i++) {
         for (int j=0; j < rows; j++) {
             for (int k=0; k < columns; k++) {
                 if (fabs((*func_cpu)(input_initial[i][j][k]) - input[i][j][k]) > 1e-6) {
-                    printf_error((char*)"Les résultats ne coincident pas\n");
-                    printf("Différence %e\n", fabs((*func_cpu)(input_initial[i][j][k]) - input[i][j][k]));
-                    exit(1);
+                    _TEST_ASSERT(false, "Coïncidence des résultats");
+                    //printf("Différence %e\n", fabs((*func_cpu)(input_initial[i][j][k]) - input[i][j][k]));
                 }
             }
             gree(input[i][j], false);
@@ -84,12 +81,11 @@ void test1(int activation, bool use_local_kernel) {
     }
     gree(input, false);
     free(input_initial);
-
-    printf("\t" GREEN "OK\n" RESET);
-    printf(GREEN "OK\n" RESET);
 }
 
 int main() {
+    _TEST_PRESENTATION("Cuda fonctions");
+
     printf("Checking CUDA compatibility.\n");
     bool cuda_compatible = cuda_setup(true);
     if (!cuda_compatible) {
