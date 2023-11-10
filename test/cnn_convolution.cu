@@ -95,7 +95,7 @@ bool check_matrices_equality(float*** m1, float*** m2, int n, int p, int q, int 
     return true;
 }
 
-void run_convolution_test(int input_width, int output_width, int rows, int columns) {
+bool run_convolution_test(int input_width, int output_width, int rows, int columns) {
     assert(input_width >= output_width);
     int k_size = input_width - output_width +1;
 
